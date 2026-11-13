@@ -134,7 +134,7 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 .access-card .time{font-size:.75rem;color:var(--ts);margin-bottom:2px}
 .access-card .name{font-weight:600;font-size:1rem}
 .access-card .meta{font-size:.8rem;color:var(--ts);margin-top:2px}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:450;display:none;align-items:flex-end;justify-content:center;pointer-events:none}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:950;display:none;align-items:flex-end;justify-content:center;pointer-events:none}
 .modal-bg.active{display:flex;pointer-events:auto}
 .modal{background:#fff;width:100%;max-width:500px;border-radius:18px 18px 0 0;max-height:90vh;overflow-y:auto}
 .mhead{padding:18px 18px 12px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:flex-start;background:var(--light);position:sticky;top:0;z-index:5;flex-shrink:0}
@@ -147,10 +147,10 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 .care{padding:16px 18px 22px;border-top:1px solid var(--b);background:#fafafa}
 .cmsg{text-align:center;margin-bottom:12px;font-size:.9rem;color:var(--ts)}
 .wabox{margin-top:12px;padding:14px;background:#e8f5e9;border-radius:12px;text-align:center}
-.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--b);display:flex;justify-content:space-around;align-items:stretch;padding:0 0 env(safe-area-inset-bottom);z-index:400;box-shadow:0 -2px 12px rgba(0,0,0,.08);pointer-events:auto}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--b);display:flex;justify-content:space-around;align-items:stretch;padding:0 0 env(safe-area-inset-bottom);z-index:500;box-shadow:0 -2px 12px rgba(0,0,0,.08);pointer-events:auto}
 .nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--ts);font-size:.7rem;cursor:pointer;padding:10px 8px;flex:1;min-height:56px;min-width:0;-webkit-tap-highlight-color:rgba(46,125,50,.15);touch-action:manipulation;position:relative;z-index:401}
 .nav.active{color:var(--p);font-weight:700}.nav .ic{font-size:1.4rem;line-height:1;pointer-events:none}.nav span:not(.ic){pointer-events:none}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);background:#323232;color:#fff;padding:12px 22px;border-radius:10px;font-size:.92rem;z-index:300;opacity:0;pointer-events:none;transition:all .3s;max-width:90%;text-align:center;visibility:hidden}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);background:#323232;color:#fff;padding:12px 22px;border-radius:10px;font-size:.92rem;z-index:12050;opacity:0;pointer-events:none;transition:all .3s;max-width:90%;text-align:center;visibility:hidden}
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);pointer-events:none}.toast.ok{background:var(--s)}.toast.er{background:var(--d)}
 .empty{text-align:center;padding:40px 20px;color:var(--ts)}.empty .ic{font-size:2.8rem;margin-bottom:10px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
@@ -303,6 +303,13 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 #site-msg.off{display:none}
 #site-msg button{background:var(--p);color:#fff;border:0;border-radius:24px;padding:11px 24px;font-weight:700;cursor:pointer}
 #nav-site{order:-2}
+/* MOBILE MODAL SAFE */
+@media (max-width:900px){
+  .modal-bg{align-items:flex-end!important;padding-top:env(safe-area-inset-top,0)}
+  .modal-bg .modal{max-height:calc(100vh - 12px - env(safe-area-inset-top,0))!important;border-radius:16px 16px 0 0!important}
+  .mhead{padding-top:max(14px, env(safe-area-inset-top, 0px))!important}
+  .mclose{min-width:44px;min-height:44px;font-size:1.6rem!important;line-height:1}
+}
 </style>
 <style>
 .tit-row{align-items:center!important;min-height:44px}
@@ -567,7 +574,7 @@ html:not([data-role="op"]) #op-conta{display:none!important}
 #scan-cam-sel{width:100%;padding:10px;border-radius:10px;border:1px solid #d1d5db;margin:8px 0}
 </style>
 <style id="popup-mov">
-#mov-popup{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:100030;width:min(92vw,380px);background:#fff;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden;display:none;font-family:inherit}
+#mov-popup{position:fixed;left:12px;right:12px;top:72px;z-index:13000;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,.28);overflow:hidden;display:none;max-width:420px;margin:0 auto}
 #mov-popup.show{display:block;animation:movIn .25s ease-out}
 @keyframes movIn{from{transform:translate(-50%,-20px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
 #mov-popup .mp-head{padding:12px 16px;color:#fff;font-weight:800;font-size:1rem;display:flex;align-items:center;gap:8px}
@@ -587,7 +594,7 @@ html:not([data-role="op"]) #op-conta{display:none!important}
 <style id="eq-v84">html[data-role="op"] #eq-card{display:none!important}#eq-card .eq-st{font-size:.85rem;margin-top:8px;min-height:18px}#eq-card .eq-st.er{color:#b91c1c}#eq-card .eq-st.ok{color:#15803d}</style>
 <style id="sync-v86">#sync-st{font-size:.8rem;margin-top:8px;color:#475569}#sync-st.er{color:#b91c1c}#sync-st.ok{color:#15803d}</style>
 <style id="v93">
-#header{position:fixed!important;top:0;left:0;right:0;z-index:800}
+#header{position:fixed!important;top:0;left:0;right:0;z-index:700}
 .acc-h{display:block;width:100%;text-align:left;background:none;border:0;padding:4px 0;font-weight:800;color:#14532d;font-size:1rem;cursor:pointer}
 .acc-b{margin-top:8px}
 #loc-row input[type=text]{font-size:.95rem}
@@ -1707,7 +1714,7 @@ st.textContent=".mor-acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.mo
 ".agl{display:block;font-size:.8rem;font-weight:600;margin-bottom:5px;color:var(--ts);text-transform:uppercase;letter-spacing:.3px}"+
 ".ag-res{text-align:center;padding:4px 0 12px}.ag-res .big{font-size:2.6rem;line-height:1.1}.ag-res h3{margin:6px 0 4px;font-size:1.15rem}.ag-ok h3{color:#1B5E20}.ag-warn h3{color:#b45309}.ag-bad h3{color:#c62828}"+
 ".ag-box{background:#f8faf8;border:1px solid var(--b);border-radius:12px;padding:12px;margin:10px 0;font-size:.88rem;line-height:1.5}.ag-box b{color:var(--p)}"+
-"#modal-alerta,#confirm-overlay{z-index:100001!important}"+
+"#modal-alerta,#confirm-overlay{z-index:14000!important}"+
 "#face-video{width:100%;border-radius:14px;background:#000;min-height:240px;transform:scaleX(-1);object-fit:cover}";
 document.head.appendChild(st);
 
@@ -3786,7 +3793,7 @@ function _regMovForce(id,tipo){
       if(rr && !endA) endA=rr.end||rr.e||"";
     }
   }catch(e){}
-  const na={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),nome:c.nome,cpf:c.cpf||"",local:sess.loc,dh:new Date().toISOString(),op:sess.op,tipo:tipo,qdlt:qdltA,end:endA,mor:c.mor||""};
+  const _uidMov="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); const na={id:_uidMov,uid:_uidMov,nome:c.nome,cpf:c.cpf||"",local:sess.loc,dh:new Date().toISOString(),op:sess.op,tipo:tipo,qdlt:qdltA,end:endA,mor:c.mor||""};
   _ajustarNa(na,c,tipo);
   acess.push(na);saveA();
   try{ if(tipo==="entrada") ticketAposEntrada(na,c); }catch(e){}
@@ -3795,7 +3802,7 @@ function _regMovForce(id,tipo){
   ult={conv:c.nome,mor:c.mor,tel:c.tel,loc:sess.loc,dh:na.dh,tipo:tipo};
   showConfirm(tipo, c.nome, sess.loc);
   if(tipo==="entrada") toast("Entrada de "+c.nome+" registrada!","ok");
-  else toast("Saida de "+c.nome+" registrada!","ok");
+  else { /* saída: só o popup vermelho completo */ }
   try{
     const morNome=c.mor||"";
     if(tipo==="entrada"){
@@ -6834,7 +6841,7 @@ function regMov(id,tipo){
       if(rr && !endA) endA=rr.end||rr.e||"";
     }
   }catch(e){}
-  const na={id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),nome:c.nome,cpf:c.cpf||"",local:sess.loc,dh:new Date().toISOString(),op:sess.op,tipo:tipo,qdlt:qdltA,end:endA,mor:c.mor||""};
+  const _uidMov="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); const na={id:_uidMov,uid:_uidMov,nome:c.nome,cpf:c.cpf||"",local:sess.loc,dh:new Date().toISOString(),op:sess.op,tipo:tipo,qdlt:qdltA,end:endA,mor:c.mor||""};
   _ajustarNa(na,c,tipo);
   acess.push(na);saveA();
   try{ if(tipo==="entrada") ticketAposEntrada(na,c); }catch(e){}
@@ -7997,7 +8004,7 @@ function ticketHtml(na, c, cfg){
     '.code{font-size:'+(big?12:10)+'pt;letter-spacing:2px;text-align:center;font-weight:800}.msg{font-size:'+(big?9.5:8)+'pt;text-align:center;margin-top:2mm}.qr{display:flex;justify-content:center;margin:2mm 0 1mm}.qr svg{width:'+(big?36:30)+'mm;height:'+(big?36:30)+'mm}';
   var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ticket '+_escH(na.tk||"")+'</title><style>'+css+'</style></head><body>'+
     '<div class="c t">ASSOCIAÇÃO ALPHAVILLE GRACIOSA RESIDENCIAL</div>'+
-    '<div class="c l">Portaria <b>'+_escH(String(_pn(na.local)||"").toUpperCase())+'</b></div><hr>'+
+    '<div class="c l">Portaria '+_escH(String(_pn(na.local)||"").toUpperCase())+'</div><hr>'+
     '<div class="big">ENTRADA</div>'+linhas.join("")+'<hr>'+
     '<div class="bar">'+code128SVG(na.tk||"T00000000",2,100)+'</div>'+
     '<div class="code">'+_escH(na.tk||"")+'</div>'+
@@ -10662,9 +10669,11 @@ function copiarTextoWa(){
   window.gaSaida=function(id){
     var ref=(acess||[]).find(function(a){return a.id===id;}); if(!ref) return;
     var agora=new Date().toISOString();
-    acess.push({id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),nome:ref.nome,cpf:ref.cpf||"",local:ref.local,dh:agora,op:(typeof sess!=="undefined"&&sess)?sess.op:"",tipo:"saida",qdlt:ref.qdlt||"",end:ref.end||"",mor:ref.mor||"",placa:ref.placa||""});
+    var uidG="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+    acess.push({id:uidG,uid:uidG,nome:ref.nome,cpf:ref.cpf||"",local:ref.local,dh:agora,op:(typeof sess!=="undefined"&&sess)?sess.op:"",tipo:"saida",qdlt:ref.qdlt||"",end:ref.end||"",mor:ref.mor||"",placa:ref.placa||""});
     try{ saveA(); }catch(e){ localStorage.setItem("cae_a",JSON.stringify(acess)); }
-    toast("Saída registrada: "+(ref.nome||""),"ok");
+    try{ if(typeof popupMov==="function"){ var cG=(conv||[]).find(function(x){return onlyDigits(x.cpf)===onlyDigits(ref.cpf||"")||x.nome===ref.nome;}); popupMov(cG||{nome:ref.nome},"saida",{nome:ref.nome,local:ref.local,dh:agora,mor:ref.mor}); } }catch(e){}
+    /* sem toast verde duplicado */
     gaRender();
   };
   window.gaCSV=function(){
@@ -10967,13 +10976,23 @@ function copiarTextoWa(){
   };
 
   function registrarSaidaAuto(c,last){
-    var na=Object.assign({},last,{id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),dh:new Date().toISOString(),op:(typeof sess!=="undefined"&&sess&&sess.op)||"",tipo:"saida"});
+    var uid="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+    var na=Object.assign({},last,{
+      id:uid, uid:uid,
+      dh:new Date().toISOString(),
+      op:(typeof sess!=="undefined"&&sess&&sess.op)||(userSess&&userSess.nome)||"",
+      tipo:"saida",
+      local:(typeof sess!=="undefined"&&sess&&sess.loc)||last.local||""
+    });
     acess.push(na);
-    try{ saveA(); }catch(e){ localStorage.setItem("cae_a",JSON.stringify(acess)); }
-    try{ agendarSyncSheets("acessos"); }catch(e){}
+    try{ saveA(); }catch(e){ try{ localStorage.setItem("cae_a",JSON.stringify(acess)); }catch(e2){} }
+    try{ if(window.bancoAtualizar){ /* força fila de gravação */ } }catch(e){}
+    try{ if(typeof agendarSyncSheets==="function") agendarSyncSheets("acessos"); }catch(e){}
     try{ if(typeof render==="function") render(""); }catch(e){}
+    try{ if(typeof refreshModal==="function" && sel && c && sel.id===c.id) refreshModal(); }catch(e){}
+    try{ if(typeof renderConvidados==="function") renderConvidados(); }catch(e){}
     popupMov(c,"saida",na);
-    toast("Saída registrada: "+c.nome,"ok");
+    // só o popup vermelho (completo) — sem toast verde duplicado
   }
 
   window.lerTicket=function(code){
@@ -11913,13 +11932,8 @@ window.edAdd_logo=function(){ edAdd("logo"); };
     }catch(e){}
   }
 
-  /* ---- Portaria em negrito no ticket impresso ---- */
-  var _th=window.ticketHtml;
-  window.ticketHtml=function(){
-    var s=_th.apply(this,arguments);
-    var reg="<style>b{font-weight:900!important}</style>";
-    return s.indexOf("</head>")>=0 ? s.replace("</head>",reg+"</head>") : reg+s;
-  };
+  /* ticket: sem forçar negrito em Portaria */
+
 
   /* ---- campo de locatário só na tela da residência, com busca que fica na tela ---- */
   function naResidencia(){ var t=document.getElementById("me-title"); return !!(t && t.textContent.indexOf("residência")>=0 && document.getElementById("modal-mor-edit") && document.getElementById("modal-mor-edit").classList.contains("active")); }
