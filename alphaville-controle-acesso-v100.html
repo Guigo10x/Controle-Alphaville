@@ -3460,6 +3460,8 @@ function persistMoradores(){
     localStorage.setItem("cae_moradores_v2", JSON.stringify(MORADORES));
   }catch(e){ console.warn("storage moradores", e); }
 }
+var SEED_MORADORES = null;
+try{ SEED_MORADORES = JSON.parse(JSON.stringify(MORADORES)); }catch(e){ SEED_MORADORES = (MORADORES||[]).slice(); }
 function loadMoradoresV2(){
   try{
     const raw=localStorage.getItem("cae_moradores_v2");
@@ -3485,6 +3487,13 @@ function loadMoradoresV2(){
   }catch(e){}
 }
 loadMoradoresV2();
+window.__seedMoradores=function(){
+  try{
+    var base = SEED_MORADORES || [];
+    if(!base.length) return [];
+    return JSON.parse(JSON.stringify(base));
+  }catch(e){ return []; }
+};
 // reset único: limpa base antiga embutida / overrides errados
 if(localStorage.getItem("cae_mor_reset_v3")!=="1"){
   localStorage.setItem("cae_mor_reset_v3","1");
@@ -3805,12 +3814,22 @@ function _regMovForce(id,tipo){
 }
 
 function compressImage(file, maxW, quality){
+  maxW = maxW || 640; quality = (quality==null?0.65:quality);
   return new Promise(function(resolve,reject){
     function draw(src,w0,h0){
-      var w=w0,h=h0; if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+      var maxSide = maxW, w=w0, h=h0;
+      if(w>maxSide || h>maxSide){
+        if(w>=h){ h=Math.round(h*maxSide/w); w=maxSide; }
+        else { w=Math.round(w*maxSide/h); h=maxSide; }
+      }
       var c=document.createElement("canvas"); c.width=w; c.height=h;
       var ctx=c.getContext("2d"); ctx.fillStyle="#fff"; ctx.fillRect(0,0,w,h); ctx.drawImage(src,0,0,w,h);
-      resolve(c.toDataURL("image/jpeg", quality));
+      var q = quality;
+      var out = c.toDataURL("image/jpeg", q);
+      // se ainda ficar grande demais (>180KB), reduz qualidade
+      var i=0;
+      while(out.length > 180000 && q > 0.4 && i < 4){ q -= 0.1; out = c.toDataURL("image/jpeg", q); i++; }
+      resolve(out);
     }
     function viaImg(){
       var reader=new FileReader();
@@ -3966,7 +3985,7 @@ function onMorTelBlur(){
 
 
 function msgSenhaOpPadrao(){
-  return "🏡 *Associação Alphaville Graciosa Residencial*\n\nOlá, *{nome}*! 👋\n\nVocê foi cadastrado como *operador* no sistema de Controle de Acesso.\n\n👤 *CPF:* {cpf}\n🔐 *Senha:* `{codigo}`\n\nNo app, toque em *Operador*, informe seu nome, CPF e a senha acima.\n\n_Não compartilhe sua senha._";
+  return "🏡 *Associação Alphaville Graciosa Residencial*\n\nOlá, *{nome}*! 👋\n\nVocê foi cadastrado como *operador* no sistema de Controle de Acesso.\n\n📧 *E-mail:* {email}\n🔐 *Senha:* `{codigo}`\n\nNo app, toque em *Operador*, preencha o campo *E-mail* e a *senha* acima e entre.\n\n_Não compartilhe sua senha._";
 }
 function loadMsgs(){
   try{
@@ -5167,25 +5186,19 @@ function abrirListaAcesso(tipo){
 }
 
 
-function onNFotoFile(inp){
+async function onNFotoFile(inp){
   const f=inp.files&&inp.files[0]; if(!f) return;
-  const r=new FileReader();
-  r.onload=function(){
-    const img=new Image();
-    img.onload=function(){
-      const c=document.createElement("canvas");
-      const max=480; let w=img.width,h=img.height;
-      if(w>max){h=h*max/w;w=max}
-      c.width=w;c.height=h;
-      (function(x){x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(img,0,0,w,h);})(c.getContext("2d"));
-      const data=c.toDataURL("image/jpeg",0.7);
-      document.getElementById("n-foto-data").value=data;
-      const prev=document.getElementById("n-foto-prev");
-      if(prev) prev.innerHTML='<img src="'+data+'" style="width:100%;height:100%;object-fit:cover">';
-    };
-    img.src=r.result;
-  };
-  r.readAsDataURL(f);
+  const prev=document.getElementById("n-foto-prev");
+  if(prev) prev.innerHTML='<span style="font-size:.75rem;color:#64748b">…</span>';
+  try{
+    const data=await compressImage(f, 640, 0.65);
+    document.getElementById("n-foto-data").value=data;
+    if(prev){ prev.className="foto-preview"; prev.innerHTML='<img src="'+data+'" style="width:100%;height:100%;object-fit:cover;border-radius:10px">'; }
+  }catch(e){
+    if(prev) prev.innerHTML="📷";
+    toast("Erro ao processar a foto","er");
+  }
+  try{ inp.value=""; }catch(e){}
 }
 function onMeFoto2File(inp){
   const f=inp.files&&inp.files[0]; if(!f) return;
@@ -7556,7 +7569,12 @@ function abrirFotoModalCad(){
 async function onFotoModalCad(input){
   var f=input.files&&input.files[0]; if(!f||!sel) return;
   try{
-    var data=await compressImage(f,480,0.7);
+    var ph=document.getElementById("m-foto-ph"); var mf=document.getElementById("m-foto");
+    if(ph) ph.textContent="…";
+    var data=await compressImage(f,640,0.65);
+    // mostra miniatura imediatamente
+    if(mf){ mf.src=data; mf.style.display="block"; }
+    if(ph) ph.style.display="none";
     var idx=conv.findIndex(function(x){ return x.id===sel.id; });
     if(idx<0) return;
     conv[idx].foto=data; conv[idx].atualizado=new Date().toISOString();
@@ -7719,7 +7737,9 @@ function enviarSenhaOperador(i){
   var tel=onlyDigits((c&&(c.telVis||""))||"");
   if(tel.length<10){ toast("O cadastro de "+a.nome+" está sem telefone","er"); return; }
   if(tel.length===10||tel.length===11) tel="55"+tel;
-  var txt=applyMsg(loadMsgs().senha_op||msgSenhaOpPadrao(),{nome:a.nome,codigo:a.senha,senha:a.senha,cpf:fmtCPF(a.cpf),remetente:(userSess&&userSess.nome)||"Administração"});
+  var tplOp=loadMsgs().senha_op||msgSenhaOpPadrao();
+  if(tplOp.indexOf("{email}")<0) tplOp=msgSenhaOpPadrao();
+  var txt=applyMsg(tplOp,{nome:a.nome,codigo:a.senha,senha:a.senha,email:a.email||"",cpf:fmtCPF(a.cpf),remetente:(userSess&&userSess.nome)||"Administração"});
   abrirWhatsSeguro("https://wa.me/"+tel+"?text="+encodeURIComponent(txt));
   toast("Abrindo WhatsApp","ok");
 }
@@ -12109,7 +12129,20 @@ window.edAdd_logo=function(){ edAdd("logo"); };
   function atualizarTela(){
     try{ conv=JSON.parse(MEM.cae_c||"[]"); }catch(e){}
     try{ acess=JSON.parse(MEM[ACESSO_K]||"[]"); }catch(e){}
-    try{ var m=JSON.parse(MEM[RES_K]||"[]"); MORADORES.length=0; m.forEach(function(x){ MORADORES.push(x); }); }catch(e){}
+    try{
+      var m=JSON.parse(MEM[RES_K]||"[]");
+      if(!m || !m.length){
+        var seed = (typeof window.__seedMoradores==="function") ? window.__seedMoradores() : [];
+        if(seed && seed.length){
+          seed.forEach(function(r){ if(r && !r.uid) r.uid = r.id || ("u"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)); });
+          m = seed;
+          MEM[RES_K]=JSON.stringify(m);
+          // agenda envio ao banco
+          try{ if(HYD) agendar(RES_K); }catch(e){}
+        }
+      }
+      MORADORES.length=0; m.forEach(function(x){ MORADORES.push(x); });
+    }catch(e){}
     if(window.__digitando) return;
     try{ if(typeof renderConvidados==="function") renderConvidados(); }catch(e){}
     try{ if(typeof render==="function") render(""); }catch(e){}
