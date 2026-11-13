@@ -12007,8 +12007,9 @@ window.edAdd_logo=function(){ edAdd("logo"); };
     }catch(e){ status("☁️ NÃO salvo: "+(e.message||"sem conexão")+". Tente de novo.","er"); }
   }
   async function enviar(tabela,linhas,pref,sess){
+    var conflict = (tabela==="configuracoes") ? "chave" : "id";
     for(var i=0;i<linhas.length;i+=100){
-      var r=await api("/rest/v1/"+tabela+"?on_conflict=id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:pref+",return=minimal"},body:JSON.stringify(linhas.slice(i,i+100))},sess);
+      var r=await api("/rest/v1/"+tabela+"?on_conflict="+conflict,{method:"POST",headers:{"Content-Type":"application/json",Prefer:pref+",return=minimal"},body:JSON.stringify(linhas.slice(i,i+100))},sess);
       if(!r.ok){ var t=""; try{ t=await r.text(); }catch(e){} throw new Error(tabela+" "+r.status+" "+t.slice(0,120)); }
     }
   }
