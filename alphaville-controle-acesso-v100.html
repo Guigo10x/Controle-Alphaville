@@ -82,8 +82,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-s
 .rs-item.hit{border:2px solid #c62828;background:#FFEBEE}
 .rs-mot{font-size:.82rem;color:#5f6368;margin-top:2px}
 #cfg-mor-box{display:none}
-body.is-mor #s-config > *:not(#cfg-mor-box){display:none!important}
-body.is-mor #cfg-mor-box{display:block!important}
+body.is-mor #s-config > *:not(#cfg-mor-box):not(#cfg-mor-aparencia):not(#cfg-mor-portaria){display:none!important}
+body.is-mor #cfg-mor-box,body.is-mor #cfg-mor-aparencia,body.is-mor #cfg-mor-portaria{display:block!important}
 .casas-toggle{width:100%;text-align:left;padding:11px 12px;border:1px solid var(--b);border-radius:10px;background:#fff;font-weight:700;color:var(--p);margin:8px 0;font-size:.9rem}
 .casa-row{border:1px solid var(--b);border-radius:10px;padding:10px;margin-bottom:8px;background:#fff}
 .casa-row.ok{border-color:#2E7D32;background:#E8F5E9}
@@ -168,6 +168,23 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 .bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--b);display:flex;justify-content:space-around;align-items:stretch;padding:0 0 env(safe-area-inset-bottom);z-index:500;box-shadow:0 -2px 12px rgba(0,0,0,.08);pointer-events:auto}
 .nav{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:none;border:none;color:var(--ts);font-size:.7rem;cursor:pointer;padding:10px 8px;flex:1;min-height:56px;min-width:0;-webkit-tap-highlight-color:rgba(46,125,50,.15);touch-action:manipulation;position:relative;z-index:401}
 .nav.active{color:var(--p);font-weight:700}.nav .ic{font-size:1.4rem;line-height:1;pointer-events:none}.nav span:not(.ic){pointer-events:none}
+
+/* Chat portaria */
+#chat-fab{position:fixed;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:#15803d;color:#fff;border:0;box-shadow:0 6px 20px rgba(21,128,61,.35);font-size:1.5rem;z-index:900;display:none;align-items:center;justify-content:center;cursor:pointer}
+#chat-fab.show{display:flex}
+#chat-fab .badge{position:absolute;top:-2px;right:-2px;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+#modal-chat .modal{max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+#modal-chat .chat-body{flex:1;overflow-y:auto;padding:12px 14px;background:#f8faf8;min-height:220px;max-height:50vh}
+#modal-chat .chat-msg{max-width:85%;margin:8px 0;padding:10px 12px;border-radius:14px;font-size:.92rem;line-height:1.35;word-break:break-word}
+#modal-chat .chat-msg.eu{margin-left:auto;background:#dcfce7;border:1px solid #bbf7d0;border-bottom-right-radius:4px}
+#modal-chat .chat-msg.eles{margin-right:auto;background:#fff;border:1px solid #e5e7eb;border-bottom-left-radius:4px}
+#modal-chat .chat-meta{font-size:.72rem;color:#64748b;margin-top:4px}
+#modal-chat .chat-foot{display:flex;gap:8px;padding:10px 12px;border-top:1px solid #e5e7eb;background:#fff;flex-shrink:0}
+#modal-chat .chat-foot input{flex:1;padding:12px;border:1.5px solid #cbd5e1;border-radius:12px}
+#modal-chat .chat-lista{max-height:40vh;overflow-y:auto}
+#modal-chat .chat-item{padding:12px;border-bottom:1px solid #eef2f0;cursor:pointer}
+#modal-chat .chat-item:active{background:#f0fdf4}
+
 .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(80px);background:#323232;color:#fff;padding:12px 22px;border-radius:10px;font-size:.92rem;z-index:12050;opacity:0;pointer-events:none;transition:all .3s;max-width:90%;text-align:center;visibility:hidden}
 .toast.show{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);pointer-events:none}.toast.ok{background:var(--s)}.toast.er{background:var(--d)}
 .empty{text-align:center;padding:40px 20px;color:var(--ts)}.empty .ic{font-size:2.8rem;margin-bottom:10px}
@@ -1065,10 +1082,19 @@ html:not([data-role="op"]) #op-conta{display:none!important}
     <div class="aform" id="cfg-mor-box" style="margin-top:12px">
       <h3 style="color:var(--p);margin-bottom:12px">👤 Minha conta</h3>
       <div id="cfg-mor-dados"></div>
-      <button class="btn btn-o btn-b" style="margin-top:12px" onclick="falarComPortaria()">💬 Falar com a portaria</button>
-      <div class="fg" style="margin-top:14px;margin-bottom:0"><label>Aparência</label>
-        <select id="ui-sel-mor" onchange="setUi(this.value)"><option value="pro">Profissional (completo)</option><option value="normal">Normal (moderno)</option><option value="classic">Clássico (Windows 98)</option></select></div>
-      <button class="btn btn-d btn-b" style="margin-top:12px" onclick="sairApp()">Trocar usuário</button>
+      <div id="cfg-face-box" style="margin-top:14px"></div>
+      <button class="btn btn-d btn-b" style="margin-top:14px" onclick="sairApp()">Trocar usuário</button>
+    </div>
+    <div class="aform" id="cfg-mor-aparencia" style="margin-top:12px">
+      <h3 style="color:var(--p);margin-bottom:10px">🎨 Aparência</h3>
+      <div class="fg" style="margin-bottom:0"><label>Tema do aplicativo</label>
+        <select id="ui-sel-mor" onchange="setUi(this.value)"><option value="pro">Profissional (completo)</option><option value="normal">Normal (moderno)</option><option value="classic">Clássico (Windows 98)</option></select>
+      </div>
+    </div>
+    <div class="aform" id="cfg-mor-portaria" style="margin-top:12px">
+      <h3 style="color:var(--p);margin-bottom:8px">💬 Falar com a portaria</h3>
+      <p style="font-size:.85rem;color:var(--ts);margin-bottom:12px">Envie mensagens diretas para a portaria da sua residência. A equipe responde pelo chat do app.</p>
+      <button class="btn btn-s btn-b" onclick="chatAbrir()">💬 Abrir chat com a portaria</button>
     </div>
 
     <div class="aform" style="margin-top:12px">
@@ -1981,15 +2007,21 @@ AG.exigirFace=async function(motivo){
 AG.faceOfertar=async function(){ /* desativado */ return; };
 AG.renderFaceCfg=function(){
   if(!isMor()) return;
-  var host=$("cfg-mor-dados"); if(!host) return;
   var box=$("cfg-face-box");
-  if(!box){box=document.createElement("div");box.id="cfg-face-box";box.style.marginTop="14px";host.parentNode.insertBefore(box,host.nextSibling);}
-  var cpf=dig(userSess.cpf),t=FB.get(cpf),lock=localStorage.getItem("cae_face_lock_"+cpf)!=="0";
-  box.innerHTML='<div class="sec-title">🔐 Biometria facial</div>'+
-   (t?('<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px"><img src="'+t.foto+'" style="width:72px;height:72px;object-fit:cover;border-radius:12px;border:2px solid #43A047"><div style="font-size:.85rem"><b>Rosto cadastrado ✅</b><br><span style="color:var(--ts)">Desde '+new Date(t.ts).toLocaleDateString("pt-BR")+'</span></div></div>'+
-     '<label style="display:flex;gap:8px;align-items:center;font-size:.9rem;margin-bottom:10px"><input type="checkbox" '+(lock?"checked":"")+' onchange="AG.faceLockToggle(this)"> Pedir meu rosto ao abrir o app</label>'+
-     '<div style="display:flex;gap:8px"><button class="btn btn-o btn-sm" style="flex:1" onclick="AG.faceRecadastrar()">Recadastrar</button><button class="btn btn-o btn-sm" style="flex:1;color:var(--d)" onclick="AG.faceRemover()">Remover</button></div>')
-    :('<div style="font-size:.85rem;color:var(--ts);margin-bottom:10px">O cadastro de rosto pela câmera foi desativado. Use a <b>digital ou Face ID</b> do celular após marcar lembrar no login.</div><button class="btn btn-s btn-b" type="button" onclick="morBioAtivar()">🔐 Ativar digital / Face ID</button>'));
+  if(!box){
+    var host=$("cfg-mor-dados"); if(!host) return;
+    box=document.createElement("div"); box.id="cfg-face-box"; box.style.marginTop="14px";
+    host.parentNode.insertBefore(box, host.nextSibling);
+  }
+  var cpf=dig(userSess&&userSess.cpf), ativo=false;
+  try{ ativo=localStorage.getItem("cae_mor_bio_"+cpf)==="1"; }catch(e){}
+  var ok=typeof bioSuportada==="function"&&bioSuportada();
+  box.innerHTML='<div class="sec-title">🔐 Biometria do aparelho</div>'+
+    '<div style="font-size:.85rem;color:var(--ts);margin-bottom:10px">'+(ok
+      ?(ativo?'Digital / Face ID <b style="color:#15803d">ativado</b> neste celular. Use no próximo login após marcar "Lembrar".'
+              :'Ative a <b>digital ou Face ID</b> deste celular para entrar mais rápido (mesmo sistema do operador).')
+      :'Este navegador/aparelho não permite biometria. Use CPF e senha.')+'</div>'+
+    (ok?('<button class="btn btn-s btn-b" type="button" onclick="morBioAtivar()">'+(ativo?'🔄 Reativar digital / Face ID':'🔐 Ativar digital / Face ID')+'</button>'):'');
 };
 AG.faceRecadastrar=async function(){
   var cpf=dig(userSess.cpf);
@@ -3897,7 +3929,17 @@ async function loginComDigital(){
       }
     });
     if(!assertion){ if(err) err.textContent="Biometria cancelada"; return; }
-    // biometria ok → preenche e loga com dados lembrados
+    // biometria ok → operador ou morador conforme cadastro
+    if(b.tipo==="mor"){
+      var mc=document.getElementById("lg-mcpf");
+      var ms=document.getElementById("lg-msenha")||document.getElementById("lg-msenha2");
+      if(mc) mc.value=(typeof fmtCPF==="function"?fmtCPF(b.cpf):b.cpf);
+      if(ms && b.senha) ms.value=b.senha;
+      try{ localStorage.setItem("cae_remember_mor", JSON.stringify({cpf:b.cpf,senha:b.senha||"",nome:b.nome||""})); }catch(e){}
+      if(typeof loginMorCadastro==="function") loginMorCadastro();
+      else if(typeof loginMor==="function") loginMor();
+      return;
+    }
     var cpfEl=document.getElementById("lg-cpf");
     var senhaEl=document.getElementById("lg-senha");
     if(cpfEl){ cpfEl.value=fmtCPF(b.cpf); }
@@ -4810,7 +4852,22 @@ async function morBioAtivar(){
       timeout:60000,attestation:"none"
     }});
     if(!cred){ toast("Não foi possível ativar","er"); return; }
+    var rem=null;
+    try{ rem=JSON.parse(localStorage.getItem("cae_remember_mor")||"null"); }catch(e){}
+    var senha=(rem&&rem.senha)||(userSess&&userSess.senha)||"";
+    // mesmo armazenamento do operador — loginComDigital reconhece tipo mor
+    if(typeof bioSave==="function") bioSave({
+      credId: (typeof bioBufToB64==="function"?bioBufToB64(cred.rawId):""),
+      cpf:cpf,
+      nome:(userSess&&userSess.nome)||"",
+      senha:senha,
+      tipo:"mor",
+      port:(userSess&&(userSess.port||userSess.p))||"",
+      em:new Date().toISOString()
+    });
     localStorage.setItem("cae_mor_bio_"+cpf,"1");
+    try{ if(typeof bioAtualizarBotao==="function") bioAtualizarBotao(); }catch(e){}
+    try{ if(typeof AG!=="undefined"&&AG.renderFaceCfg) AG.renderFaceCfg(); }catch(e){}
     toast("Digital / Face ID ativado neste aparelho","ok");
   }catch(e){
     var m=String((e&&e.message)||e||"");
@@ -4839,6 +4896,7 @@ function aposLoginMorador(m){
 }
 
 function applyRoleUI(){
+  try{ setTimeout(chatAtualizarFab, 200); }catch(e){}
   const isAdm=isAdmin();
   // hide edit/delete for non-admin
   document.querySelectorAll("#btn-cancel, [onclick*='editarAtual'], [onclick*='excluirAtual']").forEach(el=>{
@@ -5102,7 +5160,26 @@ function emitirCarteirinha(c){
     '<div class="bar">'+code128SVG(codigo,2,100)+'</div><div class="code">'+codigo+'</div>'+
     (typeof QRG!=="undefined"?'<div class="c">'+QRG.svg(codigo)+'</div>':'')+
     '<div class="c l">Apresente na portaria. Não precisa ligar.</div>'+
-    '<script>window.onload=function(){setTimeout(function(){try{window.print()}catch(e){}},300)}<\/script></body></html>';
+    '<script>window.onload=function(){setTimeout(function(){try{window.print()}catch(e){}},300)}<\/script>
+<div class="modal-bg" id="modal-chat">
+  <div class="modal">
+    <div class="mhead">
+      <div><h2 id="chat-title">💬 Chat portaria</h2><div style="font-size:.82rem;color:#64748b" id="chat-sub">Mensagens</div></div>
+      <button class="mclose" onclick="chatFechar()">×</button>
+    </div>
+    <div id="chat-lista-view" class="chat-lista" style="display:none"></div>
+    <div id="chat-thread-view" style="display:none;flex-direction:column;flex:1;min-height:0">
+      <div class="chat-body" id="chat-msgs"></div>
+      <div class="chat-foot">
+        <input type="text" id="chat-input" placeholder="Escreva sua mensagem..." maxlength="500" onkeydown="if(event.key==='Enter'){event.preventDefault();chatEnviar();}">
+        <button class="btn btn-s" style="min-width:70px" onclick="chatEnviar()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<button type="button" id="chat-fab" onclick="chatAbrir()" title="Mensagens" aria-label="Mensagens">💬<span class="badge" id="chat-fab-badge" style="display:none">0</span></button>
+
+</body></html>';
   try{
     var w=window.open("","_blank","width=420,height=700");
     if(w){ w.document.open(); w.document.write(html); w.document.close(); }
@@ -5504,16 +5581,208 @@ function renderCfgMorador(){
   el.innerHTML=row("Morador",userSess.nome)+row("Endereço",end+(ql?" · "+ql:""))+row("Portaria",_pn(userSess.port||(r&&r.p)||""))+
     row("Telefone",userSess.tel?fmtTel(userSess.tel):"")+row("Convidados cadastrados",String(gs.length))+row("Dentro agora",String(dentro));
 }
-function falarComPortaria(){
-  var r=null; try{ r=moradorResidencia(); }catch(e){}
-  var port=(userSess&&userSess.port)||(r&&r.p)||"";
-  var tel=telPortariaCadastro(port);
-  if(tel.length<10){ toast("Número da portaria não cadastrado. Fale com a administração.","er"); return; }
-  if(tel.length<=11) tel="55"+tel;
-  var end=((r?(r.end||r.e):"")||userSess.end||"");
-  var msg="Olá, portaria! Aqui é "+(userSess.nome||"")+(end?" ("+end+")":"")+".";
-  abrirWhatsSeguro("https://wa.me/"+tel+"?text="+encodeURIComponent(msg));
+
+/* ===== Chat portaria (morador ↔ portaria) ===== */
+function chatLer(){
+  try{ var a=JSON.parse(localStorage.getItem("cae_chat")||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; }
 }
+function chatSalvar(arr){
+  try{ localStorage.setItem("cae_chat", JSON.stringify((arr||[]).slice(-500))); }catch(e){}
+  try{ if(typeof agendar==="function") agendar("cae_chat"); }catch(e){}
+}
+function chatUid(){ return "ch"+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function chatPortariaAtual(){
+  try{
+    if(typeof isMoradorSess==="function" && isMoradorSess() && userSess) return userSess.port||userSess.p||(sess&&sess.loc)||"Parati";
+  }catch(e){}
+  try{ if(sess&&sess.loc) return sess.loc; }catch(e){}
+  return "Parati";
+}
+function chatSouPortaria(){
+  try{
+    if(typeof isMoradorSess==="function" && isMoradorSess()) return false;
+    if(userSess && (userSess.tipo==="adm"||userSess.tipo==="criador"||userSess.tipo==="operador"||userSess.tipo==="op")) return true;
+    if(sess && sess.op) return true;
+  }catch(e){}
+  return false;
+}
+function chatMeuId(){
+  try{
+    if(userSess && userSess.cpf) return "cpf:"+onlyDigits(userSess.cpf);
+    if(userSess && userSess.id) return "id:"+userSess.id;
+  }catch(e){}
+  try{ if(sess&&sess.op) return "op:"+String(sess.op); }catch(e){}
+  return "anon";
+}
+function chatMeuNome(){
+  try{
+    if(userSess && userSess.nome) return userSess.nome;
+    if(sess && sess.op) return sess.op;
+  }catch(e){}
+  return "Usuário";
+}
+function chatThreadKey(port, morId){
+  return String(port||"")+"|"+String(morId||"");
+}
+function chatThreads(){
+  var msgs=chatLer();
+  var map={}, port=chatPortariaAtual();
+  var souP=chatSouPortaria();
+  msgs.forEach(function(m){
+    if(souP && m.port!==port) return;
+    if(!souP && m.morId!==chatMeuId() && m.fromId!==chatMeuId()) return;
+    var k=chatThreadKey(m.port, m.morId||m.fromId);
+    if(!map[k]) map[k]={key:k, port:m.port, morId:m.morId, morNome:m.morNome||m.fromNome||"", last:m, unread:0};
+    if(!map[k].last || (m.em||"")>(map[k].last.em||"")) map[k].last=m;
+    if(souP && m.fromRole==="mor" && !m.lidaOp) map[k].unread++;
+    if(!souP && m.fromRole!=="mor" && !m.lidaMor) map[k].unread++;
+  });
+  return Object.keys(map).map(function(k){ return map[k]; }).sort(function(a,b){ return (b.last.em||"").localeCompare(a.last.em||""); });
+}
+function chatUnreadTotal(){
+  var n=0; chatThreads().forEach(function(t){ n+=t.unread||0; }); return n;
+}
+function chatAtualizarFab(){
+  var fab=document.getElementById("chat-fab");
+  var badge=document.getElementById("chat-fab-badge");
+  if(!fab) return;
+  var show=false;
+  try{
+    if(typeof isMoradorSess==="function" && isMoradorSess()) show=true;
+    else if(chatSouPortaria()) show=true;
+  }catch(e){}
+  if(show) fab.classList.add("show"); else fab.classList.remove("show");
+  var n=chatUnreadTotal();
+  if(badge){
+    if(n>0){ badge.style.display="flex"; badge.textContent=n>99?"99+":String(n); }
+    else badge.style.display="none";
+  }
+}
+window._chatCtx=null;
+function chatAbrir(){
+  var modal=document.getElementById("modal-chat"); if(!modal) return;
+  modal.classList.add("active");
+  if(chatSouPortaria()){
+    document.getElementById("chat-title").textContent="💬 Mensagens — "+chatPortariaAtual();
+    document.getElementById("chat-sub").textContent="Conversas dos moradores desta portaria";
+    document.getElementById("chat-lista-view").style.display="block";
+    document.getElementById("chat-thread-view").style.display="none";
+    chatRenderLista();
+  } else {
+    var morId=chatMeuId();
+    var port=chatPortariaAtual();
+    window._chatCtx={port:port, morId:morId, morNome:chatMeuNome()};
+    document.getElementById("chat-title").textContent="💬 Portaria "+port;
+    document.getElementById("chat-sub").textContent="Fale com a equipe da portaria";
+    document.getElementById("chat-lista-view").style.display="none";
+    document.getElementById("chat-thread-view").style.display="flex";
+    chatMarcarLidas();
+    chatRenderMsgs();
+  }
+  chatAtualizarFab();
+}
+function chatFechar(){
+  var modal=document.getElementById("modal-chat");
+  if(modal) modal.classList.remove("active");
+  window._chatCtx=null;
+  chatAtualizarFab();
+}
+function chatRenderLista(){
+  var el=document.getElementById("chat-lista-view"); if(!el) return;
+  var th=chatThreads();
+  if(!th.length){ el.innerHTML='<div style="padding:24px;text-align:center;color:#94a3b8">Nenhuma mensagem ainda.</div>'; return; }
+  el.innerHTML=th.map(function(t){
+    var preview=(t.last&&t.last.text)||"";
+    if(preview.length>60) preview=preview.slice(0,60)+"…";
+    var when=""; try{ when=new Date(t.last.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }catch(e){}
+    return '<div class="chat-item" onclick="chatAbrirThread(\''+String(t.morId).replace(/'/g,"")+"','"+String(t.morNome||"").replace(/'/g,"")+"')\">"+
+      '<div style="display:flex;justify-content:space-between;gap:8px"><b style="color:#14532d">'+(t.morNome||"Morador")+'</b>'+
+      (t.unread?'<span style="background:#dc2626;color:#fff;border-radius:10px;padding:1px 7px;font-size:.75rem">'+t.unread+'</span>':'')+'</div>'+
+      '<div style="font-size:.85rem;color:#64748b;margin-top:4px">'+preview+'</div>'+
+      '<div style="font-size:.72rem;color:#94a3b8;margin-top:4px">'+when+'</div></div>';
+  }).join("");
+}
+function chatAbrirThread(morId, morNome){
+  window._chatCtx={port:chatPortariaAtual(), morId:morId, morNome:morNome||"Morador"};
+  document.getElementById("chat-title").textContent="💬 "+(morNome||"Morador");
+  document.getElementById("chat-sub").textContent="Portaria "+chatPortariaAtual();
+  document.getElementById("chat-lista-view").style.display="none";
+  document.getElementById("chat-thread-view").style.display="flex";
+  chatMarcarLidas();
+  chatRenderMsgs();
+}
+function chatMsgsThread(){
+  var ctx=window._chatCtx; if(!ctx) return [];
+  return chatLer().filter(function(m){
+    return m.port===ctx.port && (m.morId===ctx.morId || (m.fromRole==="mor" && m.fromId===ctx.morId));
+  }).sort(function(a,b){ return (a.em||"").localeCompare(b.em||""); });
+}
+function chatMarcarLidas(){
+  var ctx=window._chatCtx; if(!ctx) return;
+  var arr=chatLer(), souP=chatSouPortaria(), mudou=false;
+  arr.forEach(function(m){
+    if(m.port!==ctx.port) return;
+    if((m.morId||m.fromId)!==ctx.morId && m.morId!==ctx.morId) return;
+    if(souP && m.fromRole==="mor" && !m.lidaOp){ m.lidaOp=true; mudou=true; }
+    if(!souP && m.fromRole!=="mor" && !m.lidaMor){ m.lidaMor=true; mudou=true; }
+  });
+  if(mudou) chatSalvar(arr);
+}
+function chatRenderMsgs(){
+  var el=document.getElementById("chat-msgs"); if(!el) return;
+  var me=chatMeuId();
+  var list=chatMsgsThread();
+  if(!list.length){
+    el.innerHTML='<div style="text-align:center;color:#94a3b8;padding:28px 12px">Nenhuma mensagem ainda.<br>Envie a primeira mensagem.</div>';
+    return;
+  }
+  el.innerHTML=list.map(function(m){
+    var eu=m.fromId===me;
+    var when=""; try{ when=new Date(m.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }catch(e){}
+    return '<div class="chat-msg '+(eu?"eu":"eles")+'">'+
+      (eu?"":'<div style="font-size:.75rem;font-weight:700;color:#14532d;margin-bottom:2px">'+(m.fromNome||"")+'</div>')+
+      String(m.text||"").replace(/</g,"&lt;")+
+      '<div class="chat-meta">'+when+(eu?"":"")+'</div></div>';
+  }).join("");
+  setTimeout(function(){ el.scrollTop=el.scrollHeight; }, 30);
+}
+function chatEnviar(){
+  var inp=document.getElementById("chat-input");
+  var text=(inp&&inp.value||"").trim();
+  if(!text) return;
+  var ctx=window._chatCtx;
+  if(!ctx){
+    if(!chatSouPortaria()){
+      ctx={port:chatPortariaAtual(), morId:chatMeuId(), morNome:chatMeuNome()};
+      window._chatCtx=ctx;
+    } else { toast("Abra uma conversa","er"); return; }
+  }
+  var msg={
+    id:chatUid(),
+    port:ctx.port,
+    morId:ctx.morId,
+    morNome:ctx.morNome||"",
+    fromId:chatMeuId(),
+    fromNome:chatMeuNome(),
+    fromRole:chatSouPortaria()?"op":"mor",
+    text:text.slice(0,500),
+    em:new Date().toISOString(),
+    lidaOp:chatSouPortaria(),
+    lidaMor:!chatSouPortaria()
+  };
+  var arr=chatLer(); arr.push(msg); chatSalvar(arr);
+  if(inp) inp.value="";
+  chatRenderMsgs();
+  chatAtualizarFab();
+  try{ if(typeof pushNotif==="function"){
+    if(msg.fromRole==="mor") pushNotif("adm","Nova mensagem — "+msg.port, (msg.morNome||"Morador")+": "+text.slice(0,80), {tipo:"chat"});
+  }}catch(e){}
+}
+// botão antigo
+function falarComPortaria(){ chatAbrir(); }
+setInterval(function(){ try{ chatAtualizarFab(); }catch(e){} }, 4000);
+document.addEventListener("DOMContentLoaded", function(){ setTimeout(chatAtualizarFab, 800); });
+
 function verificarPropsAgendadas(){
   try{
     var now=Date.now(), a=loadProps(), mud=false;
@@ -6630,7 +6899,7 @@ function fecharMorEdit(){document.getElementById("modal-mor-edit").classList.rem
 function locResId(){ var e=document.getElementById("me-id"); return e?String(e.value||""):""; }
 function locLer(){ try{ return JSON.parse(localStorage.getItem("cae_loc_res")||"{}"); }catch(e){ return {}; } }
 function locGravar(m){ try{ localStorage.setItem("cae_loc_res",JSON.stringify(m)); }catch(e){} }
-function locHistLer(){ try{ return JSON.parse(localStorage.getItem("cae_titular_hist")||"[]"); }catch(e){ return []; } }
+function locHistLer(){ try{ return JSON.parse(localStorage.getItem("cae_titular_hist","cae_chat")||"[]"); }catch(e){ return []; } }
 function locHistAdd(item){
   try{
     var h=locHistLer();
@@ -11986,7 +12255,7 @@ function copiarTextoWa(){
 (function(){
   var SB_URL="https://iccrwqanjayutohmmrvz.supabase.co";
   var SB_KEY="sb_publishable_-prEky1sDvxq-K1rZAfRdw_Db0W99dh";
-  var CFG=["cae_restr","cae_props","cae_excluidos","cae_msgs","cae_port_tels","cae_solic_res","cae_vinculos_res","cae_fam_auth","cae_mor_res_ativa","cae_ticket","cae_loc_res","cae_modelos"];
+  var CFG=["cae_restr","cae_props","cae_excluidos","cae_msgs","cae_chat","cae_port_tels","cae_solic_res","cae_vinculos_res","cae_fam_auth","cae_mor_res_ativa","cae_ticket","cae_loc_res","cae_modelos"];
   var CHAVES={"cae_c":1,"cae_a":1,"cae_moradores_v2":1};
   CFG.forEach(function(k){ CHAVES[k]=1; });
   var CFG_H="cae_sync_cfg";
@@ -12795,7 +13064,7 @@ window.edAdd_logo=function(){ edAdd("logo"); };
   var SB_URL="https://iccrwqanjayutohmmrvz.supabase.co";
   var SB_KEY="sb_publishable_-prEky1sDvxq-K1rZAfRdw_Db0W99dh";
   var PESSOAS_K=["cae_c","cae_excluidos"], ACESSO_K="cae_a", RES_K="cae_moradores_v2";
-  var CFG_K=["cae_restr","cae_props","cae_msgs","cae_port_tels","cae_solic_res","cae_vinculos_res","cae_fam_auth","cae_mor_res_ativa","cae_ticket","cae_loc_res","cae_modelos","cae_admins","cae_mor_cpf","cae_mor_pwd"];
+  var CFG_K=["cae_restr","cae_props","cae_msgs","cae_chat","cae_port_tels","cae_solic_res","cae_vinculos_res","cae_fam_auth","cae_mor_res_ativa","cae_ticket","cae_loc_res","cae_modelos","cae_admins","cae_mor_cpf","cae_mor_pwd"];
   var DATA=PESSOAS_K.concat([ACESSO_K,RES_K],CFG_K);
   var TIPOS=["visitante","prestador","morador","operador","administrador","criador"];
   window.__NOVO_SYNC=true;
