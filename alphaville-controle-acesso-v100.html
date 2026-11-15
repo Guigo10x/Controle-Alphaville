@@ -930,28 +930,37 @@ html:not([data-role="op"]) #op-conta{display:none!important}
       </select>
     </div>
     <div id="box-acesso-livre" style="display:none;margin-bottom:14px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px">
-      <div style="font-weight:700;color:#14532d;margin-bottom:8px">🔓 Acesso livre em</div>
-      <div style="font-size:.82rem;color:#64748b;margin-bottom:8px">Residências onde este prestador pode entrar sem ligação (liberado).</div>
-      <div id="al-lista"></div>
-      <div class="fg" style="margin:8px 0 4px"><label>Buscar residência</label>
-        <input type="text" id="al-busca" placeholder="Nome, QD LT ou endereço" oninput="alBuscar()">
-        <div class="mlist" id="al-mlist"></div>
-      </div>
-      <button type="button" class="btn btn-o btn-sm" onclick="alAddMais()">+ Adicionar outra residência</button>
-      <div style="margin-top:10px;font-size:.82rem;font-weight:600;color:#14532d">Horário / dias liberados</div>
-      <div class="dchips" id="al-dias" style="margin:6px 0">
-        <label class="dchip"><input type="checkbox" class="al-d" value="1" checked><span>Seg</span></label>
-        <label class="dchip"><input type="checkbox" class="al-d" value="2" checked><span>Ter</span></label>
-        <label class="dchip"><input type="checkbox" class="al-d" value="3" checked><span>Qua</span></label>
-        <label class="dchip"><input type="checkbox" class="al-d" value="4" checked><span>Qui</span></label>
-        <label class="dchip"><input type="checkbox" class="al-d" value="5" checked><span>Sex</span></label>
-        <label class="dchip"><input type="checkbox" class="al-d" value="6"><span>Sáb</span></label>
-        <label class="dchip"><input type="checkbox" class="al-d" value="0"><span>Dom</span></label>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:.85rem;margin:6px 0"><input type="checkbox" id="al-todos" onchange="alToggleTodos()"> Todos os dias e horários</label>
-      <div style="display:flex;gap:10px" id="al-horas">
-        <div class="fg" style="flex:1"><label>Das</label><input type="time" id="al-hi" value="08:00"></div>
-        <div class="fg" style="flex:1"><label>Até</label><input type="time" id="al-hf" value="18:00"></div>
+      <label style="display:flex;gap:10px;align-items:center;cursor:pointer;user-select:none">
+        <input type="checkbox" id="al-ativo" style="width:18px;height:18px;accent-color:#15803d" onchange="alToggleBox()">
+        <span style="font-weight:800;color:#14532d">🔓 Acesso livre em residências</span>
+      </label>
+      <div style="font-size:.8rem;color:#64748b;margin-top:4px">Marque para liberar entrada sem ligação.</div>
+      <div id="al-detalhes" style="display:none;margin-top:12px">
+        <div id="al-lista"></div>
+        <div style="margin-top:10px;font-size:.82rem;font-weight:700;color:#14532d">1) Dias e horário</div>
+        <label style="display:flex;align-items:center;gap:10px;font-size:.9rem;margin:8px 0;padding:8px 10px;background:#fff;border-radius:10px;border:1px solid #bbf7d0;cursor:pointer">
+          <input type="checkbox" id="al-todos" style="width:18px;height:18px;accent-color:#15803d" onchange="alToggleTodos()">
+          <span style="font-weight:600;color:#14532d">Todos os dias e horários</span>
+        </label>
+        <div class="dchips" id="al-dias" style="margin:6px 0">
+          <label class="dchip"><input type="checkbox" class="al-d" value="1" checked><span>Seg</span></label>
+          <label class="dchip"><input type="checkbox" class="al-d" value="2" checked><span>Ter</span></label>
+          <label class="dchip"><input type="checkbox" class="al-d" value="3" checked><span>Qua</span></label>
+          <label class="dchip"><input type="checkbox" class="al-d" value="4" checked><span>Qui</span></label>
+          <label class="dchip"><input type="checkbox" class="al-d" value="5" checked><span>Sex</span></label>
+          <label class="dchip"><input type="checkbox" class="al-d" value="6"><span>Sáb</span></label>
+          <label class="dchip"><input type="checkbox" class="al-d" value="0"><span>Dom</span></label>
+        </div>
+        <div style="display:flex;gap:10px" id="al-horas">
+          <div class="fg" style="flex:1"><label>Das</label><input type="time" id="al-hi" value="08:00"></div>
+          <div class="fg" style="flex:1"><label>Até</label><input type="time" id="al-hf" value="18:00"></div>
+        </div>
+        <div style="margin-top:12px;font-size:.82rem;font-weight:700;color:#14532d">2) Residência liberada</div>
+        <div class="fg" style="margin:8px 0 4px"><label>Buscar residência</label>
+          <input type="text" id="al-busca" placeholder="Nome, QD LT ou endereço" oninput="alBuscar()">
+          <div class="mlist" id="al-mlist"></div>
+        </div>
+        <button type="button" class="btn btn-s btn-b" style="margin-top:6px" onclick="alConfirmarAdd()">+ Adicionar residência liberada</button>
       </div>
     </div>
     <p style="font-size:.85rem;color:var(--ts);margin-bottom:14px" id="form-desc">Dados do convidado e do morador que liberou</p>
@@ -1102,6 +1111,11 @@ html:not([data-role="op"]) #op-conta{display:none!important}
   </div>
 
   
+  <div class="aform" id="cfg-titular-hist-box">
+    <h3 style="color:var(--p);margin-bottom:8px">Alterações de titular</h3>
+    <p style="font-size:.82rem;color:var(--ts);margin-bottom:10px">Histórico de trocas de titular / locatário nas residências.</p>
+    <div id="cfg-titular-hist" style="max-height:260px;overflow-y:auto;font-size:.85rem"></div>
+  </div>
   <div class="aform" id="cfg-moradores-box">
     <h3 style="color:var(--p);margin-bottom:12px">Cadastro de moradores</h3>
     <div class="filter-row">
@@ -1544,6 +1558,29 @@ html:not([data-role="op"]) #op-conta{display:none!important}
     <div class="mbody mor-edit-modal">
       <input type="hidden" id="me-id">
 
+      <div id="loc-box-res" style="margin:4px 0 14px;padding:12px 14px;border:1px solid #bbf7d0;border-radius:14px;background:#f0fdf4">
+        <label style="display:flex;gap:10px;align-items:center;cursor:pointer;user-select:none">
+          <input type="checkbox" id="loc-chk" style="width:18px;height:18px;accent-color:#15803d" onchange="locToggle()">
+          <span style="font-size:.78rem;font-weight:800;letter-spacing:.6px;color:#14532d;text-transform:uppercase">Residência alugada (locatário)</span>
+        </label>
+        <div style="font-size:.8rem;color:#64748b;margin-top:6px;line-height:1.35">Marque se quem mora aqui é locatário. O dono pode ser morador ou visitante (quando o proprietário não mora no condomínio).</div>
+        <div id="loc-own" style="display:none;margin-top:12px">
+          <div id="loc-tenant-box" style="margin-bottom:10px;padding:10px 12px;background:#fff;border:1px solid #bbf7d0;border-radius:10px">
+            <div style="font-size:.72rem;color:#64748b;text-transform:uppercase;letter-spacing:.3px">Locatário(s) nesta casa</div>
+            <div id="loc-tenant-nome" style="font-weight:700;color:#14532d;margin-top:2px">-</div>
+          </div>
+          <div style="font-size:.72rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:6px">Proprietário / dono (morador ou visitante)</div>
+          <input type="text" id="loc-busca" placeholder="Buscar por nome, CPF, QD ou LT" autocomplete="off" oninput="locBuscar(this.value)" style="width:100%;padding:11px 12px;border:1.5px solid #86efac;border-radius:11px;box-sizing:border-box;background:#fff;font-size:.95rem">
+          <div id="loc-res" style="margin-top:6px"></div>
+          <div id="loc-sel" style="display:none;margin-top:8px;padding:10px 12px;background:#fff;border:1px solid #bbf7d0;border-radius:10px">
+            <div style="font-size:.72rem;color:#64748b;text-transform:uppercase">Proprietário selecionado</div>
+            <div id="loc-sel-nome" style="font-weight:700;color:#14532d;margin-top:2px">-</div>
+            <div id="loc-sel-tipo" style="font-size:.78rem;color:#64748b"></div>
+            <button type="button" onclick="locRemoverDono()" style="margin-top:6px;background:none;border:0;color:#b91c1c;font-size:.82rem;text-decoration:underline;padding:0;cursor:pointer">Remover dono</button>
+          </div>
+          <div style="margin-top:10px;font-size:.8rem;color:#14532d;background:#dcfce7;border-radius:8px;padding:8px 10px">Os <b>Associados titulares</b> abaixo são quem mora na casa (locatário). Vincule o dono acima e salve.</div>
+        </div>
+      </div>
       <div class="sec-title" style="margin-top:4px">Associado titular 1</div>
       <div class="fg"><label>Foto</label>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -4869,6 +4906,20 @@ function onTipoCadastro(){
 
 /* ===== Acesso livre (prestador liberado sem ligação) ===== */
 window._alRes=[];
+function alToggleBox(){
+  var a=document.getElementById("al-ativo"), d=document.getElementById("al-detalhes");
+  if(!a||!d) return;
+  d.style.display=a.checked?"block":"none";
+  if(!a.checked){ window._alRes=[]; try{alRenderLista();}catch(e){} var m=document.getElementById("al-mlist"); if(m){m.innerHTML="";m.style.display="none";} var b=document.getElementById("al-busca"); if(b) b.value=""; }
+}
+window._alPendente=null;
+function alConfirmarAdd(){
+  if(!window._alPendente){ toast("Busque e toque numa residência, depois em Adicionar","er"); return; }
+  alPick(window._alPendente); window._alPendente=null;
+  var b=document.getElementById("al-busca"); if(b) b.value="";
+  var m=document.getElementById("al-mlist"); if(m){ m.innerHTML=""; m.style.display="none"; }
+  toast("Residência adicionada ao acesso livre","ok");
+}
 function alToggleTodos(){
   var t=document.getElementById("al-todos");
   var h=document.getElementById("al-horas");
@@ -4910,7 +4961,10 @@ function alPickIdx(i){
   var r=(window._alTmp||[])[i]; if(!r) return;
   var mor=[r.n1,r.n2].filter(Boolean).join(" e ");
   var qdlt=(r.qd||r.lt)?("QD "+(r.qd||"")+" LT "+(r.lt||"")):"";
-  alPick({rid:r.id,mor:mor,end:r.end||"",qdlt:qdlt,p:r.p||""});
+  window._alPendente={rid:r.id,mor:mor,end:r.end||"",qdlt:qdlt,p:r.p||""};
+  var ml=document.getElementById("al-mlist");
+  if(ml){ ml.querySelectorAll(".mitem").forEach(function(el,idx){ el.style.background=idx===i?"#dcfce7":""; }); }
+  toast("Selecionada. Toque em Adicionar residência liberada.","ok");
 }
 function alPick(r){
   if(!r||!r.rid) return;
@@ -4938,6 +4992,9 @@ function alCarregarDoCadastro(c){
   window._alRes=[];
   try{
     (c.libres||[]).forEach(function(r){ window._alRes.push({rid:r.rid,mor:r.mor,end:r.end,qdlt:r.qdlt,p:r.p}); });
+    var ativo=document.getElementById("al-ativo"); var det=document.getElementById("al-detalhes");
+    if(ativo) ativo.checked=!!(c.libres&&c.libres.length);
+    if(det) det.style.display=(c.libres&&c.libres.length)?"block":"none";
     var first=(c.libres||[])[0];
     if(first){
       var td=document.getElementById("al-todos"); if(td) td.checked=!!first.todos;
@@ -6468,8 +6525,10 @@ function abrirMorEdit(id){
     const modal=document.getElementById("modal-mor-edit");
     window._meFamilia = (m && m.familia) ? JSON.parse(JSON.stringify(m.familia)) : [];
     try{ renderFamiliaLista(); }catch(e){}
+    try{ window._titularAntes=m?([m.n1,m.n2].filter(Boolean).join(" e ")||m.n||""):""; }catch(e){ window._titularAntes=""; }
     if(modal) modal.classList.add("active");
     else toast("Formulário de morador não encontrado","er");
+    setTimeout(function(){ try{ locAtualizarUI(); }catch(e){} }, 50);
   }catch(e){
     console.error("abrirMorEdit", e);
     toast("Erro ao abrir morador","er");
@@ -6496,20 +6555,219 @@ function excluirMorEdit(){
     onOk:function(){
       const idx=MORADORES.findIndex(x=>x.id===id);
       if(idx>=0){
-        const nome=MORADORES[idx].n1||MORADORES[idx].n||"";
-        try{ registrarExclusao("MORADOR", Object.assign({}, MORADORES[idx]), (sess&&sess.op)||(userSess&&userSess.nome)||""); }catch(e){}
-        MORADORES.splice(idx,1);
+        const ant=MORADORES[idx];
+        const nome=ant.n1||ant.n||"";
+        // se houver dono/locatário vinculado, atualiza a residência em vez de só apagar
+        var atualizou=false;
+        try{
+          if(ant.donoId){
+            var donoMor=(MORADORES||[]).find(function(x){return x.id===ant.donoId;});
+            var donoVis=(typeof conv!=="undefined"?conv:[]).find(function(x){return x.id===ant.donoId;});
+            if(donoMor){
+              // já é outra residência — só registra histórico
+              locHistAdd({resId:id,qdlt:((ant.qd||ant.lt)?("QD "+(ant.qd||"")+" LT "+(ant.lt||"")):""),end:ant.end||ant.e||"",antigo:[ant.n1,ant.n2].filter(Boolean).join(" e "),novo:[donoMor.n1,donoMor.n2].filter(Boolean).join(" e "),dono:ant.donoNome||"",por:(userSess&&userSess.nome)||(sess&&sess.op)||"",obs:"Exclusão com dono morador vinculado"});
+            } else if(donoVis){
+              // promove visitante/dono para titular da residência
+              ant.n1=(donoVis.nome||"").toUpperCase();
+              ant.n2="";
+              ant.cpf1=onlyDigits(donoVis.cpf||"");
+              ant.t1=onlyDigits(donoVis.telVis||donoVis.tel||"");
+              ant.foto1=donoVis.foto||"";
+              ant.locatario=false;
+              ant.locatarioNome=nome;
+              delete ant.donoId; delete ant.donoNome; delete ant.donoTipo;
+              ant.atualizado=new Date().toISOString();
+              atualizou=true;
+              locHistAdd({resId:id,qdlt:((ant.qd||ant.lt)?("QD "+(ant.qd||"")+" LT "+(ant.lt||"")):""),end:ant.end||ant.e||"",antigo:nome,novo:ant.n1,locatario:nome,dono:donoVis.nome||"",por:(userSess&&userSess.nome)||(sess&&sess.op)||"",obs:"Titular atualizado com cadastro do visitante/dono após exclusão"});
+            }
+          }
+        }catch(e){}
+        try{ registrarExclusao("MORADOR", Object.assign({}, ant), (sess&&sess.op)||(userSess&&userSess.nome)||""); }catch(e){}
+        if(!atualizou){
+          MORADORES.splice(idx,1);
+          toast("Morador excluído","ok");
+        } else {
+          toast("Residência atualizada com os dados do proprietário vinculado","ok");
+        }
         try{ if(typeof saveMorOverrides==="function") saveMorOverrides(); }catch(e){}
         try{ if(typeof persistMoradores==="function") persistMoradores(); }catch(e){}
-        pushNotif("adm","Morador excluído", nome+" foi excluído por "+((userSess&&userSess.nome)||sess.op||"ADM"), {tipo:"exclusao"});
-        toast("Morador excluído","ok");
+        pushNotif("adm", atualizou?"Titular atualizado":"Morador excluído", nome+(atualizou?" → dados do dono aplicados":" foi excluído")+" por "+((userSess&&userSess.nome)||sess.op||"ADM"), {tipo:"exclusao"});
       }
       fecharMorEdit();
       try{renderMoradoresCfg()}catch(e){}
+      try{renderTitularHistCfg()}catch(e){}
     }
   });
 }
 function fecharMorEdit(){document.getElementById("modal-mor-edit").classList.remove("active")}
+
+/* Locatário — somente edição de residência */
+function locResId(){ var e=document.getElementById("me-id"); return e?String(e.value||""):""; }
+function locLer(){ try{ return JSON.parse(localStorage.getItem("cae_loc_res")||"{}"); }catch(e){ return {}; } }
+function locGravar(m){ try{ localStorage.setItem("cae_loc_res",JSON.stringify(m)); }catch(e){} }
+function locHistLer(){ try{ return JSON.parse(localStorage.getItem("cae_titular_hist")||"[]"); }catch(e){ return []; } }
+function locHistAdd(item){
+  try{
+    var h=locHistLer();
+    h.unshift(Object.assign({id:"th"+Date.now(), em:new Date().toISOString()}, item));
+    localStorage.setItem("cae_titular_hist", JSON.stringify(h.slice(0,200)));
+  }catch(e){}
+  try{ renderTitularHistCfg(); }catch(e){}
+}
+function locNomeRes(id){
+  var m=(typeof MORADORES!=="undefined"?MORADORES:[]).find(function(x){return x.id===id;});
+  if(m){
+    var n=[m.n1,m.n2].filter(Boolean).join(" e ")||m.n||"";
+    var qdlt=(m.qd||m.lt)?("QD "+(m.qd||"")+" LT "+(m.lt||"")):"";
+    return [n,qdlt,m.end||m.e||""].filter(Boolean).join(" · ");
+  }
+  var c=(typeof conv!=="undefined"?conv:[]).find(function(x){return x.id===id;});
+  if(c) return (c.nome||"")+(c.tipo?" · "+String(c.tipo).toUpperCase():"")+(c.cpf?" · "+(typeof fmtCPF==="function"?fmtCPF(c.cpf):c.cpf):"");
+  return "";
+}
+function locEsc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
+function locTitularesAtuais(){
+  var n1=((document.getElementById("me-nome")||{}).value||"").trim();
+  var n2=((document.getElementById("me-nome2")||{}).value||"").trim();
+  return [n1,n2].filter(Boolean).join(" e ");
+}
+function locToggle(){
+  var chk=document.getElementById("loc-chk"), own=document.getElementById("loc-own");
+  if(!chk||!own) return;
+  own.style.display=chk.checked?"block":"none";
+  var r=locResId();
+  var m=locLer();
+  var ten=locTitularesAtuais()||"-";
+  var tn=document.getElementById("loc-tenant-nome"); if(tn) tn.textContent=ten;
+  if(chk.checked){
+    if(r) m[r]=Object.assign({}, m[r]||{}, {loc:true, locatarioNome:ten});
+  } else {
+    if(r) m[r]={loc:false};
+    var bus=document.getElementById("loc-busca"); if(bus) bus.value="";
+    var res=document.getElementById("loc-res"); if(res) res.innerHTML="";
+    var sel=document.getElementById("loc-sel"); if(sel) sel.style.display="none";
+  }
+  locGravar(m);
+  if(r){
+    try{
+      var i=(MORADORES||[]).findIndex(function(x){return x.id===r;});
+      if(i>=0){
+        MORADORES[i].locatario=!!chk.checked;
+        if(chk.checked) MORADORES[i].locatarioNome=ten;
+        else { delete MORADORES[i].locatarioNome; delete MORADORES[i].donoId; delete MORADORES[i].donoNome; delete MORADORES[i].donoTipo; }
+        if(typeof persistMoradores==="function") persistMoradores();
+        else if(typeof saveMorOverrides==="function") saveMorOverrides();
+      }
+    }catch(e){}
+  }
+}
+function locBuscar(txt){
+  var r=locResId(), q=String(txt||"").trim().toLowerCase(), box=document.getElementById("loc-res");
+  if(!box) return;
+  if(q.length<2){ box.innerHTML=""; return; }
+  var out=[];
+  (MORADORES||[]).forEach(function(x){
+    if(x.id===r) return;
+    var s=((x.n1||"")+" "+(x.n2||"")+" "+(x.qd||"")+" "+(x.lt||"")+" "+(x.end||x.e||"")+" "+(x.cpf1||"")+" "+(x.cpf2||"")).toLowerCase();
+    if(s.indexOf(q)>=0) out.push({kind:"morador", id:x.id, nome:[x.n1,x.n2].filter(Boolean).join(" e "), extra:((x.qd||x.lt)?("QD "+(x.qd||"")+" LT "+(x.lt||"")):"")+(x.end||x.e?" · "+(x.end||x.e):"")});
+  });
+  (typeof conv!=="undefined"?conv:[]).forEach(function(c){
+    var s=((c.nome||"")+" "+(c.cpf||"")+" "+(c.mor||"")+" "+(c.end||"")).toLowerCase();
+    if(s.indexOf(q)>=0) out.push({kind:c.tipo||"visitante", id:c.id, nome:c.nome||"", extra:(c.tipo||"visitante").toUpperCase()+(c.cpf?" · "+(typeof fmtCPF==="function"?fmtCPF(c.cpf):c.cpf):"")});
+  });
+  out=out.slice(0,10);
+  if(!out.length){ box.innerHTML='<div style="font-size:.85rem;color:#64748b;padding:6px 2px">Nenhum morador ou visitante encontrado.</div>'; return; }
+  window._locPick=out;
+  box.innerHTML=out.map(function(x,i){
+    return '<button type="button" onclick="locEscolherDonoIdx('+i+')" style="display:block;width:100%;text-align:left;padding:10px 12px;margin-top:4px;border:1px solid #e5e7eb;border-radius:10px;background:#fff;cursor:pointer">'+
+      '<b style="color:#14532d">'+locEsc(x.nome||"-")+'</b>'+
+      '<div style="font-size:.78rem;color:#64748b">'+locEsc(x.extra||"")+'</div></button>';
+  }).join("");
+}
+function locEscolherDonoIdx(i){ var x=(window._locPick||[])[i]; if(x) locEscolherDono(x); }
+function locEscolherDono(x){
+  var r=locResId(); if(!r){ toast("Salve a residência antes de vincular o dono","er"); return; }
+  var m=locLer();
+  m[r]=Object.assign({}, m[r]||{}, {loc:true, dono:x.id, donoTipo:x.kind, donoNome:x.nome, locatarioNome:locTitularesAtuais()});
+  locGravar(m);
+  try{
+    var i=(MORADORES||[]).findIndex(function(z){return z.id===r;});
+    if(i>=0){
+      MORADORES[i].locatario=true;
+      MORADORES[i].donoId=x.id;
+      MORADORES[i].donoTipo=x.kind;
+      MORADORES[i].donoNome=x.nome;
+      MORADORES[i].locatarioNome=locTitularesAtuais()||MORADORES[i].locatarioNome||"";
+      if(typeof persistMoradores==="function") persistMoradores();
+      else if(typeof saveMorOverrides==="function") saveMorOverrides();
+    }
+  }catch(e){}
+  var bus=document.getElementById("loc-busca"); if(bus) bus.value="";
+  var res=document.getElementById("loc-res"); if(res) res.innerHTML="";
+  locAtualizarUI();
+  toast("Proprietário vinculado: "+(x.nome||""),"ok");
+}
+function locRemoverDono(){
+  var r=locResId(); if(!r) return;
+  var m=locLer(); if(m[r]){ delete m[r].dono; delete m[r].donoTipo; delete m[r].donoNome; } locGravar(m);
+  try{
+    var i=(MORADORES||[]).findIndex(function(x){return x.id===r;});
+    if(i>=0){ delete MORADORES[i].donoId; delete MORADORES[i].donoNome; delete MORADORES[i].donoTipo;
+      if(typeof persistMoradores==="function") persistMoradores();
+      else if(typeof saveMorOverrides==="function") saveMorOverrides();
+    }
+  }catch(e){}
+  locAtualizarUI();
+}
+function locAtualizarUI(){
+  var chk=document.getElementById("loc-chk"), own=document.getElementById("loc-own");
+  if(!chk||!own) return;
+  var modal=document.getElementById("modal-mor-edit");
+  if(!modal||!modal.classList.contains("active")) return;
+  var r=locResId(), reg=locLer()[r]||{};
+  try{
+    var mr=(MORADORES||[]).find(function(x){return x.id===r;});
+    if(mr){
+      if(mr.locatario) reg.loc=true;
+      if(mr.donoId){ reg.dono=mr.donoId; reg.donoTipo=mr.donoTipo; reg.donoNome=mr.donoNome; }
+      if(mr.locatarioNome) reg.locatarioNome=mr.locatarioNome;
+    }
+  }catch(e){}
+  chk.checked=!!reg.loc;
+  own.style.display=reg.loc?"block":"none";
+  var tn=document.getElementById("loc-tenant-nome");
+  if(tn) tn.textContent=reg.locatarioNome||locTitularesAtuais()||"-";
+  var bus=document.getElementById("loc-busca"), res=document.getElementById("loc-res");
+  var sel=document.getElementById("loc-sel"), sn=document.getElementById("loc-sel-nome"), st=document.getElementById("loc-sel-tipo");
+  if(res) res.innerHTML="";
+  if(reg.dono){
+    if(bus) bus.value="";
+    if(sel) sel.style.display="block";
+    if(sn) sn.textContent=reg.donoNome||locNomeRes(reg.dono)||String(reg.dono);
+    if(st) st.textContent=reg.donoTipo?("Tipo: "+String(reg.donoTipo).toUpperCase()):"";
+  } else {
+    if(sel) sel.style.display="none";
+    if(sn) sn.textContent="-";
+    if(st) st.textContent="";
+  }
+}
+function renderTitularHistCfg(){
+  var el=document.getElementById("cfg-titular-hist"); if(!el) return;
+  var h=locHistLer();
+  if(!h.length){ el.innerHTML='<div style="color:#94a3b8">Nenhuma alteração registrada ainda.</div>'; return; }
+  el.innerHTML=h.slice(0,50).map(function(x){
+    var when="";
+    try{ when=new Date(x.em).toLocaleString("pt-BR"); }catch(e){ when=x.em||""; }
+    return '<div style="padding:8px 0;border-bottom:1px solid #e5e7eb">'+
+      '<div style="font-weight:700;color:#14532d">'+locEsc(x.qdlt||x.end||"Residência")+'</div>'+
+      '<div style="color:#64748b">De: <b>'+locEsc(x.antigo||"-")+'</b> → Para: <b>'+locEsc(x.novo||"-")+'</b></div>'+
+      (x.locatario?'<div style="color:#b45309;font-size:.8rem">Locatário: '+locEsc(x.locatario)+'</div>':'')+
+      (x.dono?'<div style="color:#64748b;font-size:.8rem">Dono: '+locEsc(x.dono)+'</div>':'')+
+      '<div style="font-size:.75rem;color:#94a3b8">'+locEsc(when)+(x.por?" · "+locEsc(x.por):"")+'</div></div>';
+  }).join("");
+}
+
+
 
 // ===== GRUPO FAMILIAR =====
 window._meFamilia = [];
@@ -7101,9 +7359,43 @@ function salvarMorEdit(){
       atualizado:agora
     });
   }
+  // locatário + histórico de titular
+  try{
+    var chk=document.getElementById("loc-chk");
+    var reg=locLer()[id]||{};
+    var idxM=MORADORES.findIndex(function(x){return x.id===id;});
+    if(idxM>=0){
+      var novoNome=[MORADORES[idxM].n1,MORADORES[idxM].n2].filter(Boolean).join(" e ");
+      var antigo=window._titularAntes||"";
+      MORADORES[idxM].locatario=!!(chk&&chk.checked);
+      if(chk&&chk.checked){
+        MORADORES[idxM].locatarioNome=reg.locatarioNome||antigo||novoNome;
+        if(reg.dono||reg.donoId){
+          MORADORES[idxM].donoId=reg.dono||reg.donoId;
+          MORADORES[idxM].donoNome=reg.donoNome||"";
+          MORADORES[idxM].donoTipo=reg.donoTipo||"";
+        }
+      } else {
+        delete MORADORES[idxM].locatarioNome; delete MORADORES[idxM].donoId; delete MORADORES[idxM].donoNome; delete MORADORES[idxM].donoTipo;
+      }
+      if(antigo && novoNome && antigo!==novoNome){
+        locHistAdd({
+          resId:id,
+          qdlt:((MORADORES[idxM].qd||MORADORES[idxM].lt)?("QD "+(MORADORES[idxM].qd||"")+" LT "+(MORADORES[idxM].lt||"")):""),
+          end:MORADORES[idxM].end||MORADORES[idxM].e||"",
+          antigo:antigo,
+          novo:novoNome,
+          locatario:MORADORES[idxM].locatarioNome||"",
+          dono:MORADORES[idxM].donoNome||"",
+          por:(userSess&&userSess.nome)||(sess&&sess.op)||""
+        });
+      }
+    }
+  }catch(e){}
   persistMoradores();
   fecharMorEdit();
   try{renderMoradoresCfg()}catch(e){}
+  try{renderTitularHistCfg()}catch(e){}
   try{agendarSyncSheets("moradores")}catch(e){}
   toast("Morador salvo","ok");
 }
@@ -7153,6 +7445,8 @@ function cfgLibAbrir(i){ var c=(window._cfgLib||[])[i]; if(c) abrir(c.id); }
 function cfgLibCart(i){ var c=(window._cfgLib||[])[i]; if(c) emitirCarteirinha(c); }
 
 function renderConfig(){
+  try{ renderTitularHistCfg(); }catch(e){}
+
   try{ renderLibresCfg(); }catch(e){}
 
   try{renderMoradoresCfg()}catch(e){}
@@ -12107,24 +12401,7 @@ function copiarTextoWa(){
       b.onclick=function(){ var m=lerLoc(); m[r]=Object.assign({},m[r]||{},{loc:true,dono:b.getAttribute("data-id")}); gravarLoc(m); atualizar(); };
     });
   }
-  function montar(){
-    var tit=document.getElementById("m-tit1-row"); if(!tit || document.getElementById("loc-row")) return;
-    var box=document.createElement("div"); box.id="loc-row";
-    box.style.cssText="margin:6px 0 10px;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#f8faf8";
-    box.style.cssText="margin:6px 0 10px;padding:10px;border:1px solid #e5e7eb;border-radius:12px;background:#f8faf8;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap";
-    box.innerHTML='<label style="display:flex;gap:8px;align-items:center;font-weight:800;color:#14532d;white-space:nowrap"><input type="checkbox" id="loc-chk" style="width:18px;height:18px"> LOCATÁRIO</label>'+
-      '<div id="loc-own" style="display:none;flex:1;min-width:220px"><input type="text" id="loc-busca" placeholder="Buscar cadastro do dono (nome, QD ou LT)" autocomplete="off" style="width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px;box-sizing:border-box">'+
-      '<div id="loc-res"></div><div id="loc-link" style="margin-top:6px"></div></div>';
-    tit.parentNode.insertBefore(box,tit);
-    document.getElementById("loc-chk").onchange=function(){
-      var r=resAtual(); if(!r) return; var m=lerLoc(); m[r]=Object.assign({},m[r]||{},{loc:this.checked});
-      if(!this.checked) delete m[r].dono; gravarLoc(m); atualizar();
-    };
-    var bus=document.getElementById("loc-busca");
-    bus.onclick=function(){ var reg=lerLoc()[resAtual()]||{}; if(reg.dono){ abrirMorEdit(reg.dono); } };
-    bus.oninput=function(){ if(!(lerLoc()[resAtual()]||{}).dono) buscarDono(this.value); };
-    atualizar();
-  }
+  function montar(){ /* desativado: locatário fica só no modal de residência (loc-box-res) */ return; }
   function naResidenciaV93(){ var t=document.getElementById("me-title"); return !!(t && t.textContent.indexOf("residência")>=0); }
   var ultimo=null;
   setInterval(function(){
@@ -12453,8 +12730,8 @@ window.edAdd_logo=function(){ edAdd("logo"); };
   function naResidencia(){ var t=document.getElementById("me-title"); return !!(t && t.textContent.indexOf("residência")>=0 && document.getElementById("modal-mor-edit") && document.getElementById("modal-mor-edit").classList.contains("active")); }
   setInterval(function(){
     var linha=document.getElementById("loc-row");
-    if(linha && !naResidencia()) linha.remove();
-  },500);
+    if(linha) linha.remove(); // nunca no cadastro de prestador/visitante
+  },400);
   function digitandoOn(){ window.__digitando=true; }
   function digitandoOff(){ setTimeout(function(){ window.__digitando=false; },400); }
   document.addEventListener("focusin",function(e){ if(e.target && e.target.id==="loc-busca") digitandoOn(); });
