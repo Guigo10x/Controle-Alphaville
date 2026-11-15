@@ -136,15 +136,33 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 .access-card .meta{font-size:.8rem;color:var(--ts);margin-top:2px}
 .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:950;display:none;align-items:flex-end;justify-content:center;pointer-events:none}
 .modal-bg.active{display:flex;pointer-events:auto}
-.modal{background:#fff;width:100%;max-width:500px;border-radius:18px 18px 0 0;max-height:90vh;overflow-y:auto}
-.mhead{padding:18px 18px 12px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:flex-start;background:var(--light);position:sticky;top:0;z-index:5;flex-shrink:0}
-.mhead h2{font-size:1.2rem;color:var(--p)}.mclose{background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--ts)}
-.mbody{padding:18px}
+.modal{background:#fff;width:100%;max-width:500px;border-radius:18px 18px 0 0;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
+.mhead{padding:14px 16px 10px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:flex-start;background:#f0fdf4;position:relative;z-index:30;flex-shrink:0}
+.mhead h2{font-size:1.2rem;color:var(--p)}.mclose{background:#fff;border:1px solid #e5e7eb;font-size:1.5rem;cursor:pointer;color:#334155;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:40;position:relative;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+#modal .modal{position:relative}
+#modal .mclose{
+  position:absolute!important;
+  top:10px!important;
+  right:10px!important;
+  z-index:50!important;
+  background:#fff!important;
+  border:1px solid #e5e7eb!important;
+  width:42px!important;
+  height:42px!important;
+  border-radius:50%!important;
+  box-shadow:0 2px 8px rgba(0,0,0,.12)!important;
+}
+#modal .mhead{padding-right:52px}
+#modal .mhead-dados{max-height:min(32vh,220px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#modal .mbody{flex:1;overflow-y:auto;min-height:0}
+#modal .care{position:sticky;bottom:0;background:#fafafa;z-index:15;box-shadow:0 -4px 12px rgba(0,0,0,.06)}
+
+.mbody{padding:18px;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0}
 .irow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #f0f0f0;font-size:.92rem}
 .il{color:var(--ts)}.iv{font-weight:500;text-align:right;max-width:58%}
 .hsec{margin-top:18px}.hsec h3{font-size:.8rem;color:var(--p);margin-bottom:8px;text-transform:uppercase;font-weight:700;letter-spacing:.4px}
 .hitem{background:var(--light);padding:11px 12px;border-radius:8px;margin-bottom:6px;font-size:.88rem}
-.care{padding:16px 18px 22px;border-top:1px solid var(--b);background:#fafafa}
+.care{padding:14px 16px 18px;border-top:1px solid var(--b);background:#fafafa;flex-shrink:0;position:relative;z-index:20}
 .cmsg{text-align:center;margin-bottom:12px;font-size:.9rem;color:var(--ts)}
 .wabox{margin-top:12px;padding:14px;background:#e8f5e9;border-radius:12px;text-align:center}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--b);display:flex;justify-content:space-around;align-items:stretch;padding:0 0 env(safe-area-inset-bottom);z-index:500;box-shadow:0 -2px 12px rgba(0,0,0,.08);pointer-events:auto}
@@ -305,7 +323,7 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 #cfg-moradores{max-height:360px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #cfg-notifs{max-height:320px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-.hist-scroll,#m-hist{max-height:240px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.hist-scroll,#m-hist{max-height:min(36vh,260px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 #cfg-acesso-lista{max-height:360px;overflow-y:auto}
 
 .btn-ligar-wa{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff!important;text-decoration:none!important;font-weight:700;font-size:.85rem;padding:10px 14px;border-radius:10px;min-width:96px;border:none;box-shadow:0 1px 2px rgba(0,0,0,.12)}
@@ -325,7 +343,10 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 /* MOBILE MODAL SAFE */
 @media (max-width:900px){
   .modal-bg{align-items:flex-end!important;padding-top:env(safe-area-inset-top,0)}
-  .modal-bg .modal{max-height:calc(100vh - 12px - env(safe-area-inset-top,0))!important;border-radius:16px 16px 0 0!important}
+  .modal-bg .modal{max-height:calc(100dvh - 8px - env(safe-area-inset-top,0) - env(safe-area-inset-bottom,0))!important;border-radius:16px 16px 0 0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+  .modal-bg .mbody{flex:1!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;min-height:0!important}
+  .modal-bg .mhead{flex-shrink:0!important;position:relative!important;z-index:40!important}
+  #modal .hist-scroll,#modal #m-hist{max-height:min(40vh,280px)!important}
   .mhead{padding-top:max(14px, env(safe-area-inset-top, 0px))!important}
   .mclose{min-width:44px;min-height:44px;font-size:1.6rem!important;line-height:1}
 }
@@ -1954,26 +1975,10 @@ async function faceCadastrar(cpf){
   return true;
 }
 AG.exigirFace=async function(motivo){
-  if(!isMor()) return true;
-  var cpf=dig(userSess.cpf);
-  if(!cpf){tst("CPF do morador não encontrado","er");return false;}
-  var t=FB.get(cpf);
-  if(!t){
-    var q=await ask("Cadastrar seu rosto","Para autorizar liberações você precisa cadastrar o rosto antes. Cadastrar agora?");
-    if(!q) return false;
-    return await faceCadastrar(cpf);
-  }
-  var r=await FB.capture({mode:"verify",sub:motivo,ref:t.foto,desc:t.d});
-  if(!r.ok){if(r.erro)tst(r.erro,"er");return false;}
+  // Cadastro de rosto desativado — liberações do morador não exigem câmera
   return true;
 };
-AG.faceOfertar=async function(){
-  if(!isMor()) return;
-  var cpf=dig(userSess.cpf); if(!cpf||FB.get(cpf)) return;
-  try{if(sessionStorage.getItem("cae_face_ofer")==="1")return;sessionStorage.setItem("cae_face_ofer","1");}catch(e){}
-  var q=await ask("Cadastrar seu rosto?","Use o reconhecimento facial para abrir o app mais rápido e autorizar visitantes e prestadores. A foto e os dados do rosto ficam só neste aparelho.");
-  if(q) await faceCadastrar(cpf);
-};
+AG.faceOfertar=async function(){ /* desativado */ return; };
 AG.renderFaceCfg=function(){
   if(!isMor()) return;
   var host=$("cfg-mor-dados"); if(!host) return;
@@ -1984,7 +1989,7 @@ AG.renderFaceCfg=function(){
    (t?('<div style="display:flex;gap:12px;align-items:center;margin-bottom:10px"><img src="'+t.foto+'" style="width:72px;height:72px;object-fit:cover;border-radius:12px;border:2px solid #43A047"><div style="font-size:.85rem"><b>Rosto cadastrado ✅</b><br><span style="color:var(--ts)">Desde '+new Date(t.ts).toLocaleDateString("pt-BR")+'</span></div></div>'+
      '<label style="display:flex;gap:8px;align-items:center;font-size:.9rem;margin-bottom:10px"><input type="checkbox" '+(lock?"checked":"")+' onchange="AG.faceLockToggle(this)"> Pedir meu rosto ao abrir o app</label>'+
      '<div style="display:flex;gap:8px"><button class="btn btn-o btn-sm" style="flex:1" onclick="AG.faceRecadastrar()">Recadastrar</button><button class="btn btn-o btn-sm" style="flex:1;color:var(--d)" onclick="AG.faceRemover()">Remover</button></div>')
-    :('<div style="font-size:.85rem;color:var(--ts);margin-bottom:10px">Nenhum rosto cadastrado. Cadastre para abrir o app com o rosto e autorizar visitantes e prestadores.</div><button class="btn btn-s btn-b" onclick="AG.faceRecadastrar()">📷 Cadastrar meu rosto</button>'));
+    :('<div style="font-size:.85rem;color:var(--ts);margin-bottom:10px">O cadastro de rosto pela câmera foi desativado. Use a <b>digital ou Face ID</b> do celular após marcar lembrar no login.</div><button class="btn btn-s btn-b" type="button" onclick="morBioAtivar()">🔐 Ativar digital / Face ID</button>'));
 };
 AG.faceRecadastrar=async function(){
   var cpf=dig(userSess.cpf);
@@ -2004,26 +2009,8 @@ AG.faceLockToggle=async function(ch){
 };
 /* bloqueio ao abrir o app */
 window.faceGateRestore=function(m,go){
-  var t=null,cpf="";
-  try{cpf=dig(userSess.cpf);t=FB.get(cpf);}catch(e){}
-  if(!t||localStorage.getItem("cae_face_lock_"+cpf)==="0"){go();return;}
-  var ov=document.createElement("div");ov.id="face-lock";
-  ov.style.cssText="position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#0d3d12,#1B5E20 40%,#2E7D32);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;text-align:center;gap:14px";
-  var first=String((userSess&&userSess.nome)||"").split(" ")[0];
-  ov.innerHTML='<img src="'+t.foto+'" style="width:96px;height:96px;object-fit:cover;border-radius:50%;border:3px solid #fff"><div style="font-size:1.3rem;font-weight:700">Alphaville Graciosa</div><div style="opacity:.92">Olá, '+esc(first)+'. Confirme com seu rosto para abrir o app.</div><button id="fl-go" class="splash-btn">📷 Reconhecer meu rosto</button><div id="fl-err" style="min-height:20px;font-size:.88rem;color:#ffcdd2"></div><button id="fl-pw" style="background:none;border:0;color:#fff;text-decoration:underline;font-size:.95rem;cursor:pointer">Entrar com senha</button>';
-  document.body.appendChild(ov);
-  async function tentar(){
-    $("fl-err").textContent="";
-    var r=await FB.capture({mode:"verify",sub:"Abrir o aplicativo",ref:t.foto,desc:t.d});
-    if(r.ok){ov.remove();go();}
-    else if(!r.cancel&&r.erro){$("fl-err").textContent=r.erro;}
-  }
-  $("fl-go").onclick=tentar;
-  $("fl-pw").onclick=function(){
-    try{localStorage.removeItem("cae_user");localStorage.removeItem("cae_remember_flag");sessionStorage.removeItem("cae_user");}catch(e){}
-    location.reload();
-  };
-  setTimeout(tentar,350);
+  // Sem bloqueio por rosto — entra direto no app do morador
+  try{ if(typeof go==="function") go(); }catch(e){}
 };
 
 /* ================= AVISOS: não vistos ================= */
@@ -2264,8 +2251,7 @@ AG.late=function(){
   var _t=window.tela;
   window.tela=function(n,b){var r=_t.apply(this,arguments);if(n==="config"){try{AG.renderFaceCfg();}catch(e){}}return r;};
   var _a=window.aposLoginMorador;
-  if(typeof _a==="function")window.aposLoginMorador=function(){var r=_a.apply(this,arguments);setTimeout(AG.faceOfertar,1500);return r;};
-  setTimeout(function(){if(isMor())AG.faceOfertar();},2500);
+  if(typeof _a==="function")window.aposLoginMorador=function(){var r=_a.apply(this,arguments);setTimeout(function(){try{morBioOferecer();}catch(e){}},900);return r;};
 };
 })();
 
@@ -4793,6 +4779,45 @@ function aposLogin(){
 }
 
 
+
+async function morBioOferecer(){
+  try{
+    if(typeof bioSuportada!=="function"||!bioSuportada()) return;
+    if(!userSess||userSess.tipo==="adm") return;
+    var rem=localStorage.getItem("cae_remember_flag")==="1"||localStorage.getItem("cae_remember_mor");
+    if(!rem) return;
+    var cpf=onlyDigits(userSess.cpf||"");
+    if(localStorage.getItem("cae_mor_bio_"+cpf)==="1") return;
+    if(sessionStorage.getItem("cae_mor_bio_ask")==="1") return;
+    sessionStorage.setItem("cae_mor_bio_ask","1");
+    setTimeout(function(){
+      mostrarAlerta({titulo:"Usar digital / Face ID?",texto:"Quer usar a digital ou o Face ID deste celular no próximo acesso?",tipo:"ask",okText:"Sim, ativar",cancelText:"Agora não",onOk:function(){ morBioAtivar(); }});
+    },500);
+  }catch(e){}
+}
+async function morBioAtivar(){
+  try{
+    if(typeof bioSuportada!=="function"||!bioSuportada()){ toast("Biometria indisponível neste navegador","er"); return; }
+    var cpf=onlyDigits((userSess&&userSess.cpf)||"");
+    if(cpf.length!==11){ toast("CPF não encontrado","er"); return; }
+    var challenge=new Uint8Array(32); crypto.getRandomValues(challenge);
+    var userId=new TextEncoder().encode("mor-"+cpf);
+    var cred=await navigator.credentials.create({publicKey:{
+      challenge:challenge, rp:{name:"Alphaville Controle",id:location.hostname},
+      user:{id:userId,name:"mor."+cpf,displayName:(userSess&&userSess.nome)||cpf},
+      pubKeyCredParams:[{alg:-7,type:"public-key"},{alg:-257,type:"public-key"}],
+      authenticatorSelection:{authenticatorAttachment:"platform",userVerification:"required",residentKey:"preferred"},
+      timeout:60000,attestation:"none"
+    }});
+    if(!cred){ toast("Não foi possível ativar","er"); return; }
+    localStorage.setItem("cae_mor_bio_"+cpf,"1");
+    toast("Digital / Face ID ativado neste aparelho","ok");
+  }catch(e){
+    var m=String((e&&e.message)||e||"");
+    toast(/cancel|NotAllowed|Abort/i.test(m)?"Cancelado":"Não foi possível ativar a biometria","er");
+  }
+}
+
 function aposLoginMorador(m){
   document.getElementById("s-login").style.display="none";
   // Morador: sessao automatica na portaria dele, so visualizacao limitada
@@ -7083,9 +7108,16 @@ function getAppLink(){
     var s=localStorage.getItem("cae_app_link")||"";
     if(s) return s;
   }catch(e){}
-  // se estiver hospedado em https, usa a URL atual
+  // link limpo do GitHub Pages (sem nome longo do arquivo)
   try{
-    if(location.protocol==="http:"||location.protocol==="https:") return location.href.split("#")[0];
+    if(location.hostname && location.hostname.indexOf("github.io")>=0){
+      var base=location.origin+(location.pathname.replace(/\/[^\/]*\.html?$/i,"/")||"/");
+      if(base.slice(-1)!=="/") base+="/";
+      return base;
+    }
+  }catch(e){}
+  try{
+    if(location.protocol==="http:"||location.protocol==="https:") return location.href.split("#")[0].replace(/\/[^\/]*\.html?$/i,"/");
   }catch(e){}
   return "";
 }
@@ -7129,14 +7161,41 @@ function selecionarQrMor(id){
   if(lista){ lista.classList.remove("show"); lista.innerHTML=""; }
   if(document.getElementById("qr-busca")) document.getElementById("qr-busca").value=nomes;
 }
+function textosContatoPortarias(){
+  var o={};
+  try{ o=loadPortTels()||{}; }catch(e){ o={}; }
+  var linhas=[];
+  ["Iguacu","Parati","Andorinhas","Araucarias"].forEach(function(p){
+    var n=o[p]||o[p.toLowerCase()]||"";
+    var d=onlyDigits(String(n));
+    if(d.length>=10){
+      var label=p==="Iguacu"?"Iguaçu":p==="Araucarias"?"Araucárias":p;
+      linhas.push(label+": "+(typeof fmtTel==="function"?fmtTel(d):n));
+    }
+  });
+  if(!linhas.length) return "os números de contato disponíveis na aba Buscar do aplicativo";
+  return linhas.join(" · ");
+}
 function montarMsgConvite(link, nomeMorador){
   var nome=nomeMorador||"morador(a)";
-  return "🏠 *Associação Alphaville Graciosa Residencial*\\n\\n"
-    +"Olá, "+nome+"!\\n\\n"
-    +"Baixe / abra o *app de Controle de Acesso* para cadastrar seus convidados e prestadores de forma rápida e segura.\\n\\n"
-    +"🔗 *Link do app:*\\n"+link+"\\n\\n"
-    +"Ou aponte a câmera do celular para o *QR Code* enviado.\\n\\n"
-    +"Em caso de dúvidas, fale com a administração da associação.";
+  var contatos=textosContatoPortarias();
+  return [
+    "🏠 *Associação Alphaville Graciosa Residencial*",
+    "",
+    "Olá, *"+nome+"*!",
+    "",
+    "Baixe ou abra o *app de Controle de Acesso* para cadastrar seus convidados e prestadores de forma rápida e segura.",
+    "",
+    "🔗 *Link do app:*",
+    link,
+    "",
+    "Ou aponte a câmera do celular para o *QR Code* (envie a imagem do QR junto com esta mensagem).",
+    "",
+    "Em caso de dúvidas, entre em contato pelos números disponíveis na sessão *Buscar* do app:",
+    contatos,
+    "",
+    "_Associação Alphaville Graciosa Residencial • Controle de Acesso_"
+  ].join("\n");
 }
 function gerarQrConvite(){
   if(typeof isAdmin==="function" && !isAdmin()){ toast("Somente administrador","er"); return; }
@@ -7178,49 +7237,52 @@ function gerarQrConvite(){
 
   var msg=montarMsgConvite(link, nomeMsg);
   var ta=document.getElementById("qr-msg");
-  if(ta) ta.value=msg.replace(/\\n/g,"\\n");
-  // fix - montarMsg uses \\n in string for JS - actually use real newlines
-  if(ta) ta.value=msg.split("\\\\n").join("\\n");
-  // Better rebuild message with real newlines
-  if(ta) ta.value=[
-    "🏠 Associação Alphaville Graciosa Residencial",
-    "",
-    "Olá, "+nomeMsg+"!",
-    "",
-    "Baixe / abra o app de Controle de Acesso para cadastrar seus convidados e prestadores de forma rápida e segura.",
-    "",
-    "🔗 Link do app:",
-    link,
-    "",
-    "Ou aponte a câmera do celular para o QR Code.",
-    "",
-    "Em caso de dúvidas, fale com a administração da associação."
-  ].join("\\n");
+  if(ta) ta.value=msg;
+  window._qrCtx.msg=msg;
 
-  var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&data="+encodeURIComponent(link);
+var qrUrl="https://api.qrserver.com/v1/create-qr-code/?size=240x240&margin=10&data="+encodeURIComponent(link);
   var img=document.getElementById("qr-img");
   if(img) img.src=qrUrl;
   var box=document.getElementById("qr-resultado");
   if(box) box.style.display="block";
   toast("QR Code gerado ("+window._qrCtx.tels.length+" telefone(s))","ok");
 }
-function enviarQrWhatsapp(){
+async function enviarQrWhatsapp(){
   var msg=((document.getElementById("qr-msg")||{}).value||"").trim();
   if(!msg){ toast("Gere a mensagem antes","er"); return; }
   var ctx=window._qrCtx||{};
   var tels=ctx.tels||[];
+  var img=document.getElementById("qr-img");
+  // tenta compartilhar texto + imagem do QR (quando o celular permitir)
+  try{
+    if(img && img.src && navigator.share && navigator.canShare){
+      var blob=null;
+      try{
+        var resp=await fetch(img.src);
+        blob=await resp.blob();
+      }catch(e){}
+      if(blob){
+        var file=new File([blob], "qr-alphaville-controle.png", {type: blob.type||"image/png"});
+        if(navigator.canShare({ files:[file], text:msg })){
+          await navigator.share({ files:[file], text:msg, title:"Convite Alphaville" });
+          toast("Compartilhe no WhatsApp com o QR em anexo","ok");
+          return;
+        }
+      }
+    }
+  }catch(e){}
+  // fallback: baixa o QR e abre WhatsApp com o texto (usuário anexa a foto)
+  try{ if(typeof baixarQrImg==="function") baixarQrImg(); }catch(e){}
+  toast("QR baixado. No WhatsApp, anexe a imagem do QR junto com a mensagem.","ok");
   if(ctx.dest==="um" && tels.length){
-    var t=tels[0];
-    if(t.length===10||t.length===11) t="55"+t;
-    else if(t.length===8||t.length===9) t="5541"+t;
-    window.open("https://wa.me/"+t+"?text="+encodeURIComponent(msg), "_blank");
+    var tt=tels[0];
+    if(tt.length===10||tt.length===11) tt="55"+tt;
+    else if(tt.length===8||tt.length===9) tt="5541"+tt;
+    setTimeout(function(){ window.open("https://wa.me/"+tt+"?text="+encodeURIComponent(msg), "_blank"); }, 400);
     return;
   }
-  // portaria/geral: abre WhatsApp com texto (usuário escolhe contato) + avisa
-  if(tels.length>1){
-    toast("Mensagem pronta. Abrindo WhatsApp — envie para a lista ou contatos da portaria.","ok");
-  }
-  window.open("https://wa.me/?text="+encodeURIComponent(msg), "_blank");
+  if(tels.length>1) toast("Mensagem pronta para vários contatos.","ok");
+  setTimeout(function(){ window.open("https://wa.me/?text="+encodeURIComponent(msg), "_blank"); }, 400);
 }
 function copiarQrMsg(){
   var msg=((document.getElementById("qr-msg")||{}).value||"");
@@ -12381,16 +12443,8 @@ function copiarTextoWa(){
   function nomeRes(id){ var m=(MORADORES||[]).find(function(x){return x.id===id;}); return m?((m.n1||"")+" · QD "+(m.qd||"")+" LT "+(m.lt||"")):""; }
   function esc2(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;"); }
   function atualizar(){
-    var r=resAtual(), m=lerLoc(), reg=m[r]||{};
-    var chk=document.getElementById("loc-chk"); if(!chk) return;
-    chk.checked=!!reg.loc;
-    document.getElementById("loc-own").style.display=reg.loc?"block":"none";
-    var bus=document.getElementById("loc-busca");
-    bus.value=reg.dono?nomeRes(reg.dono):"";
-    bus.placeholder=reg.dono?"Toque para abrir o cadastro do dono":"Buscar dono: nome, QD ou LT";
-    document.getElementById("loc-res").innerHTML="";
-    document.getElementById("loc-link").innerHTML=reg.dono?'<button type="button" style="background:none;border:0;color:#b91c1c;font-size:.85rem;text-decoration:underline" id="loc-tirar">remover dono</button>':"";
-    var tir=document.getElementById("loc-tirar"); if(tir) tir.onclick=function(){ var mm=lerLoc(); if(mm[r]) delete mm[r].dono; gravarLoc(mm); atualizar(); };
+    // legado desativado — usa locAtualizarUI() no modal de residência
+    try{ if(typeof locAtualizarUI==="function") locAtualizarUI(); }catch(e){}
   }
   function buscarDono(txt){
     var r=resAtual(), q=String(txt||"").trim().toLowerCase(), box=document.getElementById("loc-res");
@@ -12405,14 +12459,11 @@ function copiarTextoWa(){
   function naResidenciaV93(){ var t=document.getElementById("me-title"); return !!(t && t.textContent.indexOf("residência")>=0); }
   var ultimo=null;
   setInterval(function(){
-    fixarCabecalho();
-    acordeao();
-    var tit=document.getElementById("m-tit1-row");
-    if(tit){
-      if(!document.getElementById("loc-row") && naResidenciaV93()) montar();
-      var r=resAtual(); if(r!==ultimo){ ultimo=r; atualizar(); }
-    } else ultimo=null;
-  },600);
+    try{ fixarCabecalho(); }catch(e){}
+    try{ acordeao(); }catch(e){}
+    // loc-row legado removido; não chama atualizar() (causava erro loc-link null)
+    var stray=document.getElementById("loc-row"); if(stray) try{ stray.remove(); }catch(e){}
+  },1200);
   var _t=window.tela;
   window.tela=function(n,b){ var r=_t.apply(this,arguments); if(n==="config") setTimeout(acordeao,60); setTimeout(fixarCabecalho,60); return r; };
 })();
