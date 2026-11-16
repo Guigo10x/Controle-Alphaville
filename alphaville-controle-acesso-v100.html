@@ -155,7 +155,7 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
   box-shadow:0 2px 8px rgba(0,0,0,.12)!important;
 }
 #modal .mhead{padding-right:52px}
-#modal .mhead-dados{max-height:min(32vh,220px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#modal .mhead-dados{max-height:none;overflow:visible}
 #modal .mbody{flex:1;overflow-y:auto;min-height:0}
 #modal .care{position:sticky;bottom:0;background:#fafafa;z-index:15;box-shadow:0 -4px 12px rgba(0,0,0,.06)}
 
@@ -172,9 +172,12 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 .nav.active{color:var(--p);font-weight:700}.nav .ic{font-size:1.4rem;line-height:1;pointer-events:none}.nav span:not(.ic){pointer-events:none}
 
 /* Chat portaria */
-#chat-fab{position:fixed;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:#15803d;color:#fff;border:0;box-shadow:0 6px 20px rgba(21,128,61,.35);font-size:1.5rem;z-index:900;display:none;align-items:center;justify-content:center;cursor:pointer}
+#chat-fab{position:fixed;right:16px;bottom:calc(72px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;background:#15803d;color:#fff;border:0;box-shadow:0 6px 20px rgba(21,128,61,.35);font-size:1.6rem;font-weight:800;letter-spacing:1px;z-index:900;display:none;align-items:center;justify-content:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 #chat-fab.show{display:flex}
+#chat-fab.dragging{cursor:grabbing;opacity:.92;box-shadow:0 10px 28px rgba(21,128,61,.45)}
 #chat-fab .badge{position:absolute;top:-2px;right:-2px;background:#dc2626;color:#fff;font-size:.7rem;font-weight:700;min-width:20px;height:20px;border-radius:10px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+#chat-fab-x{position:fixed;z-index:901;width:28px;height:28px;border-radius:50%;background:#0f172a;color:#fff;border:2px solid #fff;font-size:.85rem;font-weight:700;display:none;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.25);line-height:1}
+#chat-fab-x.show{display:flex}
 #modal-chat .modal{max-height:90vh;height:min(720px,90vh);display:flex;flex-direction:column;overflow:hidden;padding:0}
 #modal-chat .mhead{padding:14px 16px;border-bottom:1px solid #e5e7eb;flex-shrink:0;background:linear-gradient(135deg,#14532d,#15803d);color:#fff}
 #modal-chat .mhead h2{color:#fff;margin:0;font-size:1.05rem}
@@ -400,15 +403,15 @@ html.ui-pro .logo-img{background:#fff;padding:5px 10px;border-radius:10px}
 .tit-nome{font-weight:700;color:#1B5E20;text-align:right;line-height:1.2;max-width:52%}
 .btn-ligar-wa{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff!important;text-decoration:none!important;font-weight:700;font-size:.82rem;padding:10px 12px;border-radius:10px;white-space:nowrap;flex-shrink:0;border:none}
 </style><style>
-.mhead-dados{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-top:10px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
-.md-item{display:flex;flex-direction:column;min-width:0;padding:6px 8px;background:#fff;border:1px solid #eef2f7;border-radius:10px}
-.md-l{font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
-.md-v{font-size:.88rem;color:#0f172a;font-weight:600;word-break:break-word;line-height:1.25}
+.mhead-dados{display:grid;grid-template-columns:1fr 1fr;gap:6px 8px;margin-top:8px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;max-height:none;overflow:visible}
+.md-item{display:flex;flex-direction:column;min-width:0;padding:0;background:transparent;border:0;border-radius:0}
+.md-l{font-size:.72rem;font-weight:700;color:#14532d;margin-bottom:3px;letter-spacing:.01em}
+.md-v{font-size:.9rem;color:#0f172a;font-weight:600;word-break:break-word;line-height:1.25;padding:8px 10px;background:#fff;border:1.5px solid #cbd5e1;border-radius:10px;min-height:36px;display:flex;align-items:center}
 .mhead{padding-bottom:12px}
-html.ui-pro .mhead-dados{background:linear-gradient(180deg,#f8fafc,#f1f5f9);border-color:#e2e8f0}
-html.ui-pro .md-item{background:#fff;border-color:#e8eef5}
-html.ui-pro .md-l{color:#64748b}
-html.ui-pro .md-v{color:#0f172a}
+html.ui-pro .mhead-dados{background:transparent;border:0}
+html.ui-pro .md-item{background:transparent;border:0}
+html.ui-pro .md-l{color:#14532d;font-weight:700}
+html.ui-pro .md-v{color:#0f172a;background:#fff;border:1.5px solid #cbd5e1}
 </style>
 <script>try{ var _u=localStorage.getItem("cae_ui"); if(_u!=="normal"&&_u!=="classic") _u="pro"; document.documentElement.classList.add(_u==="pro"?"ui-pro":(_u==="normal"?"ui-normal":"ui-win98")); }catch(e){ document.documentElement.classList.add("ui-pro"); }</script>
 <style id="ui-pro-css">
@@ -678,6 +681,11 @@ html:not([data-role="op"]) #op-conta{display:none!important}
 #mov-popup.saida .mp-bar i{background:#ef4444}
 #mov-popup.entrada .mp-bar i{background:#22c55e}
 #mov-popup.show .mp-bar i{animation:movBar 5s linear forwards}
+#mov-popup .mp-actions{display:flex;flex-direction:column;gap:8px;padding:0 14px 14px}
+#mov-popup .mp-actions .btn{width:100%;padding:11px 12px;border-radius:12px;font-weight:700;font-size:.92rem;border:0;cursor:pointer}
+#mov-popup .mp-actions .mp-wa{background:#16a34a;color:#fff}
+#mov-popup .mp-actions .mp-print{background:#fff;color:#14532d;border:1.5px solid #cbd5e1!important}
+#mov-popup .mp-tk{font-size:.82rem;color:#475569;text-align:center;margin-top:2px}
 @keyframes movBar{from{width:100%}to{width:0}}
 </style>
 <style id="eq-v84">html[data-role="op"] #eq-card{display:none!important}#eq-card .eq-st{font-size:.85rem;margin-top:8px;min-height:18px}#eq-card .eq-st.er{color:#b91c1c}#eq-card .eq-st.ok{color:#15803d}</style>
@@ -1531,21 +1539,21 @@ html:not([data-role="op"]) #op-conta{display:none!important}
         <div style="flex:1;min-width:0">
           <h2 id="m-nome" style="margin-bottom:6px">-</h2>
           <div id="m-dados" class="mhead-dados">
-            <div class="md-item" id="m-cpf-wrap"><span class="md-l">CPF</span><span class="md-v" id="m-cpf">-</span></div>
-            <div class="md-item" id="m-nasc-wrap"><span class="md-l">Nascimento</span><span class="md-v" id="m-nasc">-</span></div>
-            <div class="md-item" id="m-tel-wrap"><span class="md-l">Telefone</span><span class="md-v" id="m-tel-head">-</span></div>
-            <div class="md-item" id="m-veic-wrap"><span class="md-l">Veículo</span><span class="md-v" id="m-veiculo">-</span></div>
-            <div class="md-item" id="m-placa-wrap"><span class="md-l">Placa</span><span class="md-v" id="m-placa-line">-</span></div>
-            <div class="md-item" id="m-cnh-wrap"><span class="md-l">CNH</span><span class="md-v" id="m-cnh">-</span></div>
-            <div class="md-item" id="m-serv-wrap" style="display:none"><span class="md-l">Serviço</span><span class="md-v" id="m-servico">-</span></div>
-            <div class="md-item" id="m-tipo-wrap"><span class="md-l">Tipo</span><span class="md-v" id="m-tipo">-</span></div>
-            <div class="md-item" id="m-port-wrap"><span class="md-l">Portaria</span><span class="md-v" id="m-port">-</span></div>
+            <div class="md-item" id="m-cpf-wrap"><span class="md-l">CPF:</span><span class="md-v" id="m-cpf">-</span></div>
+            <div class="md-item" id="m-nasc-wrap"><span class="md-l">Nascimento:</span><span class="md-v" id="m-nasc">-</span></div>
+            <div class="md-item" id="m-tel-wrap"><span class="md-l">Telefone:</span><span class="md-v" id="m-tel-head">-</span></div>
+            <div class="md-item" id="m-veic-wrap"><span class="md-l">Veículo:</span><span class="md-v" id="m-veiculo">-</span></div>
+            <div class="md-item" id="m-placa-wrap"><span class="md-l">Placa:</span><span class="md-v" id="m-placa-line">-</span></div>
+            <div class="md-item" id="m-cnh-wrap"><span class="md-l">CNH:</span><span class="md-v" id="m-cnh">-</span></div>
+            <div class="md-item" id="m-serv-wrap" style="display:none"><span class="md-l">Serviço:</span><span class="md-v" id="m-servico">-</span></div>
+            <div class="md-item" id="m-tipo-wrap"><span class="md-l">Tipo:</span><span class="md-v" id="m-tipo">-</span></div>
+            <div class="md-item" id="m-port-wrap"><span class="md-l">Portaria:</span><span class="md-v" id="m-port">-</span></div>
             <div id="m-lib-box" style="display:none;grid-column:1/-1;margin-top:8px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px">
               <div style="font-size:.75rem;font-weight:700;color:#14532d;text-transform:uppercase;margin-bottom:6px">🔓 Escolher liberação</div>
               <select id="m-lib-sel" style="width:100%;padding:10px;border-radius:10px;border:1px solid #86efac;font-size:.9rem" onchange="onLibSelChange()"></select>
               <div id="m-lib-info" style="font-size:.8rem;color:#64748b;margin-top:6px"></div>
             </div>
-            <div class="md-item" id="m-resp-wrap" style="display:none;grid-column:1/-1"><span class="md-l">Responsável</span><span class="md-v" id="m-resp">-</span></div>
+            <div class="md-item" id="m-resp-wrap" style="display:none;grid-column:1/-1"><span class="md-l">Responsável:</span><span class="md-v" id="m-resp">-</span></div>
           </div>
         </div>
       </div>
@@ -5674,6 +5682,26 @@ function chatThreads(limit){
 function chatUnreadTotal(){
   var n=0; chatThreads().forEach(function(t){ n+=t.unread||0; }); return n;
 }
+function chatFabPosicionarX(){
+  var fab=document.getElementById("chat-fab");
+  var x=document.getElementById("chat-fab-x");
+  if(!fab||!x||!fab.classList.contains("show")){ if(x) x.classList.remove("show"); return; }
+  var r=fab.getBoundingClientRect();
+  x.style.left=(r.right-10)+"px";
+  x.style.top=(r.top-8)+"px";
+  x.classList.add("show");
+}
+function chatFabOcultar(){
+  try{ localStorage.setItem("cae_chat_fab_hide","1"); }catch(e){}
+  var fab=document.getElementById("chat-fab");
+  var x=document.getElementById("chat-fab-x");
+  if(fab) fab.classList.remove("show");
+  if(x) x.classList.remove("show");
+}
+function chatFabMostrarForcado(){
+  try{ localStorage.removeItem("cae_chat_fab_hide"); }catch(e){}
+  chatAtualizarFab();
+}
 function chatAtualizarFab(){
   var fab=document.getElementById("chat-fab");
   var badge=document.getElementById("chat-fab-badge");
@@ -5683,13 +5711,75 @@ function chatAtualizarFab(){
     if(typeof isMoradorSess==="function" && isMoradorSess()) show=true;
     else if(chatSouPortaria()) show=true;
   }catch(e){}
-  if(show) fab.classList.add("show"); else fab.classList.remove("show");
   var n=chatUnreadTotal();
+  var oculto=false;
+  try{ oculto=localStorage.getItem("cae_chat_fab_hide")==="1"; }catch(e){}
+  // se tem mensagem nova, sempre mostra de novo
+  if(n>0 && oculto){ try{ localStorage.removeItem("cae_chat_fab_hide"); }catch(e){} oculto=false; }
+  if(show && !oculto) fab.classList.add("show"); else fab.classList.remove("show");
   if(badge){
     if(n>0){ badge.style.display="flex"; badge.textContent=n>99?"99+":String(n); }
     else badge.style.display="none";
   }
+  try{ chatFabPosicionarX(); }catch(e){}
 }
+(function initChatFabDrag(){
+  function ready(){
+    var fab=document.getElementById("chat-fab");
+    var xbtn=document.getElementById("chat-fab-x");
+    if(!fab) return;
+    // restaura posição salva
+    try{
+      var pos=JSON.parse(localStorage.getItem("cae_chat_fab_pos")||"null");
+      if(pos && typeof pos.left==="number" && typeof pos.top==="number"){
+        fab.style.left=pos.left+"px"; fab.style.top=pos.top+"px";
+        fab.style.right="auto"; fab.style.bottom="auto";
+      }
+    }catch(e){}
+    var dragging=false, moved=false, sx=0, sy=0, ol=0, ot=0;
+    function start(clientX, clientY){
+      dragging=true; moved=false;
+      var r=fab.getBoundingClientRect();
+      ol=r.left; ot=r.top; sx=clientX; sy=clientY;
+      fab.classList.add("dragging");
+      fab.style.left=ol+"px"; fab.style.top=ot+"px";
+      fab.style.right="auto"; fab.style.bottom="auto";
+    }
+    function move(clientX, clientY){
+      if(!dragging) return;
+      var dx=clientX-sx, dy=clientY-sy;
+      if(Math.abs(dx)>6||Math.abs(dy)>6) moved=true;
+      var left=Math.max(8, Math.min(window.innerWidth-fab.offsetWidth-8, ol+dx));
+      var top=Math.max(8, Math.min(window.innerHeight-fab.offsetHeight-8, ot+dy));
+      fab.style.left=left+"px"; fab.style.top=top+"px";
+      try{ chatFabPosicionarX(); }catch(e){}
+    }
+    function end(){
+      if(!dragging) return;
+      dragging=false; fab.classList.remove("dragging");
+      try{
+        localStorage.setItem("cae_chat_fab_pos", JSON.stringify({left:parseFloat(fab.style.left)||0, top:parseFloat(fab.style.top)||0}));
+      }catch(e){}
+      try{ chatFabPosicionarX(); }catch(e){}
+      if(!moved) chatAbrir();
+      setTimeout(function(){ moved=false; }, 50);
+    }
+    fab.addEventListener("pointerdown", function(e){
+      if(e.button!=null && e.button!==0) return;
+      try{ fab.setPointerCapture(e.pointerId); }catch(err){}
+      start(e.clientX, e.clientY);
+    });
+    fab.addEventListener("pointermove", function(e){ move(e.clientX, e.clientY); });
+    fab.addEventListener("pointerup", end);
+    fab.addEventListener("pointercancel", end);
+    // bloqueia click nativo se arrastou
+    fab.addEventListener("click", function(e){ if(moved){ e.preventDefault(); e.stopPropagation(); } });
+    if(xbtn) xbtn.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); chatFabOcultar(); });
+    window.addEventListener("resize", function(){ try{ chatFabPosicionarX(); }catch(e){} });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", ready);
+  else setTimeout(ready, 200);
+})();
 window._chatCtx=null;
 function chatAbrir(){
   var modal=document.getElementById("modal-chat"); if(!modal) return;
@@ -12289,33 +12379,85 @@ function copiarTextoWa(){
     return d;
   }
   window.fecharMovPopup=function(){ var d=document.getElementById("mov-popup"); if(d){ d.classList.remove("show"); } clearTimeout(TIMER); TIMER=null; };
+  function listaDestinosPopup(rec,c){
+    var dests=[], seen={};
+    function add(q,e){
+      var label="";
+      try{ if(q && typeof fmtQdLtLabel==="function") label=fmtQdLtLabel(q); else label=q||""; }catch(err){ label=q||""; }
+      if(e && String(e).trim()) label=(label?label+" · ":"")+String(e).trim();
+      label=String(label||"").trim();
+      if(!label) return;
+      var k=label.toUpperCase();
+      if(seen[k]) return;
+      seen[k]=1; dests.push(label);
+    }
+    try{
+      var casas=(rec&&rec.casas)||(c&&c._cs)||[];
+      if(casas && casas.length){
+        casas.forEach(function(x){
+          if(x && x.st && x.st!=="ok" && x.st!=="OK") return;
+          add(x.qdlt||"", x.end||"");
+        });
+      }
+    }catch(e){}
+    if(!dests.length){
+      add((rec&&rec.qdlt)||(c&&c.qdlt)||"", (rec&&rec.end)||(c&&c.end)||"");
+    }
+    return dests;
+  }
   window.popupMov=function(c,tipo,rec){
     var d=garantir();
     var titulo=tipo==="saida"?"🚪 SAÍDA REGISTRADA":(tipo==="entrada"?"➡️ ENTRADA REGISTRADA":"⚠️ ATENÇÃO");
     var local=(rec&&rec.local)||(typeof sess!=="undefined"&&sess&&sess.loc)||"-";
     var nome=(c&&c.nome)||(rec&&rec.nome)||"Pessoa não identificada";
     var foto=(c&&c.foto)?'<img class="mp-foto" src="'+c.foto+'" alt="">':'<div class="mp-foto">👤</div>';
-    var qdlt=(rec&&rec.qdlt)||(c&&c.qdlt)||"";
-    try{ if(qdlt && typeof fmtQdLtLabel==="function") qdlt=fmtQdLtLabel(qdlt); }catch(e){}
-    var end=(rec&&rec.end)||(c&&c.end)||"";
+    var dests=listaDestinosPopup(rec,c);
+    var destHtml="";
+    if(dests.length){
+      var show=dests.slice(0,5);
+      destHtml="<br>Destino: <b>"+show.map(function(x){ return esc(x); }).join("</b><br>Destino: <b>");
+      destHtml+="</b>";
+      if(dests.length>5) destHtml+="<br><b>…</b> +"+ (dests.length-5) +" destinos";
+    }
     var mor=(rec&&rec.mor)||(c&&c.mor)||"";
     var linhas="";
     if(tipo==="erro"){
       linhas="Ticket não encontrado ou sem entrada ativa.";
     } else {
       linhas="Portaria: <b>"+esc(local)+"</b>";
-      if(tipo==="entrada" && qdlt) linhas+="<br>Destino: <b>"+esc(qdlt)+"</b>";
-      else if(qdlt) linhas+="<br>"+esc(qdlt);
-      if(end) linhas+="<br>"+esc(end);
+      linhas+=destHtml;
       if(mor) linhas+="<br>Morador: "+esc(mor);
       linhas+="<br>Horário: "+fmt(rec&&rec.dh);
+      if(tipo==="entrada" && rec && rec.tk) linhas+="<br><span class=\"mp-tk\">Ticket: <b>"+esc(rec.tk)+"</b></span>";
+    }
+    var actions="";
+    if(tipo==="entrada" && rec && rec.tk){
+      actions='<div class="mp-actions">'+
+        '<button type="button" class="btn mp-wa" id="mp-btn-wa">📲 Enviar ticket por WhatsApp</button>'+
+        '<button type="button" class="btn mp-print" id="mp-btn-print">🖨️ Imprimir ticket</button>'+
+        '</div>';
     }
     d.className=(tipo==="saida"?"saida":(tipo==="entrada"?"entrada":"erro"));
     d.innerHTML='<div class="mp-head">'+titulo+'<button class="mp-x" type="button" onclick="fecharMovPopup()" aria-label="Fechar">✕</button></div>'+
       '<div class="mp-body">'+foto+'<div><div class="mp-nome">'+esc(nome)+'</div><div class="mp-info">'+linhas+'</div></div></div>'+
+      actions+
       '<div class="mp-bar"><i></i></div>';
     void d.offsetWidth; d.classList.add("show");
     clearTimeout(TIMER); TIMER=setTimeout(fecharMovPopup,AUTO_MS);
+    try{
+      if(tipo==="entrada" && rec && rec.tk){
+        var bWa=document.getElementById("mp-btn-wa");
+        var bPr=document.getElementById("mp-btn-print");
+        if(bWa) bWa.onclick=function(){
+          clearTimeout(TIMER); TIMER=null;
+          try{ if(typeof ticketEnviarWhats==="function") ticketEnviarWhats(rec,c); }catch(e){}
+        };
+        if(bPr) bPr.onclick=function(){
+          clearTimeout(TIMER); TIMER=null;
+          try{ if(typeof imprimirTicket==="function") imprimirTicket(rec,c); }catch(e){}
+        };
+      }
+    }catch(e){}
   };
 
   function registrarSaidaAuto(c,last){
@@ -12834,18 +12976,109 @@ function copiarTextoWa(){
   function htmlParaCompartilhar(na,c){
     return ticketHtml(na,c,loadTicketCfg()).replace(/<script>[\s\S]*?<\/script>/,"");
   }
+  function telDoCadastro(c,na){
+    var raw="";
+    try{
+      if(c){
+        raw=c.telVis||c.tel||c.telefone||c.cel||"";
+        if(!raw && c.maeTel) raw=c.maeTel;
+      }
+      if(!raw && na) raw=na.tel||na.telefone||"";
+    }catch(e){}
+    var d=String(raw||"").replace(/\D/g,"");
+    if(d.length===8||d.length===9) d="41"+d;
+    if(d.length===10||d.length===11) d="55"+d;
+    if(d.indexOf("55")!==0 && d.length>=12) d="55"+d.replace(/^55/,"");
+    return d.length>=12?d:"";
+  }
+  function ticketPngBlob(na,c){
+    return new Promise(function(resolve){
+      try{
+        var W=420,H=640;
+        var canvas=document.createElement("canvas");
+        canvas.width=W; canvas.height=H;
+        var ctx=canvas.getContext("2d");
+        ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,W,H);
+        ctx.fillStyle="#14532d"; ctx.fillRect(0,0,W,70);
+        ctx.fillStyle="#fff"; ctx.font="bold 16px Arial"; ctx.textAlign="center";
+        ctx.fillText("ASSOCIAÇÃO ALPHAVILLE GRACIOSA", W/2, 32);
+        ctx.font="13px Arial"; ctx.fillText("RESIDENCIAL — TICKET DE ENTRADA", W/2, 54);
+        ctx.textAlign="left"; ctx.fillStyle="#0f172a";
+        var y=100, line=function(label,val){
+          if(!val) return;
+          ctx.fillStyle="#64748b"; ctx.font="bold 12px Arial"; ctx.fillText(label, 28, y);
+          y+=20; ctx.fillStyle="#0f172a"; ctx.font="bold 16px Arial";
+          var t=String(val); while(t.length>36){ ctx.fillText(t.slice(0,36),28,y); y+=22; t=t.slice(36); }
+          ctx.fillText(t,28,y); y+=28;
+        };
+        var tipo=((c&&c.tipo)==="prestador")?"PRESTADOR":"VISITANTE";
+        line("TIPO", tipo);
+        line("NOME", (na&&na.nome)||(c&&c.nome)||"");
+        line("PORTARIA", (na&&na.local)||"");
+        var dest="";
+        try{
+          if(na&&na.qdlt) dest=na.qdlt;
+          else if(c&&c.qdlt) dest=c.qdlt;
+          if(typeof fmtQdLtLabel==="function" && dest) dest=fmtQdLtLabel(dest);
+        }catch(e){}
+        line("DESTINO", dest||((na&&na.end)||""));
+        if(na&&na.mor) line("MORADOR", na.mor);
+        if(c&&c.placa) line("PLACA", c.placa+(c.veiculo?" · "+c.veiculo:""));
+        try{ line("ENTRADA", (typeof fmtD==="function"?fmtD(na.dh):String(na.dh||""))); }catch(e){ line("ENTRADA", String(na&&na.dh||"")); }
+        line("OPERADOR", (na&&na.op)||"");
+        // código grande
+        y+=10;
+        ctx.strokeStyle="#14532d"; ctx.lineWidth=2; ctx.strokeRect(28,y,W-56,70);
+        ctx.fillStyle="#14532d"; ctx.font="bold 28px monospace"; ctx.textAlign="center";
+        ctx.fillText(String(na&&na.tk||""), W/2, y+45);
+        ctx.textAlign="left";
+        y+=95;
+        ctx.fillStyle="#64748b"; ctx.font="12px Arial"; ctx.textAlign="center";
+        ctx.fillText("Mostre este ticket na portaria · Vel. máx. 30 km/h", W/2, y);
+        ctx.fillText("Cuide de nossas crianças", W/2, y+18);
+        canvas.toBlob(function(blob){ resolve(blob); }, "image/png", 0.92);
+      }catch(e){ resolve(null); }
+    });
+  }
   window.ticketEnviarWhats=async function(na,c){
-    var html=htmlParaCompartilhar(na,c);
-    var file=null; try{ file=new File([html],"ticket-"+(na.tk||"acesso")+".html",{type:"text/html"}); }catch(e){}
+    var tel=telDoCadastro(c,na);
+    var codigo=(na&&na.tk)||"";
+    var nome=(na&&na.nome)||(c&&c.nome)||"";
+    var local=(na&&na.local)||"";
+    var txt="Ticket de acesso — Alphaville Graciosa\n"+
+      "Nome: "+nome+"\n"+
+      "Código: "+codigo+"\n"+
+      (local?("Portaria: "+local+"\n"):"")+
+      "Mostre este ticket (código ou imagem) na portaria.";
+    var blob=null;
+    try{ blob=await ticketPngBlob(na,c); }catch(e){}
+    var file=null;
+    try{ if(blob) file=new File([blob],"ticket-"+(codigo||"acesso")+".png",{type:"image/png"}); }catch(e){}
+    // tenta compartilhar PNG (WhatsApp no celular entra na lista)
     try{
       if(file && navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:"Ticket de acesso",text:"Ticket de acesso - Alphaville Graciosa"}); return;
+        await navigator.share({files:[file], title:"Ticket "+codigo, text:txt});
+        // se já compartilhou, ainda assim tenta abrir chat direto se tiver telefone
+        if(tel) setTimeout(function(){ abrirWhatsSeguro("https://wa.me/"+tel+"?text="+encodeURIComponent(txt)); }, 400);
+        return;
       }
     }catch(e){ if(e&&e.name==="AbortError") return; }
-    var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([html],{type:"text/html"})); a.download="ticket-"+(na.tk||"acesso")+".html";
-    document.body.appendChild(a); a.click(); setTimeout(function(){a.remove();},500);
-    var txt="Ticket de acesso - Alphaville Graciosa\nCódigo: "+(na.tk||"")+"\nAbra o arquivo ticket-"+(na.tk||"")+".html que foi baixado e mostre na portaria.";
-    abrirWhatsSeguro("https://wa.me/?text="+encodeURIComponent(txt));
+    // fallback: baixa PNG e abre WhatsApp direto na conversa
+    if(blob){
+      try{
+        var a=document.createElement("a");
+        a.href=URL.createObjectURL(blob);
+        a.download="ticket-"+(codigo||"acesso")+".png";
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ try{a.remove(); URL.revokeObjectURL(a.href);}catch(e){} }, 800);
+      }catch(e){}
+    }
+    if(tel){
+      abrirWhatsSeguro("https://wa.me/"+tel+"?text="+encodeURIComponent(txt));
+    } else {
+      toast("Cadastro sem telefone — abra o WhatsApp e envie o ticket baixado","er");
+      abrirWhatsSeguro("https://wa.me/?text="+encodeURIComponent(txt));
+    }
   };
   window.ticketAposEntrada=function(na,c){
     if(!na) return;
@@ -13193,42 +13426,26 @@ window.edAdd_logo=function(){ edAdd("logo"); };
     return _pc.apply(this,arguments);
   };
 
-  /* ---- cada entrada recebe um ticket novo ---- */
+  /* ---- cada entrada: garante ticket e atualiza o popup único (foto + botões) ---- */
   var _rm=window.regMov;
   window.regMov=function(id,tipo){
     var antes=(acess||[]).length;
     var r=_rm.apply(this,arguments);
     if(tipo==="entrada" && (acess||[]).length>antes){
       var na=acess[acess.length-1];
-      na.tk=novoTk(); try{ saveA(); }catch(e){}
-      var c=(conv||[]).find(function(x){ return x.id===id; });
-      setTimeout(function(){ ticketNaConfirmacao(na,c); },60);
+      if(!na.tk){ try{ na.tk=novoTk(); }catch(e){ na.tk="T"+Date.now().toString().slice(-8); } }
+      try{ saveA(); }catch(e){}
+      var c=(conv||[]).find(function(x){ return x.id===id; })||null;
+      // fecha o pop-up "Entrada confirmada" se ainda estiver aberto
+      try{ if(typeof hideConfirm==="function") hideConfirm(); }catch(e){}
+      setTimeout(function(){
+        try{ if(typeof popupMov==="function") popupMov(c,"entrada",na); }catch(e){}
+      },40);
     }
     return r;
   };
-  window.ticketAposEntrada=function(){ /* substituído: opções ficam na tela de confirmação */ };
-
-  function ticketNaConfirmacao(na,c){
-    var box=document.getElementById("confirm-actions"); if(!box) return;
-    var ov=document.getElementById("confirm-overlay");
-    var confBox=document.getElementById("confirm-box");
-    try{
-      if(confBox) confBox.className="confirm-box ok";
-      var ic=document.getElementById("confirm-icon"); if(ic) ic.textContent="✅";
-      var ti=document.getElementById("confirm-title"); if(ti) ti.textContent="Entrada confirmada";
-      var ms=document.getElementById("confirm-msg");
-      if(ms) ms.textContent=(c&&c.nome?c.nome:"")+(sess&&sess.loc?" · "+sess.loc:"")+(na&&na.tk?" · Ticket "+na.tk:"");
-    }catch(e){}
-    box.innerHTML='<div style="font-size:.85rem;color:#475569;margin-bottom:8px">Ticket: <b>'+(na.tk||"")+'</b></div>'+
-      '<button class="btn btn-s btn-b" id="cf-whats">📲 Enviar ticket por WhatsApp</button>'+
-      '<button class="btn btn-o btn-b" id="cf-print" style="margin-top:8px">🖨️ Imprimir ticket</button>'+
-      '<button class="btn btn-o btn-b" style="margin-top:8px" onclick="hideConfirm()">Fechar</button>';
-    try{ if(ov) ov.classList.add("show"); }catch(e){}
-    try{
-      document.getElementById("cf-whats").onclick=function(){ hideConfirm(); ticketEnviarWhats(na,c); };
-      document.getElementById("cf-print").onclick=function(){ hideConfirm(); imprimirTicket(na,c); };
-    }catch(e){}
-  }
+  window.ticketAposEntrada=function(){ /* opções ficam no popup ENTRADA REGISTRADA */ };
+  function ticketNaConfirmacao(na,c){ /* desativado: não sobrepõe o popup de foto */ }
 
   /* ticket: sem forçar negrito em Portaria */
 
@@ -13526,7 +13743,8 @@ window.edAdd_logo=function(){ edAdd("logo"); };
     <button type="button" class="btn btn-o" onclick="chatFecharFoto()">Fechar</button>
   </div>
 </div>
-<button type="button" id="chat-fab" onclick="chatAbrir()" title="Mensagens" aria-label="Mensagens">💬<span class="badge" id="chat-fab-badge" style="display:none">0</span></button>
+<button type="button" id="chat-fab" title="Mensagens (segure para arrastar)" aria-label="Mensagens">⋯<span class="badge" id="chat-fab-badge" style="display:none">0</span></button>
+<button type="button" id="chat-fab-x" title="Ocultar chat" aria-label="Ocultar">×</button>
 
 </body>
 </html>
