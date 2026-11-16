@@ -400,11 +400,15 @@ html.ui-pro .logo-img{background:#fff;padding:5px 10px;border-radius:10px}
 .tit-nome{font-weight:700;color:#1B5E20;text-align:right;line-height:1.2;max-width:52%}
 .btn-ligar-wa{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff!important;text-decoration:none!important;font-weight:700;font-size:.82rem;padding:10px 12px;border-radius:10px;white-space:nowrap;flex-shrink:0;border:none}
 </style><style>
-.mhead-dados{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:4px}
-.md-item{display:flex;flex-direction:column;min-width:0}
-.md-l{font-size:.68rem;font-weight:700;color:#2E7D32;text-transform:uppercase;letter-spacing:.02em;opacity:.9}
-.md-v{font-size:.84rem;color:#1B5E20;font-weight:600;word-break:break-word}
+.mhead-dados{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin-top:10px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.md-item{display:flex;flex-direction:column;min-width:0;padding:6px 8px;background:#fff;border:1px solid #eef2f7;border-radius:10px}
+.md-l{font-size:.65rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.03em;margin-bottom:2px}
+.md-v{font-size:.88rem;color:#0f172a;font-weight:600;word-break:break-word;line-height:1.25}
 .mhead{padding-bottom:12px}
+html.ui-pro .mhead-dados{background:linear-gradient(180deg,#f8fafc,#f1f5f9);border-color:#e2e8f0}
+html.ui-pro .md-item{background:#fff;border-color:#e8eef5}
+html.ui-pro .md-l{color:#64748b}
+html.ui-pro .md-v{color:#0f172a}
 </style>
 <script>try{ var _u=localStorage.getItem("cae_ui"); if(_u!=="normal"&&_u!=="classic") _u="pro"; document.documentElement.classList.add(_u==="pro"?"ui-pro":(_u==="normal"?"ui-normal":"ui-win98")); }catch(e){ document.documentElement.classList.add("ui-pro"); }</script>
 <style id="ui-pro-css">
@@ -670,7 +674,9 @@ html:not([data-role="op"]) #op-conta{display:none!important}
 #mov-popup .mp-nome{font-weight:800;font-size:1.05rem;color:#0f172a;line-height:1.2}
 #mov-popup .mp-info{font-size:.85rem;color:#475569;margin-top:6px;line-height:1.5}
 #mov-popup .mp-bar{height:4px;background:rgba(0,0,0,.08)}
-#mov-popup .mp-bar i{display:block;height:100%;width:100%;background:#94a3b8}
+#mov-popup .mp-bar i{display:block;height:100%;width:100%;transform-origin:left center;background:#94a3b8}
+#mov-popup.saida .mp-bar i{background:#ef4444}
+#mov-popup.entrada .mp-bar i{background:#22c55e}
 #mov-popup.show .mp-bar i{animation:movBar 5s linear forwards}
 @keyframes movBar{from{width:100%}to{width:0}}
 </style>
@@ -4204,9 +4210,8 @@ function _regMovForce(id,tipo){
   try{ if(tipo==="entrada") aposPrimeiroAcesso(na,c); }catch(e){}
   const q=contagemEntrada(c.nome,sess.loc);
   ult={conv:c.nome,mor:c.mor,tel:c.tel,loc:sess.loc,dh:na.dh,tipo:tipo};
-  showConfirm(tipo, c.nome, sess.loc);
+  try{ if(typeof popupMov==="function") popupMov(c, tipo==="saida"?"saida":"entrada", na); }catch(e){}
   if(tipo==="entrada"){
-    toast("Entrada de "+c.nome+" registrada!","ok");
     try{
       if(c.tipo==="prestador" && (c.libres||[]).length && !c.carteirinha){
         setTimeout(function(){
@@ -4215,7 +4220,7 @@ function _regMovForce(id,tipo){
         }, 400);
       }
     }catch(e){}
-  } else { /* saída: só o popup vermelho completo */ }
+  }
   try{
     const morNome=c.mor||"";
     if(tipo==="entrada"){
@@ -8158,14 +8163,8 @@ function regMov(id,tipo){
   try{ if(tipo==="entrada") aposPrimeiroAcesso(na,c); }catch(e){}
   const q=contagemEntrada(c.nome,sess.loc);
   ult={conv:c.nome,mor:c.mor,tel:c.tel,loc:sess.loc,dh:na.dh,tipo:tipo};
-  showConfirm(tipo, c.nome, sess.loc);
+  try{ if(typeof popupMov==="function") popupMov(c, tipo==="saida"?"saida":"entrada", na); }catch(e){}
   if(sel&&sel.id===c.id) try{refreshModal()}catch(e){}
-  if(tipo==="entrada"){
-    toast("Entrada de "+c.nome+" registrada!","ok");
-    
-  } else {
-    toast("Saida de "+c.nome+" registrada!","ok");
-  }
   
   // Notificações: APENAS para o morador convidante (nunca para operador/ADM)
   try{
@@ -12296,7 +12295,21 @@ function copiarTextoWa(){
     var local=(rec&&rec.local)||(typeof sess!=="undefined"&&sess&&sess.loc)||"-";
     var nome=(c&&c.nome)||(rec&&rec.nome)||"Pessoa não identificada";
     var foto=(c&&c.foto)?'<img class="mp-foto" src="'+c.foto+'" alt="">':'<div class="mp-foto">👤</div>';
-    var linhas=tipo==="erro"?'Ticket não encontrado ou sem entrada ativa.':('Portaria: <b>'+esc(local)+'</b><br>Horário: '+fmt(rec&&rec.dh)+(rec&&rec.mor?'<br>Morador: '+esc(rec.mor):""));
+    var qdlt=(rec&&rec.qdlt)||(c&&c.qdlt)||"";
+    try{ if(qdlt && typeof fmtQdLtLabel==="function") qdlt=fmtQdLtLabel(qdlt); }catch(e){}
+    var end=(rec&&rec.end)||(c&&c.end)||"";
+    var mor=(rec&&rec.mor)||(c&&c.mor)||"";
+    var linhas="";
+    if(tipo==="erro"){
+      linhas="Ticket não encontrado ou sem entrada ativa.";
+    } else {
+      linhas="Portaria: <b>"+esc(local)+"</b>";
+      if(tipo==="entrada" && qdlt) linhas+="<br>Destino: <b>"+esc(qdlt)+"</b>";
+      else if(qdlt) linhas+="<br>"+esc(qdlt);
+      if(end) linhas+="<br>"+esc(end);
+      if(mor) linhas+="<br>Morador: "+esc(mor);
+      linhas+="<br>Horário: "+fmt(rec&&rec.dh);
+    }
     d.className=(tipo==="saida"?"saida":(tipo==="entrada"?"entrada":"erro"));
     d.innerHTML='<div class="mp-head">'+titulo+'<button class="mp-x" type="button" onclick="fecharMovPopup()" aria-label="Fechar">✕</button></div>'+
       '<div class="mp-body">'+foto+'<div><div class="mp-nome">'+esc(nome)+'</div><div class="mp-info">'+linhas+'</div></div></div>'+
@@ -12350,18 +12363,7 @@ function copiarTextoWa(){
     else { buscarPorTicket(code,true); popupMov(c,"erro",{nome:c.nome,local:(typeof sess!=="undefined"&&sess)?sess.loc:"",dh:Date.now()}); toast(c.nome+" já está fora. Para entrada, use o cadastro.","er"); }
   };
 
-  /* saída confirmada manualmente também mostra o aviso */
-  var _cmp=window.confirmarMovPendente;
-  window.confirmarMovPendente=function(){
-    var p=window._pendingMov;
-    var r=_cmp.apply(this,arguments);
-    if(p && p.tipo==="saida"){
-      var c=(conv||[]).find(function(x){ return x.id===p.id; });
-      var ult=c?_ultimoMov(c.nome):null;
-      if(ult && ult.tipo==="saida") popupMov(c,"saida",ult);
-    }
-    return r;
-  };
+  /* popupMov já é chamado em regMov / _regMovForce / ticket — sem duplicar aqui */
 })();
 </script>
 <script>
@@ -13507,8 +13509,10 @@ window.edAdd_logo=function(){ edAdd("logo"); };
     <div id="chat-thread-view" style="display:none;flex-direction:column;flex:1;min-height:0">
       <div class="chat-body" id="chat-msgs"></div>
       <div class="chat-foot">
-        <button type="button" class="chat-btn-foto" onclick="document.getElementById('chat-foto-input').click()" title="Enviar foto">📷</button>
-        <input type="file" id="chat-foto-input" accept="image/*" capture="environment" style="display:none" onchange="chatEnviarFoto(this)">
+        <button type="button" class="chat-btn-foto" onclick="document.getElementById('chat-foto-gal').click()" title="Foto da galeria">🖼️</button>
+        <button type="button" class="chat-btn-foto" onclick="document.getElementById('chat-foto-cam').click()" title="Tirar foto">📷</button>
+        <input type="file" id="chat-foto-gal" accept="image/*" style="display:none" onchange="chatEnviarFoto(this)">
+        <input type="file" id="chat-foto-cam" accept="image/*" capture="environment" style="display:none" onchange="chatEnviarFoto(this)">
         <input type="text" id="chat-input" placeholder="Escreva sua mensagem..." maxlength="500" onkeydown="if(event.key==='Enter'){event.preventDefault();chatEnviar();}">
         <button class="btn btn-s" style="min-width:70px" onclick="chatEnviar()">Enviar</button>
       </div>
