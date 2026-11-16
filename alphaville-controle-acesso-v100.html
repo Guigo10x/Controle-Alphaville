@@ -1046,6 +1046,23 @@ html:not([data-role="op"]) #op-conta{display:none!important}
       </div>
     </div>
     <p style="font-size:.85rem;color:var(--ts);margin-bottom:14px" id="form-desc">Dados do convidado e do morador que liberou</p>
+    <div class="fg"><label>CPF</label><input type="text" id="n-cpf" placeholder="000.000.000-00" inputmode="numeric" oninput="maskCPF(this);liveCpf(this);checarBlForm();morCpfStep()"><div id="bl-form-aviso" class="bl-form-aviso" style="display:none"></div>
+      <div id="n-cpf-hint" style="font-size:.8rem;color:#64748b;margin-top:4px;display:none">Digite o CPF para verificar se a pessoa já tem cadastro.</div>
+    </div>
+    <div id="n-cpf-exist" style="display:none;margin:10px 0 14px;padding:14px;border:1.5px solid #86efac;border-radius:14px;background:#f0fdf4">
+      <div style="font-size:.78rem;font-weight:700;color:#14532d;text-transform:uppercase;margin-bottom:8px">Cadastro encontrado</div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="n-cpf-exist-foto" style="width:56px;height:56px;border-radius:12px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:1.4rem">👤</div>
+        <div style="min-width:0;flex:1">
+          <div id="n-cpf-exist-nome" style="font-weight:800;color:#0f172a;font-size:1rem"></div>
+          <div id="n-cpf-exist-meta" style="font-size:.82rem;color:#64748b;margin-top:2px"></div>
+        </div>
+      </div>
+      <p style="font-size:.85rem;color:#334155;margin:10px 0 8px">Confirma que é esta pessoa? O convite será vinculado a esta residência e enviado à portaria pelo chat.</p>
+      <button type="button" class="btn btn-s btn-b" onclick="morConfirmarCadExistente()">✅ Sim, é esta pessoa — enviar</button>
+      <button type="button" class="btn btn-o btn-b" style="margin-top:8px" onclick="morCpfOutro()">Não é esta pessoa / outro CPF</button>
+    </div>
+    <div id="n-rest-fields">
     <div class="fg"><label>Foto</label>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <div id="n-foto-prev" style="width:64px;height:64px;border-radius:10px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.4rem">📷</div>
@@ -1058,7 +1075,6 @@ html:not([data-role="op"]) #op-conta{display:none!important}
       </div>
     </div>
     <div class="fg"><label id="lbl-nome">Nome completo *</label><input type="text" id="n-nome" placeholder="Exemplo: Maria de Jesus" style="text-transform:uppercase" oninput="liveNome(this)"></div>
-    <div class="fg"><label>CPF</label><input type="text" id="n-cpf" placeholder="000.000.000-00" inputmode="numeric" oninput="maskCPF(this);liveCpf(this);checarBlForm()"><div id="bl-form-aviso" class="bl-form-aviso" style="display:none"></div></div>
     <div class="fg"><label>Data de nascimento</label><input type="text" id="n-nasc" placeholder="31/01/1989" inputmode="numeric" maxlength="10" oninput="maskData(this);liveNasc(this);checkMenor()"></div>
     <div class="fg"><label id="lbl-tel-vis">Telefone do visitante</label><input type="text" id="n-tel-vis" placeholder="(41) 9 9950-1620" inputmode="numeric" oninput="maskTel(this);liveTel(this)"></div>
     <div class="fg" id="box-servico" style="display:none">
@@ -1115,7 +1131,8 @@ html:not([data-role="op"]) #op-conta{display:none!important}
     <div class="fg"><label>Telefone do morador</label><input type="text" id="n-tel" readonly></div>
     <div id="casas-extra-box"></div>
     <button type="button" class="btn btn-o btn-b" id="btn-add-casa" style="margin-bottom:8px" onclick="addCasaExtra()">+ Adicionar outra residência</button></div>
-    <button class="btn btn-p btn-b" onclick="pedirConfirmCadastro()">Salvar cadastro</button>
+    </div><!-- /n-rest-fields -->
+    <button class="btn btn-p btn-b" id="btn-salvar-cad" onclick="pedirConfirmCadastro()">Salvar cadastro</button>
     <button class="btn btn-o btn-b" style="margin-top:8px" id="btn-cancel-edit" onclick="cancelarCadastro()">✖ Cancelar cadastro</button>
   </div>
 
@@ -4221,7 +4238,9 @@ function _regMovForce(id,tipo){
   }catch(e){}
   const _uidMov="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); const na={id:_uidMov,uid:_uidMov,nome:c.nome,cpf:c.cpf||"",local:sess.loc,dh:new Date().toISOString(),op:sess.op,tipo:tipo,qdlt:qdltA,end:endA,mor:c.mor||""};
   _ajustarNa(na,c,tipo);
-  acess.push(na);saveA();
+  acess.push(na);
+  try{ if(tipo==="entrada") _pushExtraCasas(na,c); }catch(e){}
+  saveA();
   try{ if(tipo==="entrada") ticketAposEntrada(na,c); }catch(e){}
   try{ if(tipo==="entrada") aposPrimeiroAcesso(na,c); }catch(e){}
   const q=contagemEntrada(c.nome,sess.loc);
@@ -5025,6 +5044,104 @@ function abrirCadastroMorador(tipo){
   if(document.getElementById("n-port")){ document.getElementById("n-port").value=userSess.port||(res&&res.p)||""; document.getElementById("n-port").disabled=true; }
   if(document.getElementById("n-busca")) document.getElementById("n-busca").value=par;
   window._moradorLock=true;
+  window._morCpfExist=null;
+  try{
+    var h=document.getElementById("n-cpf-hint"); if(h) h.style.display="";
+    var rest=document.getElementById("n-rest-fields"); if(rest) rest.style.display="none";
+    var ex=document.getElementById("n-cpf-exist"); if(ex) ex.style.display="none";
+    var btn=document.getElementById("btn-salvar-cad"); if(btn) btn.style.display="none";
+    var cpfEl=document.getElementById("n-cpf"); if(cpfEl){ cpfEl.value=""; cpfEl.focus(); }
+  }catch(e){}
+}
+function morEhCadastroMorador(){
+  try{ return !!(typeof isMoradorSess==="function" && isMoradorSess()) || !!window._moradorLock; }catch(e){ return !!window._moradorLock; }
+}
+function morCpfStep(){
+  if(!morEhCadastroMorador()) return;
+  var editId=""; try{ editId=(document.getElementById("edit-id")||{}).value||""; }catch(e){}
+  if(editId) return; // edição: formulário completo
+  var el=document.getElementById("n-cpf");
+  var d=onlyDigits(el&&el.value||"");
+  var rest=document.getElementById("n-rest-fields");
+  var box=document.getElementById("n-cpf-exist");
+  var btn=document.getElementById("btn-salvar-cad");
+  var hint=document.getElementById("n-cpf-hint");
+  if(d.length<11){
+    window._morCpfExist=null;
+    if(rest) rest.style.display="none";
+    if(box) box.style.display="none";
+    if(btn) btn.style.display="none";
+    if(hint) hint.style.display="";
+    return;
+  }
+  if(typeof validarCPF==="function" && !validarCPF(d)){
+    if(rest) rest.style.display="none";
+    if(box) box.style.display="none";
+    if(btn) btn.style.display="none";
+    return;
+  }
+  var ex=null;
+  try{ ex=cadastroConvPorCpf(d); }catch(e){}
+  if(ex){
+    window._morCpfExist=ex;
+    if(rest) rest.style.display="none";
+    if(btn) btn.style.display="none";
+    if(hint) hint.style.display="none";
+    if(box){
+      box.style.display="block";
+      var nomeEl=document.getElementById("n-cpf-exist-nome");
+      var metaEl=document.getElementById("n-cpf-exist-meta");
+      var fotoEl=document.getElementById("n-cpf-exist-foto");
+      // privacidade: só o nome completo
+      if(nomeEl) nomeEl.textContent=ex.nome||"Cadastro encontrado";
+      if(metaEl) metaEl.textContent="Confirme se é esta pessoa.";
+      if(fotoEl) fotoEl.style.display="none";
+    }
+  } else {
+    window._morCpfExist=null;
+    if(box) box.style.display="none";
+    if(rest) rest.style.display="";
+    if(btn) btn.style.display="";
+    if(hint) hint.style.display="none";
+  }
+}
+function morCpfOutro(){
+  window._morCpfExist=null;
+  var el=document.getElementById("n-cpf"); if(el){ el.value=""; el.focus(); }
+  var box=document.getElementById("n-cpf-exist"); if(box) box.style.display="none";
+  var rest=document.getElementById("n-rest-fields"); if(rest) rest.style.display="none";
+  var btn=document.getElementById("btn-salvar-cad"); if(btn) btn.style.display="none";
+  var hint=document.getElementById("n-cpf-hint"); if(hint) hint.style.display="";
+  clearLiveErr(el);
+}
+function morConfirmarCadExistente(){
+  var ex=window._morCpfExist;
+  if(!ex){ toast("Nenhum cadastro encontrado para este CPF","er"); return; }
+  var res=(typeof moradorResidencia==="function")?moradorResidencia():null;
+  var morFinal=(userSess&&userSess.nome)||"";
+  var endFinal=(userSess&&userSess.end)||"";
+  var port=(userSess&&userSess.port)||"";
+  var telFinal=onlyDigits((userSess&&userSess.tel)||"");
+  if(res){
+    morFinal=[res.n1,res.n2].filter(Boolean).join(" e ")||morFinal;
+    endFinal=res.end||res.e||endFinal;
+    if(res.p) port=res.p;
+  }
+  var casas=null;
+  try{ casas=montarCasas(morFinal,endFinal,port,telFinal,null); }catch(e){
+    casas=[{rid:res&&res.id||"",mor:morFinal,end:endFinal,qdlt:res?("QD "+(res.qd||"")+" LT "+(res.lt||"")):"" ,tel:telFinal,p:port,st:"ok"}];
+  }
+  try{ mesclarConvite(ex,{casas:casas}); }catch(e){}
+  try{ if(typeof aposSalvarCadastro==="function") aposSalvarCadastro(ex); }catch(e){}
+  try{ renderListasMorador(); }catch(e){}
+  try{ render(); }catch(e){}
+  try{ renderConvidados(); }catch(e){}
+  toast("Convite vinculado ao cadastro de "+(ex.nome||"") ,"ok");
+  try{ if(typeof chatEnviarCadastro==="function") chatEnviarCadastro(ex); }catch(e){}
+  try{ if(typeof oferecerEnvioPortaria==="function"){ /* já enviado no chat */ } }catch(e){}
+  window._morCpfExist=null;
+  try{ cancelarCadastro(); }catch(e){}
+  try{ if(typeof tela==="function") tela("home"); }catch(e){}
 }
 function onTipoCadastro(){
   const t=(document.getElementById("n-tipo")||{}).value||"visitante";
@@ -5357,7 +5474,23 @@ function renderListasMorador(){
     vis=vis.filter(match); pre=pre.filter(match);
   }
   function card(c){
-    return '<div class="access-card" style="margin-bottom:6px;cursor:pointer" onclick="abrir(\''+c.id+'\')"><div class="name">'+(c.nome||"")+'</div><div class="meta">'+(c.placa||"")+(c.nasc?(" · "+c.nasc):"")+'</div>'+agendaStatusMor(c)+'<div class="mor-acts"><button onclick="event.stopPropagation();AG.abrirVisitaDia(\''+c.id+'\')">📨 Enviar para o dia</button>'+((c.tipo||"")==="prestador"?'<button onclick="event.stopPropagation();AG.abrirPasseFixo(\''+c.id+'\')">📆 Prestador fixo</button>':"")+'</div></div>';
+    // lista do morador: só nome + CPF; foto só se o próprio morador tirou no cadastro
+    var cpfShow="";
+    try{
+      var d=onlyDigits(c.cpf||"");
+      if(d.length===11) cpfShow=d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4");
+      else cpfShow=c.cpf||"";
+    }catch(e){ cpfShow=c.cpf||""; }
+    var fotoHtml="";
+    if(c.fotoPorMor && c.foto){
+      fotoHtml='<img src="'+c.foto+'" alt="" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0">';
+    } else {
+      fotoHtml='<div style="width:44px;height:44px;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:1.2rem">👤</div>';
+    }
+    return '<div class="access-card" style="margin-bottom:6px;cursor:pointer;display:flex;gap:10px;align-items:center" onclick="abrir(\''+c.id+'\')">'+
+      fotoHtml+
+      '<div style="min-width:0;flex:1"><div class="name">'+(c.nome||"")+'</div><div class="meta">'+(cpfShow?("CPF "+cpfShow):"Sem CPF")+' · '+((c.tipo||"")==="prestador"?"Prestador":"Visitante")+'</div>'+agendaStatusMor(c)+
+      '<div class="mor-acts"><button onclick="event.stopPropagation();AG.abrirVisitaDia(\''+c.id+'\')">📨 Enviar para o dia</button>'+((c.tipo||"")==="prestador"?'<button onclick="event.stopPropagation();AG.abrirPasseFixo(\''+c.id+'\')">📆 Prestador fixo</button>':"")+'</div></div></div>';
   }
   const lv=document.getElementById("lista-mor-vis");
   const lp=document.getElementById("lista-mor-pre");
@@ -8357,7 +8490,9 @@ function regMov(id,tipo){
   }catch(e){}
   const _uidMov="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,8); const na={id:_uidMov,uid:_uidMov,nome:c.nome,cpf:c.cpf||"",local:sess.loc,dh:new Date().toISOString(),op:sess.op,tipo:tipo,qdlt:qdltA,end:endA,mor:c.mor||""};
   _ajustarNa(na,c,tipo);
-  acess.push(na);saveA();
+  acess.push(na);
+  try{ if(tipo==="entrada") _pushExtraCasas(na,c); }catch(e){}
+  saveA();
   try{ if(tipo==="entrada") ticketAposEntrada(na,c); }catch(e){}
   try{ if(tipo==="entrada") aposPrimeiroAcesso(na,c); }catch(e){}
   const q=contagemEntrada(c.nome,sess.loc);
@@ -8685,15 +8820,39 @@ function _ajustarNa(na,c,tipo){
   var cs=c._cs;
   if(cs && cs.length){
     na.casas=cs.map(function(x){ return {mor:x.mor,end:x.end,qdlt:x.qdlt,st:x.st,tel:x.t1||""}; });
-    var f=cs.find(function(x){return x.st==="ok"})||cs[0];
+    var oks=cs.filter(function(x){return x.st==="ok";});
+    var f=oks[0]||cs[0];
     na.mor=f.mor; na.end=f.end; na.qdlt=fmtQdLtLabel(f.qdlt);
+    // marca as demais residências liberadas para gravar 1 movimento por casa
+    na._extraCasas=oks.slice(1).map(function(x){
+      return {mor:x.mor,end:x.end,qdlt:fmtQdLtLabel(x.qdlt),st:"ok",tel:x.t1||""};
+    });
     try{
-      cs.filter(function(x){return x.st==="ok"}).slice(1).forEach(function(x){
+      oks.slice(1).forEach(function(x){
         var tt=onlyDigits(x.t1||"");
         if(tt) pushNotif(tt,"Convidado acessou","Seu convidado "+c.nome+" entrou na portaria "+sess.loc+".",{tipo:"entrada_mor",visitante:c.nome,local:sess.loc,morKey:tt});
       });
     }catch(e){}
   }
+}
+function _pushExtraCasas(na,c){
+  if(!na || !na._extraCasas || !na._extraCasas.length) return;
+  var extras=na._extraCasas; delete na._extraCasas;
+  extras.forEach(function(x,i){
+    try{
+      var uid="u"+Date.now().toString(36)+Math.random().toString(36).slice(2,8)+i;
+      var copia={
+        id:uid, uid:uid,
+        nome:na.nome, cpf:na.cpf||"", local:na.local, dh:na.dh, op:na.op,
+        tipo:na.tipo||"entrada", qdlt:x.qdlt||"", end:x.end||"", mor:x.mor||"",
+        tk:na.tk||"", placa:na.placa||"", restr:na.restr||"",
+        casas:[{mor:x.mor,end:x.end,qdlt:x.qdlt,st:"ok"}],
+        grupoTk:na.tk||""
+      };
+      acess.push(copia);
+    }catch(e){}
+  });
+  try{ saveA(); }catch(e){}
 }
 function _validarMovOperador(c,tipo){
   if(tipo!=="entrada") return true;
@@ -10134,6 +10293,22 @@ function cancelEdit(){
     var warn=document.getElementById("n-cnh-val-warn");
     if(warn) warn.textContent="";
     try{ if(typeof checkMenor==="function") checkMenor(); }catch(e){}
+    try{
+      window._morCpfExist=null;
+      var box=document.getElementById("n-cpf-exist"); if(box) box.style.display="none";
+      var rest=document.getElementById("n-rest-fields");
+      var hint=document.getElementById("n-cpf-hint");
+      var btn=document.getElementById("btn-salvar-cad");
+      if(morEhCadastroMorador()){
+        if(rest) rest.style.display="none";
+        if(hint) hint.style.display="";
+        if(btn) btn.style.display="none";
+      } else {
+        if(rest) rest.style.display="";
+        if(hint) hint.style.display="none";
+        if(btn) btn.style.display="";
+      }
+    }catch(e2){}
   }catch(e){ console.warn("cancelEdit", e); }
 }
 function aposSalvarCadastro(c){
@@ -10408,6 +10583,8 @@ function liveCpf(el){
   if(!d){ clearLiveErr(el); return; }
   if(d.length<11){ clearLiveErr(el); return; }
   if(typeof validarCPF==="function" && !validarCPF(d)){ setLiveErr(el,"CPF inválido"); return; }
+  // no login de morador não bloqueia CPF já cadastrado — o fluxo de confirmação trata isso
+  if(morEhCadastroMorador()){ clearLiveErr(el); return; }
   var ignore=null;
   try{ ignore=(document.getElementById("edit-id")||{}).value||null; }catch(e){}
   if(!ignore && typeof cpfJaCadastrado==="function" && cpfJaCadastrado(d, ignore||((document.getElementById("edit-id")||{}).value)||null, (document.getElementById("n-nome")||{}).value)){ setLiveErr(el,"CPF já cadastrado"); return; }
@@ -10523,8 +10700,9 @@ function liveTel(el){
   var d=onlyDigits(el.value||"");
   if(!d){ clearLiveErr(el); return; }
   if(d.length>=10){
-    // optional: check duplicate
     try{
+      // morador pode cadastrar/convidar quem já tem telefone no sistema
+      if(morEhCadastroMorador()){ clearLiveErr(el); return; }
       if(typeof telefoneJaUsado==="function" && telefoneJaUsado(d)) setLiveErr(el,"Telefone já cadastrado");
       else clearLiveErr(el);
     }catch(e){ clearLiveErr(el); }
@@ -10654,9 +10832,11 @@ function addConv(){
       var editIdCpf=((document.getElementById("edit-id")||{}).value)||"";
       window._mergeCad=null;
       if(typeof cpfJaCadastrado==="function" && cpfJaCadastrado(cpfD, editIdCpf||null, (document.getElementById("n-nome")||{}).value)){
-        var _exm=(!editIdCpf && (isMoradorSess()||window._moradorLock))?cadastroConvPorCpf(cpfD):null;
-        if(_exm && !cpfJaCadastrado(cpfD, null, (document.getElementById("n-nome")||{}).value, true)){ window._mergeCad=_exm; }
-        else if(!editIdCpf){ toast("CPF já cadastrado","er"); return; }
+        var _exm=(!editIdCpf)?cadastroConvPorCpf(cpfD):null;
+        // morador: sempre une ao cadastro existente em vez de bloquear
+        if(_exm && (isMoradorSess()||window._moradorLock)){ window._mergeCad=_exm; }
+        else if(_exm && !cpfJaCadastrado(cpfD, null, (document.getElementById("n-nome")||{}).value, true)){ window._mergeCad=_exm; }
+        else if(!editIdCpf && !(isMoradorSess()||window._moradorLock)){ toast("CPF já cadastrado","er"); return; }
       }
       cpfVal=cpfD.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4");
       if(!isMoradorSess() && !window._moradorLock){
@@ -10684,7 +10864,7 @@ const placaVal=placaRaw?(typeof fmtPlaca==="function"?fmtPlaca(placaRaw):placaRa
     const foto=((document.getElementById("n-foto-data")||{}).value)||"";
     const veiculo=((document.getElementById("n-veiculo")||{}).value||"").trim().toUpperCase();
     const telVis=onlyDigits(((document.getElementById("n-tel-vis")||{}).value)||"");
-    if(telVis){
+    if(telVis && !(isMoradorSess()||window._moradorLock)){
       var _dupT=telJaCadastrado(telVis, cpfD, ((document.getElementById("edit-id")||{}).value)||"", (document.getElementById("n-nome")||{}).value);
       if(_dupT){
         var _tvEl=document.getElementById("n-tel-vis"); if(_tvEl) _tvEl.classList.add("field-err");
@@ -10723,6 +10903,7 @@ const placaVal=placaRaw?(typeof fmtPlaca==="function"?fmtPlaca(placaRaw):placaRa
       }
       if(idx>=0){
         var agoraIso=new Date().toISOString();
+        var _fotoMor=!!((isMoradorSess()||window._moradorLock) && foto);
         conv[idx]=Object.assign({}, conv[idx], {
           nome:nome, cpf:cpfVal, mor:morFinal, end:endFinal, tel:telFinal,
           veiculo:veiculo, placa:placaVal, foto:foto||conv[idx].foto||"",
@@ -10734,6 +10915,7 @@ const placaVal=placaRaw?(typeof fmtPlaca==="function"?fmtPlaca(placaRaw):placaRa
           qdlt:(typeof qdLtDoCadastro==="function"?qdLtDoCadastro({mor:morFinal,end:endFinal,port:port}):(conv[idx].qdlt||"")),
           atualizado:agoraIso,
           porMor:!!(morFinal&&String(morFinal).trim()),
+          fotoPorMor:_fotoMor?true:(conv[idx].fotoPorMor||false),
           casas:montarCasas(morFinal,endFinal,port,telFinal,conv[idx])
         });
         saveC();
@@ -10771,6 +10953,7 @@ const placaVal=placaRaw?(typeof fmtPlaca==="function"?fmtPlaca(placaRaw):placaRa
       qdlt:(typeof qdLtDoCadastro==="function"?qdLtDoCadastro({mor:morFinal,end:endFinal,port:port}):""),
       criado:new Date().toISOString(),
       porMor:!!(morFinal&&String(morFinal).trim()),
+      fotoPorMor:!!((isMoradorSess()||window._moradorLock) && foto),
       casas:montarCasas(morFinal,endFinal,port,telFinal,null),
       libres:[]
     };
@@ -12161,10 +12344,12 @@ function copiarTextoWa(){
   }
   function item(a,ref){
     var s=ehSaida(a);
-    return '<div class="ga-item'+(s?" s":"")+'"><div class="nm">'+esc(a.nome||"-")+'<span class="ga-tag'+(s?" s":"")+'">'+(s?"SAÍDA":"ENTRADA")+'</span></div>'+
+    var cpfAttr=esc(onlyDigits(a.cpf||""));
+    return '<div class="ga-item'+(s?" s":"")+'" style="cursor:pointer" onclick="gaAbrirCadastro(\''+cpfAttr+'\',\''+esc(a.nome||"").replace(/'/g,"\\'")+'\')">'+
+      '<div class="nm">'+esc(a.nome||"-")+'<span class="ga-tag'+(s?" s":"")+'">'+(s?"SAÍDA":"ENTRADA")+'</span></div>'+
       '<div class="mt">'+fmtDH(a.dh)+' · '+esc(a.local||"-")+(a.cpf?' · CPF '+esc(a.cpf):"")+'<br>'+
       (a.mor?'Morador: '+esc(a.mor)+(a.qdlt?' · '+esc(a.qdlt):""):(a.qdlt?esc(a.qdlt):""))+(a.placa?' · Placa '+esc(a.placa):"")+(a.op?'<br>Operador: '+esc(a.op):"")+'</div>'+
-      (ref?'<div class="ga-act"><button type="button" onclick="gaSaida(\''+esc(a.id)+'\')">🚪 Registrar saída agora</button></div>':"")+(document.documentElement.classList.contains("ui-pro")?'<div class="ga-act" style="margin-top:6px"><button type="button" style="border-color:#93c5fd;color:#1d4ed8" onclick="prnComprovante(\''+esc(a.id)+'\')">🖨️ Imprimir comprovante</button></div>':"")+'</div>';
+      (ref?'<div class="ga-act"><button type="button" onclick="event.stopPropagation();gaSaida(\''+esc(a.id)+'\')">🚪 Registrar saída agora</button></div>':"")+(document.documentElement.classList.contains("ui-pro")?'<div class="ga-act" style="margin-top:6px"><button type="button" style="border-color:#93c5fd;color:#1d4ed8" onclick="event.stopPropagation();prnComprovante(\''+esc(a.id)+'\')">🖨️ Imprimir comprovante</button></div>':"")+'</div>';
   }
   function movimentos(){
     var it=filtrar(), show=it.slice(0,GA.lim);
@@ -12183,19 +12368,70 @@ function copiarTextoWa(){
     var ks=Object.keys(m).sort(function(a,b){return (m[b].e+m[b].s)-(m[a].e+m[a].s);});
     if(!ks.length) return '<div class="ga-empty">Sem registros no período.</div>';
     return '<div class="ga-sec">'+ks.length+' pessoa(s)</div>'+ks.slice(0,150).map(function(k){var p=m[k];
-      return '<div class="ga-item"><div class="nm">'+esc(p.nome||"-")+'</div><div class="mt">'+(p.cpf?'CPF '+esc(p.cpf)+' · ':'')+p.e+' entrada(s) · '+p.s+' saída(s)<br>Último: '+fmtDH(p.ult)+'</div></div>';}).join("");
+      var cpfAttr=esc(onlyDigits(p.cpf||""));
+      return '<div class="ga-item" style="cursor:pointer" onclick="gaAbrirCadastro(\''+cpfAttr+'\',\''+esc(p.nome||"").replace(/'/g,"\\'")+'\')"><div class="nm">'+esc(p.nome||"-")+'</div><div class="mt">'+(p.cpf?'CPF '+esc(p.cpf)+' · ':'')+p.e+' entrada(s) · '+p.s+' saída(s)<br>Último: '+fmtDH(p.ult)+'</div></div>';}).join("");
   }
+  window.gaAbrirCadastro=function(cpf,nome){
+    try{
+      var d=onlyDigits(cpf||"");
+      var c=null;
+      if(d) c=(conv||[]).find(function(x){ return onlyDigits(x.cpf||"")===d; });
+      if(!c && nome) c=(conv||[]).find(function(x){ return _norm(x.nome)===_norm(nome); });
+      if(c && c.id && typeof abrir==="function"){
+        try{ gaFechar(); }catch(e){}
+        abrir(c.id,"main");
+        return;
+      }
+      toast("Cadastro não encontrado na base","er");
+    }catch(e){ toast("Não foi possível abrir o cadastro","er"); }
+  };
+  function gaSugestoes(){
+    var q=(GA.f.q||"").trim().toLowerCase();
+    if(q.length<2) return "";
+    var qn=q.replace(/\D/g,"");
+    var hits=[];
+    var seen={};
+    (conv||[]).forEach(function(c){
+      if(hits.length>=8) return;
+      var nome=(c.nome||"").toLowerCase();
+      var cpf=onlyDigits(c.cpf||"");
+      var placa=(c.placa||"").toLowerCase();
+      var ok=nome.indexOf(q)>=0 || (qn.length>=3 && cpf.indexOf(qn)>=0) || placa.indexOf(q)>=0;
+      if(!ok) return;
+      var k=cpf||nome;
+      if(seen[k]) return; seen[k]=1;
+      hits.push(c);
+    });
+    if(!hits.length) return "";
+    return '<div id="ga-sug" style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;margin:0 0 10px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.06)">'+
+      hits.map(function(c){
+        var cpfShow=""; try{ var d=onlyDigits(c.cpf||""); if(d.length===11) cpfShow=d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4"); else cpfShow=c.cpf||""; }catch(e){}
+        return '<button type="button" style="display:block;width:100%;text-align:left;padding:10px 12px;border:0;border-bottom:1px solid #f1f5f9;background:#fff;cursor:pointer" onclick="gaPickSug(\''+esc(onlyDigits(c.cpf||""))+'\',\''+esc(c.nome||"").replace(/'/g,"\\'")+'\')">'+
+          '<b style="color:#0f172a">'+esc(c.nome||"")+'</b>'+
+          '<div style="font-size:.78rem;color:#64748b">'+(cpfShow?("CPF "+cpfShow):"")+(c.tipo==="prestador"?" · Prestador":" · Visitante")+'</div></button>';
+      }).join("")+'</div>';
+  }
+  window.gaPickSug=function(cpf,nome){
+    var label=nome||cpf||"";
+    try{
+      var d=onlyDigits(cpf||"");
+      if(d.length===11) label=d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4");
+      else if(nome) label=nome;
+    }catch(e){}
+    GA.f.q=label;
+    gaRender();
+  };
   window.gaRender=function(){
     if(!document.getElementById("ga-modal")) return;
     tabs();
     var body=document.getElementById("ga-body");
     var conteudo=GA.tab==="geral"?visao():GA.tab==="mov"?movimentos():GA.tab==="dentro"?dentro():pessoas();
-    var mostraFiltro=GA.tab!=="geral"||true;
+    var sug=gaSugestoes();
     if(GA.tab==="dentro"){
       var ops=portarias().map(function(p){return '<option value="'+esc(p)+'"'+(GA.f.port===p?" selected":"")+'>'+esc(p)+'</option>';}).join("");
       body.innerHTML='<div class="ga-filters"><select onchange="gaSet(\'port\',this.value)"><option value="">Todas as portarias</option>'+ops+'</select>'+
-        '<input type="text" id="ga-q" placeholder="Buscar pessoa, placa, morador..." value="'+esc(GA.f.q)+'" oninput="gaSet(\'q\',this.value,true)" autocomplete="off"></div>'+conteudo;
-    } else body.innerHTML=filtrosHtml()+conteudo;
+        '<input type="text" id="ga-q" placeholder="Buscar pessoa, placa, morador..." value="'+esc(GA.f.q)+'" oninput="gaSet(\'q\',this.value,true)" autocomplete="off"></div>'+sug+conteudo;
+    } else body.innerHTML=filtrosHtml()+sug+conteudo;
   };
   window.gaAbrir=function(){
     try{ if(typeof isMoradorSess==="function" && isMoradorSess()){ toast("Disponível só para operador","er"); return; } }catch(e){}
