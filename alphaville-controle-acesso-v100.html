@@ -1011,38 +1011,48 @@ html:not([data-role="op"]) #op-conta{display:none!important}
         <option value="prestador">Prestador de serviço</option>
       </select>
     </div>
-    <div id="box-acesso-livre" style="display:none;margin-bottom:14px;padding:12px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px">
-      <label style="display:flex;gap:10px;align-items:center;cursor:pointer;user-select:none">
-        <input type="checkbox" id="al-ativo" style="width:18px;height:18px;accent-color:#15803d" onchange="alToggleBox()">
-        <span style="font-weight:800;color:#14532d">🔓 Acesso livre em residências</span>
-      </label>
-      <div style="font-size:.8rem;color:#64748b;margin-top:4px">Marque para liberar entrada sem ligação.</div>
-      <div id="al-detalhes" style="display:none;margin-top:12px">
-        <div id="al-lista"></div>
-        <div style="margin-top:10px;font-size:.82rem;font-weight:700;color:#14532d">1) Dias e horário</div>
-        <label style="display:flex;align-items:center;gap:10px;font-size:.9rem;margin:8px 0;padding:8px 10px;background:#fff;border-radius:10px;border:1px solid #bbf7d0;cursor:pointer">
-          <input type="checkbox" id="al-todos" style="width:18px;height:18px;accent-color:#15803d" onchange="alToggleTodos()">
-          <span style="font-weight:600;color:#14532d">Todos os dias e horários</span>
-        </label>
-        <div class="dchips" id="al-dias" style="margin:6px 0">
-          <label class="dchip"><input type="checkbox" class="al-d" value="1" checked><span>Seg</span></label>
-          <label class="dchip"><input type="checkbox" class="al-d" value="2" checked><span>Ter</span></label>
-          <label class="dchip"><input type="checkbox" class="al-d" value="3" checked><span>Qua</span></label>
-          <label class="dchip"><input type="checkbox" class="al-d" value="4" checked><span>Qui</span></label>
-          <label class="dchip"><input type="checkbox" class="al-d" value="5" checked><span>Sex</span></label>
-          <label class="dchip"><input type="checkbox" class="al-d" value="6"><span>Sáb</span></label>
-          <label class="dchip"><input type="checkbox" class="al-d" value="0"><span>Dom</span></label>
+    <div id="box-acesso-livre" style="display:none;margin-bottom:14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;overflow:hidden">
+      <button type="button" id="al-head" onclick="alToggleAccordion()" style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:transparent;border:0;cursor:pointer;text-align:left">
+        <span style="display:flex;align-items:center;gap:10px;min-width:0">
+          <input type="checkbox" id="al-ativo" style="width:18px;height:18px;accent-color:#15803d;flex-shrink:0" onclick="event.stopPropagation()" onchange="alToggleBox()">
+          <span style="min-width:0">
+            <span style="font-weight:800;color:#14532d;display:block">🔓 Acesso livre em residências</span>
+            <span style="font-size:.78rem;color:#64748b">Toque para expandir · liberar sem ligação</span>
+          </span>
+        </span>
+        <span id="al-chevron" style="font-size:1.1rem;color:#14532d;flex-shrink:0">▼</span>
+      </button>
+      <div id="al-detalhes" style="display:none;padding:0 12px 14px;border-top:1px solid #bbf7d0">
+        <div style="margin-top:12px;font-size:.82rem;font-weight:700;color:#14532d">Residências liberadas <span style="font-weight:500;color:#64748b">(toque para editar horário)</span></div>
+        <div id="al-lista" style="margin-top:6px"></div>
+        <div id="al-edit-box" style="display:none;margin-top:10px;padding:10px;background:#fff;border:1px solid #86efac;border-radius:10px">
+          <div id="al-edit-titulo" style="font-size:.85rem;font-weight:700;color:#14532d;margin-bottom:8px">Horário desta residência</div>
+          <label style="display:flex;align-items:center;gap:10px;font-size:.9rem;margin:6px 0;padding:8px 10px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;cursor:pointer">
+            <input type="checkbox" id="al-todos" style="width:18px;height:18px;accent-color:#15803d" onchange="alToggleTodos();alSalvarHorarioSelecionado()">
+            <span style="font-weight:600;color:#14532d">Todos os dias e horários</span>
+          </label>
+          <div class="dchips" id="al-dias" style="margin:6px 0">
+            <label class="dchip"><input type="checkbox" class="al-d" value="1" checked onchange="alSalvarHorarioSelecionado()"><span>Seg</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="2" checked onchange="alSalvarHorarioSelecionado()"><span>Ter</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="3" checked onchange="alSalvarHorarioSelecionado()"><span>Qua</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="4" checked onchange="alSalvarHorarioSelecionado()"><span>Qui</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="5" checked onchange="alSalvarHorarioSelecionado()"><span>Sex</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="6" onchange="alSalvarHorarioSelecionado()"><span>Sáb</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="0" onchange="alSalvarHorarioSelecionado()"><span>Dom</span></label>
+          </div>
+          <div style="display:flex;gap:10px" id="al-horas">
+            <div class="fg" style="flex:1"><label>Das</label><input type="time" id="al-hi" value="08:00" onchange="alSalvarHorarioSelecionado()"></div>
+            <div class="fg" style="flex:1"><label>Até</label><input type="time" id="al-hf" value="18:00" onchange="alSalvarHorarioSelecionado()"></div>
+          </div>
         </div>
-        <div style="display:flex;gap:10px" id="al-horas">
-          <div class="fg" style="flex:1"><label>Das</label><input type="time" id="al-hi" value="08:00"></div>
-          <div class="fg" style="flex:1"><label>Até</label><input type="time" id="al-hf" value="18:00"></div>
+        <div id="al-busca-wrap" style="margin-top:12px">
+          <div style="font-size:.82rem;font-weight:700;color:#14532d;margin-bottom:4px">Adicionar residência</div>
+          <div class="fg" style="margin:0"><label>Buscar residência</label>
+            <input type="text" id="al-busca" placeholder="Nome, QD LT ou endereço" oninput="alBuscar()">
+            <div class="mlist" id="al-mlist"></div>
+          </div>
+          <button type="button" class="btn btn-s btn-b" style="margin-top:6px" onclick="alConfirmarAdd()">+ Adicionar residência liberada</button>
         </div>
-        <div style="margin-top:12px;font-size:.82rem;font-weight:700;color:#14532d">2) Residência liberada</div>
-        <div class="fg" style="margin:8px 0 4px"><label>Buscar residência</label>
-          <input type="text" id="al-busca" placeholder="Nome, QD LT ou endereço" oninput="alBuscar()">
-          <div class="mlist" id="al-mlist"></div>
-        </div>
-        <button type="button" class="btn btn-s btn-b" style="margin-top:6px" onclick="alConfirmarAdd()">+ Adicionar residência liberada</button>
       </div>
     </div>
     <p style="font-size:.85rem;color:var(--ts);margin-bottom:14px" id="form-desc">Dados do convidado e do morador que liberou</p>
@@ -5230,59 +5240,83 @@ function onTipoCadastro(){
 
 /* ===== Acesso livre (prestador liberado sem ligação) ===== */
 window._alRes=[];
+window._alSelIdx=-1;
+window._alAberto=false;
+function alToggleAccordion(){
+  var a=document.getElementById("al-ativo");
+  var d=document.getElementById("al-detalhes");
+  var ch=document.getElementById("al-chevron");
+  if(!d) return;
+  // se ainda não está ativo, ativa ao expandir
+  if(a && !a.checked){ a.checked=true; try{ alToggleBox(); }catch(e){} }
+  window._alAberto=!window._alAberto;
+  d.style.display=window._alAberto?"block":"none";
+  if(ch) ch.textContent=window._alAberto?"▲":"▼";
+}
 function alToggleBox(){
   var a=document.getElementById("al-ativo"), d=document.getElementById("al-detalhes");
+  var ch=document.getElementById("al-chevron");
   if(!a||!d) return;
-  d.style.display=a.checked?"block":"none";
-  if(!a.checked){ window._alRes=[]; try{alRenderLista();}catch(e){} var m=document.getElementById("al-mlist"); if(m){m.innerHTML="";m.style.display="none";} var b=document.getElementById("al-busca"); if(b) b.value=""; }
-  try{ if(a.checked) alSetupMoradorUI(); }catch(e){}
+  if(a.checked){
+    window._alAberto=true;
+    d.style.display="block";
+    if(ch) ch.textContent="▲";
+    try{ alSetupMoradorUI(); }catch(e){}
+  } else {
+    window._alAberto=false;
+    d.style.display="none";
+    if(ch) ch.textContent="▼";
+    window._alRes=[]; window._alSelIdx=-1;
+    try{ alRenderLista(); }catch(e){}
+    var m=document.getElementById("al-mlist"); if(m){m.innerHTML="";m.style.display="none";}
+    var b=document.getElementById("al-busca"); if(b) b.value="";
+    var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="none";
+  }
+}
+function _alDefaultHorario(){
+  return {todos:false, dias:[1,2,3,4,5], hi:"08:00", hf:"18:00"};
+}
+function _alHorarioResumo(r){
+  if(!r) return "";
+  if(r.todos) return "Todos os dias e horários";
+  var nomes={0:"Dom",1:"Seg",2:"Ter",3:"Qua",4:"Qui",5:"Sex",6:"Sáb"};
+  var ds=(r.dias||[]).map(function(d){ return nomes[d]||d; }).join(", ");
+  return (ds||"Dias")+" · "+(r.hi||"08:00")+"–"+(r.hf||"18:00");
 }
 function alSetupMoradorUI(){
-  // no login de morador: não busca residência de outros — usa as do próprio associado
   var ehMor=false; try{ ehMor=!!(typeof isMoradorSess==="function"&&isMoradorSess())||!!window._moradorLock; }catch(e){}
   if(!ehMor) return;
-  var buscaWrap=document.getElementById("al-busca");
-  var btnAdd=null;
-  try{ btnAdd=document.querySelector("#al-detalhes button[onclick*=\"alConfirmarAdd\"]"); }catch(e){}
-  var labBusca=buscaWrap?buscaWrap.closest(".fg"):null;
-  if(labBusca) labBusca.style.display="none";
-  if(btnAdd) btnAdd.style.display="none";
-  // título
-  try{
-    var tit=document.querySelector("#al-detalhes div[style*=\"Residência liberada\"]");
-    if(tit) tit.textContent="2) Sua(s) residência(s)";
-  }catch(e){}
+  var wrap=document.getElementById("al-busca-wrap"); if(wrap) wrap.style.display="none";
   var lista=[];
   try{
     if(typeof residenciasDoMoradorComVinculo==="function") lista=residenciasDoMoradorComVinculo()||[];
     if(!lista.length && typeof residenciasDoMorador==="function") lista=residenciasDoMorador()||[];
   }catch(e){}
   if(!lista.length){
-    try{
-      var r=(typeof moradorResidencia==="function")?moradorResidencia():null;
-      if(r) lista=[r];
-    }catch(e){}
+    try{ var r=(typeof moradorResidencia==="function")?moradorResidencia():null; if(r) lista=[r]; }catch(e){}
   }
+  // preserva horários já definidos se mesma rid
+  var prev={};
+  (window._alRes||[]).forEach(function(x){ if(x.rid) prev[x.rid]=x; });
   window._alRes=[];
   lista.forEach(function(r){
     if(!r) return;
+    var rid=r.id||"";
+    var base=prev[rid]||_alDefaultHorario();
     window._alRes.push({
-      rid:r.id||"",
+      rid:rid,
       mor:[r.n1,r.n2].filter(Boolean).join(" e ")||(userSess&&userSess.nome)||"",
       end:r.end||r.e||"",
       qdlt:((r.qd||"")+" "+(r.lt||"")).trim(),
-      p:r.p||(userSess&&userSess.port)||""
+      p:r.p||(userSess&&userSess.port)||"",
+      todos:!!base.todos,
+      dias:(base.dias&&base.dias.length)?base.dias.slice():[1,2,3,4,5],
+      hi:base.hi||"08:00",
+      hf:base.hf||"18:00"
     });
   });
-  // se só uma, já fica linkada; se várias, todas disponíveis (morador escolhe dias/horas)
-  try{ alRenderLista(); }catch(e){}
-  var a=document.getElementById("al-ativo");
-  if(a && !a.checked && window._alRes.length){
-    // não força check — só preenche quando marcar
-  }
-  if(a && a.checked){
-    try{ alRenderLista(); }catch(e){}
-  }
+  window._alSelIdx=window._alRes.length?0:-1;
+  try{ alRenderLista(); if(window._alSelIdx>=0) alSelecionarRes(window._alSelIdx); }catch(e){}
 }
 window._alPendente=null;
 function alConfirmarAdd(){
@@ -5290,7 +5324,7 @@ function alConfirmarAdd(){
   alPick(window._alPendente); window._alPendente=null;
   var b=document.getElementById("al-busca"); if(b) b.value="";
   var m=document.getElementById("al-mlist"); if(m){ m.innerHTML=""; m.style.display="none"; }
-  toast("Residência adicionada ao acesso livre","ok");
+  toast("Residência adicionada — toque nela para definir horário","ok");
 }
 function alToggleTodos(){
   var t=document.getElementById("al-todos");
@@ -5302,14 +5336,63 @@ function alToggleTodos(){
 }
 function alRenderLista(){
   var el=document.getElementById("al-lista"); if(!el) return;
-  if(!window._alRes.length){ el.innerHTML='<div style="font-size:.82rem;color:#94a3b8">Nenhuma residência liberada ainda.</div>'; return; }
+  if(!window._alRes.length){
+    el.innerHTML='<div style="font-size:.82rem;color:#94a3b8">Nenhuma residência liberada ainda.</div>';
+    var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="none";
+    return;
+  }
   el.innerHTML=window._alRes.map(function(r,i){
-    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:#fff;border:1px solid #bbf7d0;border-radius:10px;padding:8px 10px;margin-bottom:6px">'+
-      '<div style="font-size:.85rem"><b>'+_escH(r.mor||"")+'</b><div style="color:#64748b;font-size:.78rem">'+_escH((r.qdlt?fmtQdLtLabel(r.qdlt):"")+(r.end?" · "+r.end:""))+(r.p?" · "+r.p:"")+'</div></div>'+
-      '<button type="button" class="btn btn-o btn-sm" onclick="alRem('+i+')">✖</button></div>';
+    var sel=i===window._alSelIdx;
+    return '<div onclick="alSelecionarRes('+i+')" style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:'+(sel?"#dcfce7":"#fff")+';border:1.5px solid '+(sel?"#16a34a":"#bbf7d0")+';border-radius:10px;padding:8px 10px;margin-bottom:6px;cursor:pointer">'+
+      '<div style="font-size:.85rem;min-width:0;flex:1">'+
+        '<b>'+_escH(r.mor||"")+'</b>'+
+        '<div style="color:#64748b;font-size:.78rem">'+_escH((r.qdlt?(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(r.qdlt):r.qdlt):"")+(r.end?" · "+r.end:""))+(r.p?" · "+r.p:"")+'</div>'+
+        '<div style="color:#15803d;font-size:.75rem;font-weight:600;margin-top:2px">⏰ '+_escH(_alHorarioResumo(r))+'</div>'+
+      '</div>'+
+      '<button type="button" class="btn btn-o btn-sm" onclick="event.stopPropagation();alRem('+i+')" style="flex-shrink:0">✖</button></div>';
   }).join("");
 }
-function alRem(i){ window._alRes.splice(i,1); alRenderLista(); }
+function alRem(i){
+  window._alRes.splice(i,1);
+  if(window._alSelIdx===i) window._alSelIdx=-1;
+  else if(window._alSelIdx>i) window._alSelIdx--;
+  alRenderLista();
+  var eb=document.getElementById("al-edit-box");
+  if(window._alSelIdx<0 && eb) eb.style.display="none";
+  else if(window._alSelIdx>=0) alSelecionarRes(window._alSelIdx);
+}
+function alSelecionarRes(i){
+  var r=window._alRes[i]; if(!r) return;
+  // salva horário da seleção anterior antes de trocar
+  try{ alSalvarHorarioSelecionado(); }catch(e){}
+  window._alSelIdx=i;
+  alRenderLista();
+  var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="block";
+  var tit=document.getElementById("al-edit-titulo");
+  if(tit) tit.textContent="Horário · "+(r.mor||"Residência")+(r.qdlt?(" · "+(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(r.qdlt):r.qdlt)):"");
+  var td=document.getElementById("al-todos"); if(td) td.checked=!!r.todos;
+  var dias=r.dias||[1,2,3,4,5];
+  document.querySelectorAll(".al-d").forEach(function(ch){ ch.checked=dias.indexOf(+ch.value)>=0; });
+  var hi=document.getElementById("al-hi"); if(hi) hi.value=r.hi||"08:00";
+  var hf=document.getElementById("al-hf"); if(hf) hf.value=r.hf||"18:00";
+  alToggleTodos();
+}
+function alSalvarHorarioSelecionado(){
+  var i=window._alSelIdx; if(i<0||!window._alRes[i]) return;
+  var r=window._alRes[i];
+  r.todos=!!(document.getElementById("al-todos")&&document.getElementById("al-todos").checked);
+  r.dias=[].slice.call(document.querySelectorAll(".al-d:checked")).map(function(x){return +x.value;});
+  r.hi=(document.getElementById("al-hi")||{}).value||"08:00";
+  r.hf=(document.getElementById("al-hf")||{}).value||"18:00";
+  // atualiza só o resumo na lista sem perder seleção
+  try{
+    var el=document.getElementById("al-lista");
+    if(el && el.children[i]){
+      var sub=el.children[i].querySelector("div div[style*='15803d']");
+      if(sub) sub.textContent="⏰ "+_alHorarioResumo(r);
+    }
+  }catch(e){}
+}
 function alAddMais(){ var b=document.getElementById("al-busca"); if(b){ b.value=""; b.focus(); } var m=document.getElementById("al-mlist"); if(m) m.style.display=""; }
 function alBuscar(){
   var q=_norm((document.getElementById("al-busca")||{}).value||"");
@@ -5333,7 +5416,8 @@ function alPickIdx(i){
   var r=(window._alTmp||[])[i]; if(!r) return;
   var mor=[r.n1,r.n2].filter(Boolean).join(" e ");
   var qdlt=(r.qd||r.lt)?("QD "+(r.qd||"")+" LT "+(r.lt||"")):"";
-  window._alPendente={rid:r.id,mor:mor,end:r.end||"",qdlt:qdlt,p:r.p||""};
+  var def=_alDefaultHorario();
+  window._alPendente={rid:r.id,mor:mor,end:r.end||"",qdlt:qdlt,p:r.p||"",todos:def.todos,dias:def.dias.slice(),hi:def.hi,hf:def.hf};
   var ml=document.getElementById("al-mlist");
   if(ml){ ml.querySelectorAll(".mitem").forEach(function(el,idx){ el.style.background=idx===i?"#dcfce7":""; }); }
   toast("Selecionada. Toque em Adicionar residência liberada.","ok");
@@ -5341,43 +5425,58 @@ function alPickIdx(i){
 function alPick(r){
   if(!r||!r.rid) return;
   if(window._alRes.some(function(x){return x.rid===r.rid;})){ toast("Residência já adicionada","er"); return; }
-  window._alRes.push(r);
+  var def=_alDefaultHorario();
+  window._alRes.push({
+    rid:r.rid, mor:r.mor, end:r.end||"", qdlt:r.qdlt||"", p:r.p||"",
+    todos:r.todos!=null?!!r.todos:def.todos,
+    dias:(r.dias&&r.dias.length)?r.dias.slice():def.dias.slice(),
+    hi:r.hi||def.hi, hf:r.hf||def.hf
+  });
+  window._alSelIdx=window._alRes.length-1;
   alRenderLista();
+  alSelecionarRes(window._alSelIdx);
   var b=document.getElementById("al-busca"); if(b) b.value="";
   var m=document.getElementById("al-mlist"); if(m){ m.innerHTML=""; m.style.display="none"; }
 }
 function alColetar(){
-  var todos=!!(document.getElementById("al-todos")&&document.getElementById("al-todos").checked);
-  var dias=[].slice.call(document.querySelectorAll(".al-d:checked")).map(function(i){return +i.value;});
-  var hi=(document.getElementById("al-hi")||{}).value||"08:00";
-  var hf=(document.getElementById("al-hf")||{}).value||"18:00";
-  return {res:window._alRes.slice(), todos:todos, dias:dias, hi:hi, hf:hf};
+  try{ alSalvarHorarioSelecionado(); }catch(e){}
+  return {res:window._alRes.slice()};
 }
 function alAplicarNoCadastro(c){
   var d=alColetar();
   if(!d.res.length){ c.libres=[]; return; }
   c.libres=d.res.map(function(r){
-    return Object.assign({},r,{todos:d.todos,dias:d.dias.slice(),hi:d.hi,hf:d.hf});
+    return {
+      rid:r.rid||"", mor:r.mor||"", end:r.end||"", qdlt:r.qdlt||"", p:r.p||"",
+      todos:!!r.todos,
+      dias:(r.dias&&r.dias.length)?r.dias.slice():[1,2,3,4,5],
+      hi:r.hi||"08:00", hf:r.hf||"18:00"
+    };
   });
 }
 function alCarregarDoCadastro(c){
   window._alRes=[];
+  window._alSelIdx=-1;
   try{
-    (c.libres||[]).forEach(function(r){ window._alRes.push({rid:r.rid,mor:r.mor,end:r.end,qdlt:r.qdlt,p:r.p}); });
-    var ativo=document.getElementById("al-ativo"); var det=document.getElementById("al-detalhes");
-    if(ativo) ativo.checked=!!(c.libres&&c.libres.length);
-    if(det) det.style.display=(c.libres&&c.libres.length)?"block":"none";
-    var first=(c.libres||[])[0];
-    if(first){
-      var td=document.getElementById("al-todos"); if(td) td.checked=!!first.todos;
-      var dias=first.dias||[1,2,3,4,5];
-      document.querySelectorAll(".al-d").forEach(function(ch){ ch.checked=dias.indexOf(+ch.value)>=0; });
-      var hi=document.getElementById("al-hi"); if(hi) hi.value=first.hi||"08:00";
-      var hf=document.getElementById("al-hf"); if(hf) hf.value=first.hf||"18:00";
-      alToggleTodos();
-    }
+    (c.libres||[]).forEach(function(r){
+      window._alRes.push({
+        rid:r.rid, mor:r.mor, end:r.end, qdlt:r.qdlt, p:r.p,
+        todos:!!r.todos,
+        dias:(r.dias&&r.dias.length)?r.dias.slice():[1,2,3,4,5],
+        hi:r.hi||"08:00", hf:r.hf||"18:00"
+      });
+    });
+    var ativo=document.getElementById("al-ativo");
+    var det=document.getElementById("al-detalhes");
+    var ch=document.getElementById("al-chevron");
+    var tem=!!(c.libres&&c.libres.length);
+    if(ativo) ativo.checked=tem;
+    window._alAberto=tem;
+    if(det) det.style.display=tem?"block":"none";
+    if(ch) ch.textContent=tem?"▲":"▼";
+    alRenderLista();
+    if(window._alRes.length) alSelecionarRes(0);
   }catch(e){}
-  alRenderLista();
 }
 function libreAgoraValida(lib){
   if(!lib) return false;
