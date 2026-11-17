@@ -304,7 +304,7 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 .gcard-foto-ph{width:56px;height:56px;border-radius:12px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;border:2px solid var(--b)}
 .gcard-body{flex:1;min-width:0}
 
-.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:center;justify-content:center;padding:24px;pointer-events:none}
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20000;display:none;align-items:center;justify-content:center;padding:24px;pointer-events:none}
 .confirm-overlay.show{display:flex;pointer-events:auto}
 .confirm-msg{white-space:pre-line}.confirm-box{background:#fff;border-radius:20px;padding:28px 24px;text-align:center;max-width:320px;width:100%;box-shadow:0 12px 40px rgba(0,0,0,.3);animation:pop .25s ease}
 .confirm-msg{white-space:pre-line}.confirm-box.ok{border-top:6px solid #2E7D32}
@@ -373,7 +373,7 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 #cfg-moradores{max-height:360px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #cfg-notifs{max-height:320px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-.hist-scroll,#m-hist{max-height:min(36vh,260px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+.hist-scroll,#m-hist{max-height:min(42vh,320px);overflow-y:auto;-webkit-overflow-scrolling:touch}
 #cfg-acesso-lista{max-height:360px;overflow-y:auto}
 
 .btn-ligar-wa{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff!important;text-decoration:none!important;font-weight:700;font-size:.85rem;padding:10px 14px;border-radius:10px;min-width:96px;border:none;box-shadow:0 1px 2px rgba(0,0,0,.12)}
@@ -411,10 +411,10 @@ html.ui-pro .logo-img{background:#fff;padding:5px 10px;border-radius:10px}
 .tit-nome{font-weight:700;color:#1B5E20;text-align:right;line-height:1.2;max-width:52%}
 .btn-ligar-wa{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff!important;text-decoration:none!important;font-weight:700;font-size:.82rem;padding:10px 12px;border-radius:10px;white-space:nowrap;flex-shrink:0;border:none}
 </style><style>
-.mhead-dados{display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-top:4px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;max-height:none;overflow:visible}
-.md-item{display:flex;flex-direction:column;min-width:0;padding:0;background:transparent;border:0;border-radius:0}
-.md-l{font-size:.68rem;font-weight:700;color:#14532d;margin-bottom:2px;letter-spacing:.01em}
-.md-v{font-size:.82rem;color:#0f172a;font-weight:600;word-break:break-word;line-height:1.2;padding:5px 8px;background:#fff;border:1px solid #9ca3af;border-radius:4px;min-height:28px;display:flex;align-items:center;box-shadow:inset 1px 1px 2px rgba(0,0,0,.12)}
+.mhead-dados{display:grid;grid-template-columns:1fr 1fr;gap:3px 6px;margin:0 0 8px;padding:0;background:transparent;border:0}
+.md-item{display:flex;flex-direction:column;min-width:0;padding:0}
+.md-l{font-size:.65rem;font-weight:700;color:#14532d;margin-bottom:1px}
+.md-v{font-size:.78rem;color:#0f172a;font-weight:600;line-height:1.15;padding:4px 7px;background:#fff;border:1px solid #9ca3af;border-radius:4px;min-height:26px;max-height:26px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:inset 1px 1px 2px rgba(0,0,0,.1)}
 .mhead{padding-bottom:12px}
 html.ui-pro .mhead-dados{background:transparent;border:0}
 html.ui-pro .md-item{background:transparent;border:0}
@@ -1561,31 +1561,31 @@ html:not([data-role="op"]) #op-conta{display:none!important}
         </div>
         <input type="file" id="m-foto-cam" accept="image/*" capture="environment" style="display:none" onchange="onFotoModalCad(this)">
         <input type="file" id="m-foto-gal" accept="image/*" style="display:none" onchange="onFotoModalCad(this)">
-        <div style="flex:1;min-width:0">
-          <h2 id="m-nome" style="margin-bottom:6px">-</h2>
-          <div id="m-dados" class="mhead-dados">
-            <div class="md-item" id="m-cpf-wrap"><span class="md-l">CPF:</span><span class="md-v" id="m-cpf">-</span></div>
-            <div class="md-item" id="m-nasc-wrap"><span class="md-l">Nascimento:</span><span class="md-v" id="m-nasc">-</span></div>
-            <div class="md-item" id="m-tel-wrap"><span class="md-l">Telefone:</span><span class="md-v" id="m-tel-head">-</span></div>
-            <div class="md-item" id="m-veic-wrap"><span class="md-l">Veículo:</span><span class="md-v" id="m-veiculo">-</span></div>
-            <div class="md-item" id="m-placa-wrap"><span class="md-l">Placa:</span><span class="md-v" id="m-placa-line">-</span></div>
-            <div class="md-item" id="m-cnh-wrap"><span class="md-l">CNH:</span><span class="md-v" id="m-cnh">-</span></div>
-            <div class="md-item" id="m-serv-wrap" style="display:none"><span class="md-l">Serviço:</span><span class="md-v" id="m-servico">-</span></div>
-            <div class="md-item" id="m-tipo-wrap"><span class="md-l">Tipo:</span><span class="md-v" id="m-tipo">-</span></div>
-            <div class="md-item" id="m-port-wrap"><span class="md-l">Portaria:</span><span class="md-v" id="m-port">-</span></div>
-            <div id="m-lib-box" style="display:none;grid-column:1/-1;margin-top:8px;padding:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px">
-              <div style="font-size:.75rem;font-weight:700;color:#14532d;text-transform:uppercase;margin-bottom:6px">🔓 Escolher liberação</div>
-              <select id="m-lib-sel" style="width:100%;padding:10px;border-radius:10px;border:1px solid #86efac;font-size:.9rem" onchange="onLibSelChange()"></select>
-              <div id="m-lib-info" style="font-size:.8rem;color:#64748b;margin-top:6px"></div>
-            </div>
-            <div class="md-item" id="m-resp-wrap" style="display:none;grid-column:1/-1"><span class="md-l">Responsável:</span><span class="md-v" id="m-resp">-</span></div>
-          </div>
+        <div style="flex:1;min-width:0;padding-right:8px">
+          <h2 id="m-nome" style="margin:0;font-size:1.05rem;line-height:1.25">-</h2>
         </div>
       </div>
       <button class="mclose" onclick="fechar()">×</button>
     </div>
     <div class="mbody">
-      <div class="sec-title" style="margin:4px 0 8px"id="m-conv-title">Convidado por</div>
+      <div id="m-dados" class="mhead-dados">
+        <div class="md-item" id="m-cpf-wrap"><span class="md-l">CPF</span><span class="md-v" id="m-cpf">-</span></div>
+        <div class="md-item" id="m-nasc-wrap"><span class="md-l">Nascimento</span><span class="md-v" id="m-nasc">-</span></div>
+        <div class="md-item" id="m-tel-wrap"><span class="md-l">Telefone</span><span class="md-v" id="m-tel-head">-</span></div>
+        <div class="md-item" id="m-veic-wrap"><span class="md-l">Veículo</span><span class="md-v" id="m-veiculo">-</span></div>
+        <div class="md-item" id="m-placa-wrap"><span class="md-l">Placa</span><span class="md-v" id="m-placa-line">-</span></div>
+        <div class="md-item" id="m-cnh-wrap"><span class="md-l">CNH</span><span class="md-v" id="m-cnh">-</span></div>
+        <div class="md-item" id="m-serv-wrap" style="display:none"><span class="md-l">Serviço</span><span class="md-v" id="m-servico">-</span></div>
+        <div class="md-item" id="m-tipo-wrap"><span class="md-l">Tipo</span><span class="md-v" id="m-tipo">-</span></div>
+        <div class="md-item" id="m-port-wrap"><span class="md-l">Portaria</span><span class="md-v" id="m-port">-</span></div>
+        <div id="m-lib-box" style="display:none;grid-column:1/-1;margin-top:6px;padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px">
+          <div style="font-size:.72rem;font-weight:700;color:#14532d;text-transform:uppercase;margin-bottom:4px">🔓 Escolher liberação</div>
+          <select id="m-lib-sel" style="width:100%;padding:8px;border-radius:6px;border:1px solid #86efac;font-size:.85rem" onchange="onLibSelChange()"></select>
+          <div id="m-lib-info" style="font-size:.78rem;color:#64748b;margin-top:4px"></div>
+        </div>
+        <div class="md-item" id="m-resp-wrap" style="display:none;grid-column:1/-1"><span class="md-l">Responsável</span><span class="md-v" id="m-resp">-</span></div>
+      </div>
+      <div class="sec-title" style="margin:10px 0 6px" id="m-conv-title">Convidado por</div>
       <div class="irow" id="m-mor-row" style="display:none"><span class="il">Convidado por</span><span class="iv" id="m-mor">-</span></div>
       <div id="m-mor-pick" style="display:none"><input type="text" id="m-mor-q" placeholder="Nome, endereço ou QD LT..." autocomplete="off" oninput="buscarMorConv(this.value)"><div id="m-mor-res" class="mp-res"></div></div>
       <button type="button" id="m-casas-clear" class="btn btn-o btn-sm" style="display:none;margin:4px 0 6px" onclick="limparCasasVisita()">✕ Limpar morador selecionado</button>
@@ -1598,7 +1598,7 @@ html:not([data-role="op"]) #op-conta{display:none!important}
     </div>
     <div class="care">
       <div class="cmsg" id="c-msg"></div>
-      <button class="btn btn-s btn-b" id="btn-ci" onclick="if(sel)pedirConfirmacaoMov(sel.id,'entrada')">Registrar Entrada</button>
+      <button class="btn btn-s btn-b" id="btn-ci" style="display:none" onclick="if(sel)pedirConfirmacaoMov(sel.id,'entrada')">Registrar Entrada</button>
       <div class="actions">
         <button class="btn btn-o btn-sm" style="flex:1" onclick="editarAtual()">Editar</button>
         <button class="btn btn-d btn-sm" style="flex:1" onclick="excluirAtual()">Excluir</button>
@@ -9133,7 +9133,8 @@ function _validarMovOperador(c,tipo){
     }
   }catch(e){}
   var cs=window._visitaCasas||[];
-  if(window._modalOrigem==="main" && !cs.length){
+  if(!cs.length){
+    // chat/conv/main: precisa de morador destino
     mostrarAlerta({titulo:"Selecione um morador",texto:"Busque e selecione o morador que vai receber "+c.nome+" antes de registrar a entrada.",tipo:"er"});
     return false;
   }
