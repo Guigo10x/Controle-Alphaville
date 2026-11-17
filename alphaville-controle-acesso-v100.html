@@ -896,7 +896,7 @@ html:not([data-role="op"]) #op-conta{display:none!important}
     </div>
     <div class="fg" style="margin-bottom:10px">
       <label>Buscar visitante ou prestador da residência</label>
-      <input type="text" id="busca-mor-res" placeholder="Nome, CPF ou placa..." oninput="filtrarListasMorador(this.value)">
+      <input type="text" id="busca-mor-res" placeholder="Nome ou CPF..." oninput="filtrarListasMorador(this.value)">
     </div>
     <div class="sec-title">Visitantes</div>
     <div id="lista-mor-vis" style="max-height:32vh;overflow-y:auto;margin-bottom:14px"></div>
@@ -1929,7 +1929,10 @@ st.textContent=".mor-acts{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}.mo
 ".agl{display:block;font-size:.8rem;font-weight:600;margin-bottom:5px;color:var(--ts);text-transform:uppercase;letter-spacing:.3px}"+
 ".ag-res{text-align:center;padding:4px 0 12px}.ag-res .big{font-size:2.6rem;line-height:1.1}.ag-res h3{margin:6px 0 4px;font-size:1.15rem}.ag-ok h3{color:#1B5E20}.ag-warn h3{color:#b45309}.ag-bad h3{color:#c62828}"+
 ".ag-box{background:#f8faf8;border:1px solid var(--b);border-radius:12px;padding:12px;margin:10px 0;font-size:.88rem;line-height:1.5}.ag-box b{color:var(--p)}"+
-"#modal-alerta,#confirm-overlay{z-index:14000!important}"+
+"#modal-alerta,
+.confirm-box.warn{border-color:#f59e0b;background:#fffbeb}
+.confirm-box.warn .confirm-title,.confirm-box.warn h3{color:#b45309}
+#confirm-overlay{z-index:14000!important}"+
 "#face-video{width:100%;border-radius:14px;background:#000;min-height:240px;transform:scaleX(-1);object-fit:cover}";
 document.head.appendChild(st);
 
@@ -4702,6 +4705,23 @@ function hideConfirm(){
   if(window._confirmT){clearTimeout(window._confirmT);window._confirmT=null}
   window._pendingMov=null;
 }
+function _fmtLibresResumo(libs){
+  if(!libs||!libs.length) return "";
+  var nomes={0:"Dom",1:"Seg",2:"Ter",3:"Qua",4:"Qui",5:"Sex",6:"Sáb"};
+  var seen={}, out=[];
+  libs.forEach(function(L){
+    var key="";
+    if(L.todos) key="todos";
+    else key=(L.dias||[]).slice().sort().join(",")+"|"+(L.hi||"")+"|"+(L.hf||"");
+    if(seen[key]) return; seen[key]=1;
+    if(L.todos) out.push("Todos os dias e horários");
+    else {
+      var ds=(L.dias||[]).map(function(d){ return nomes[d]||d; }).join(", ");
+      out.push((ds||"Dias")+" · "+(L.hi||"08:00")+"–"+(L.hf||"18:00"));
+    }
+  });
+  return out.join(" | ");
+}
 function pedirConfirmacaoMov(id, tipo){
   const c=conv.find(x=>x.id===id); if(!c) return;
   if(sel && sel.id===id && !(typeof isMoradorSess==="function" && userSess && isMoradorSess())){
@@ -4714,10 +4734,43 @@ function pedirConfirmacaoMov(id, tipo){
   box.className="confirm-box "+(tipo==="saida"?"sai":"ok");
   document.getElementById("confirm-icon").textContent=tipo==="saida"?"🚪":"➡️";
   document.getElementById("confirm-title").textContent=tipo==="saida"?"Confirmar saida?":"Confirmar entrada?";
-  document.getElementById("confirm-msg").textContent=c.nome+(sess.loc?" · "+sess.loc:"")+((tipo==="entrada"&&window._visitaCasas&&window._visitaCasas.length&&sel&&sel.id===id)?(" · "+window._visitaCasas.filter(function(x){return x.st==="ok"}).map(function(x){return fmtQdLtLabel(x.qdlt)}).join(", ")):"");
+  var dest="";
+  try{
+    if(tipo==="entrada"&&window._visitaCasas&&window._visitaCasas.length&&sel&&sel.id===id)
+      dest=" · "+window._visitaCasas.filter(function(x){return x.st==="ok"}).map(function(x){return fmtQdLtLabel(x.qdlt)}).join(", ");
+  }catch(e){}
+  var msgBase=c.nome+(sess&&sess.loc?" · "+sess.loc:"")+(dest||"");
+  // aviso: fora do dia/horário liberado pelo morador
+  var avisoFora="";
+  try{
+    if(tipo==="entrada" && c.libres && c.libres.length){
+      var ativas=(typeof libresAtivas==="function")?libresAtivas(c):[];
+      if(!ativas.length){
+        var resumo=_fmtLibresResumo(c.libres);
+        var agora=new Date();
+        var hm=("0"+agora.getHours()).slice(-2)+":"+("0"+agora.getMinutes()).slice(-2);
+        var diasN={0:"Domingo",1:"Segunda",2:"Terça",3:"Quarta",4:"Quinta",5:"Sexta",6:"Sábado"};
+        avisoFora="⚠️ FORA DO HORÁRIO/DIA liberado pelo morador.\nAgora: "+(diasN[agora.getDay()]||"")+" "+hm+(resumo?("\nLiberado: "+resumo):"")+"\n\nVocê pode autorizar a entrada mesmo assim.";
+        box.className="confirm-box warn";
+        document.getElementById("confirm-icon").textContent="⏰";
+        document.getElementById("confirm-title").textContent="Fora do horário liberado";
+      }
+    }
+  }catch(e){}
+  document.getElementById("confirm-msg").textContent=msgBase+(avisoFora?("\n\n"+avisoFora):"");
+  // se o confirm-msg for textContent, \n não quebra — usa innerHTML se tiver aviso
+  try{
+    var cm=document.getElementById("confirm-msg");
+    if(avisoFora){
+      cm.innerHTML=_escH(msgBase)+'<div style="margin-top:10px;padding:10px;border-radius:10px;background:#fef3c7;border:1px solid #fbbf24;color:#92400e;font-size:.88rem;line-height:1.35;white-space:pre-line;text-align:left">'+_escH(avisoFora.replace(/\\n/g,"\n"))+'</div>';
+    } else {
+      cm.textContent=msgBase;
+    }
+  }catch(e){ document.getElementById("confirm-msg").textContent=msgBase; }
   const acts=document.getElementById("confirm-actions");
   if(acts){
-    acts.innerHTML='<button class="btn '+(tipo==="saida"?"btn-d":"btn-s")+' btn-b" onclick="confirmarMovPendente()">Confirmar '+(tipo==="saida"?"saida":"entrada")+'</button>'+
+    var okLabel=avisoFora?("Autorizar entrada mesmo assim"):("Confirmar "+(tipo==="saida"?"saida":"entrada"));
+    acts.innerHTML='<button class="btn '+(tipo==="saida"?"btn-d":(avisoFora?"btn-d":"btn-s"))+' btn-b" onclick="confirmarMovPendente()">'+okLabel+'</button>'+
       '<button class="btn btn-o btn-b" style="margin-top:8px" onclick="hideConfirm()">Cancelar</button>';
   }
   ov.classList.add("show");
@@ -5052,6 +5105,11 @@ function abrirCadastroMorador(tipo){
     var btn=document.getElementById("btn-salvar-cad"); if(btn) btn.style.display="none";
     var cpfEl=document.getElementById("n-cpf"); if(cpfEl){ cpfEl.value=""; cpfEl.focus(); }
   }catch(e){}
+  try{
+    // mostra liberação (dias/horas) e preenche residências do associado
+    var al=document.getElementById("box-acesso-livre"); if(al) al.style.display="";
+    alSetupMoradorUI();
+  }catch(e){}
 }
 function morEhCadastroMorador(){
   try{ return !!(typeof isMoradorSess==="function" && isMoradorSess()) || !!window._moradorLock; }catch(e){ return !!window._moradorLock; }
@@ -5132,16 +5190,22 @@ function morConfirmarCadExistente(){
     casas=[{rid:res&&res.id||"",mor:morFinal,end:endFinal,qdlt:res?("QD "+(res.qd||"")+" LT "+(res.lt||"")):"" ,tel:telFinal,p:port,st:"ok"}];
   }
   try{ mesclarConvite(ex,{casas:casas}); }catch(e){}
+  try{ marcarConviteMorador(ex); }catch(e){}
+  try{ if(ex.port!==port && port) ex.port=port; }catch(e){}
+  try{
+    var alAt=document.getElementById("al-ativo");
+    if(alAt && alAt.checked) alAplicarNoCadastro(ex);
+  }catch(e){}
+  try{ saveC(); }catch(e){}
   try{ if(typeof aposSalvarCadastro==="function") aposSalvarCadastro(ex); }catch(e){}
-  try{ renderListasMorador(); }catch(e){}
-  try{ render(); }catch(e){}
-  try{ renderConvidados(); }catch(e){}
-  toast("Convite vinculado ao cadastro de "+(ex.nome||"") ,"ok");
+  toast("Convite vinculado. "+(ex.nome||"")+" aparece na sua lista.","ok");
   try{ if(typeof chatEnviarCadastro==="function") chatEnviarCadastro(ex); }catch(e){}
-  try{ if(typeof oferecerEnvioPortaria==="function"){ /* já enviado no chat */ } }catch(e){}
   window._morCpfExist=null;
   try{ cancelarCadastro(); }catch(e){}
-  try{ if(typeof tela==="function") tela("home"); }catch(e){}
+  try{
+    if(typeof tela==="function") tela("site");
+    setTimeout(function(){ try{ renderListasMorador(); }catch(e){} }, 80);
+  }catch(e){}
 }
 function onTipoCadastro(){
   const t=(document.getElementById("n-tipo")||{}).value||"visitante";
@@ -5156,7 +5220,12 @@ function onTipoCadastro(){
   const bs=document.getElementById("box-servico");
   if(bs) bs.style.display=t==="prestador"?"":"none";
   const al=document.getElementById("box-acesso-livre");
-  if(al) al.style.display=t==="prestador"?"":"none";
+  if(al){
+    var ehMor=false; try{ ehMor=!!(typeof isMoradorSess==="function"&&isMoradorSess())||!!window._moradorLock; }catch(e){}
+    // prestador: sempre; visitante: só no login de morador (liberação com dias/horas)
+    al.style.display=(t==="prestador" || ehMor)?"":"none";
+    try{ if(ehMor) alSetupMoradorUI(); }catch(e){}
+  }
 }
 
 /* ===== Acesso livre (prestador liberado sem ligação) ===== */
@@ -5166,6 +5235,54 @@ function alToggleBox(){
   if(!a||!d) return;
   d.style.display=a.checked?"block":"none";
   if(!a.checked){ window._alRes=[]; try{alRenderLista();}catch(e){} var m=document.getElementById("al-mlist"); if(m){m.innerHTML="";m.style.display="none";} var b=document.getElementById("al-busca"); if(b) b.value=""; }
+  try{ if(a.checked) alSetupMoradorUI(); }catch(e){}
+}
+function alSetupMoradorUI(){
+  // no login de morador: não busca residência de outros — usa as do próprio associado
+  var ehMor=false; try{ ehMor=!!(typeof isMoradorSess==="function"&&isMoradorSess())||!!window._moradorLock; }catch(e){}
+  if(!ehMor) return;
+  var buscaWrap=document.getElementById("al-busca");
+  var btnAdd=null;
+  try{ btnAdd=document.querySelector("#al-detalhes button[onclick*=\"alConfirmarAdd\"]"); }catch(e){}
+  var labBusca=buscaWrap?buscaWrap.closest(".fg"):null;
+  if(labBusca) labBusca.style.display="none";
+  if(btnAdd) btnAdd.style.display="none";
+  // título
+  try{
+    var tit=document.querySelector("#al-detalhes div[style*=\"Residência liberada\"]");
+    if(tit) tit.textContent="2) Sua(s) residência(s)";
+  }catch(e){}
+  var lista=[];
+  try{
+    if(typeof residenciasDoMoradorComVinculo==="function") lista=residenciasDoMoradorComVinculo()||[];
+    if(!lista.length && typeof residenciasDoMorador==="function") lista=residenciasDoMorador()||[];
+  }catch(e){}
+  if(!lista.length){
+    try{
+      var r=(typeof moradorResidencia==="function")?moradorResidencia():null;
+      if(r) lista=[r];
+    }catch(e){}
+  }
+  window._alRes=[];
+  lista.forEach(function(r){
+    if(!r) return;
+    window._alRes.push({
+      rid:r.id||"",
+      mor:[r.n1,r.n2].filter(Boolean).join(" e ")||(userSess&&userSess.nome)||"",
+      end:r.end||r.e||"",
+      qdlt:((r.qd||"")+" "+(r.lt||"")).trim(),
+      p:r.p||(userSess&&userSess.port)||""
+    });
+  });
+  // se só uma, já fica linkada; se várias, todas disponíveis (morador escolhe dias/horas)
+  try{ alRenderLista(); }catch(e){}
+  var a=document.getElementById("al-ativo");
+  if(a && !a.checked && window._alRes.length){
+    // não força check — só preenche quando marcar
+  }
+  if(a && a.checked){
+    try{ alRenderLista(); }catch(e){}
+  }
 }
 window._alPendente=null;
 function alConfirmarAdd(){
@@ -5441,21 +5558,38 @@ function filterConvMorador(list){
   const meta=residenciasFamiliaIds();
   const res=moradorResidencia();
   const end=(res?(res.end||res.e):"")||userSess.end||"";
-  const qAt=((res&&res.qd)||"")+" "+((res&&res.lt)||"");
+  const meuCpf=onlyDigits((userSess&&userSess.cpf)||"");
+  const meuTel=_telKey((userSess&&(userSess.tel||userSess.key))||"");
   return (list||[]).filter(function(c){
+    try{
+      if(meuCpf && onlyDigits(c.convidadoPorCpf||"")===meuCpf) return true;
+      if(meuCpf && (c.morKeys||[]).indexOf("cpf:"+meuCpf)>=0) return true;
+      if(meuTel && (c.morKeys||[]).indexOf("tel:"+meuTel)>=0) return true;
+    }catch(e){}
     const mor=(c.mor||"").toUpperCase();
     const ce=(c.end||"").toUpperCase();
     const cp=(c.port||"").toUpperCase();
-    // endereço da residência
     if(end && ce && (ce===end.toUpperCase() || ce.indexOf(end.toUpperCase())>=0)) return true;
     if(Object.keys(meta.ends).some(function(e){ return e && ce.indexOf(e)>=0; })) return true;
-    // convidado por nome do titular/familiar
     if(Object.keys(meta.nomes).some(function(n){ return n && mor.indexOf(n.split(" ")[0])>=0; })) return true;
-    // mesma portaria + qd/lt no texto do endereço às vezes
     if(res && res.p && cp===String(res.p).toUpperCase() && end && ce.indexOf(String(res.qd||""))>=0) return true;
     if((c.casas||[]).some(function(x){ return (res && res.id && x.rid===res.id) || (end && x.end && String(x.end).toUpperCase()===end.toUpperCase()); })) return true;
     return false;
   });
+}
+function marcarConviteMorador(c){
+  if(!c) return c;
+  try{
+    var cpf=onlyDigits((userSess&&userSess.cpf)||"");
+    var tel=_telKey((userSess&&(userSess.tel||userSess.key))||"");
+    c.convidadoPorCpf=cpf||c.convidadoPorCpf||"";
+    c.morKeys=c.morKeys||[];
+    if(cpf && c.morKeys.indexOf("cpf:"+cpf)<0) c.morKeys.push("cpf:"+cpf);
+    if(tel && c.morKeys.indexOf("tel:"+tel)<0) c.morKeys.push("tel:"+tel);
+    c.porMor=true;
+    c.convitePend=true;
+  }catch(e){}
+  return c;
 }
 function filtrarListasMorador(q){
   window._filtroMor=q||"";
@@ -5469,7 +5603,7 @@ function renderListasMorador(){
   const fq=(window._filtroMor||"").toLowerCase().trim();
   if(fq){
     const match=function(c){
-      return (c.nome||"").toLowerCase().indexOf(fq)>=0 || (c.cpf||"").replace(/\D/g,"").indexOf(fq.replace(/\D/g,""))>=0 || (c.placa||"").toLowerCase().indexOf(fq)>=0 || (c.servico||"").toLowerCase().indexOf(fq)>=0;
+      return (c.nome||"").toLowerCase().indexOf(fq)>=0 || (c.cpf||"").replace(/\D/g,"").indexOf(fq.replace(/\D/g,""))>=0;
     };
     vis=vis.filter(match); pre=pre.filter(match);
   }
@@ -6062,17 +6196,20 @@ function chatRenderMsgs(opts){
     var when=""; try{ when=new Date(m.em).toLocaleString("pt-BR",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); }catch(e){}
     var label=role==="op"?"Operador":"Morador";
     var nome=m.fromNome||label;
-    if(m.tipo==="cadastro" && m.cadId){
+    if(m.tipo==="cadastro" && (m.cadId||m.cpf)){
       var fotoHtml=m.foto
         ? '<img class="cad-foto" src="'+m.foto+'" alt="">'
         : '<div class="cad-foto ph">👤</div>';
       var qd=m.qdlt||m.end||"";
-      return '<div class="chat-msg '+role+' cadastro" onclick="chatAbrirCadastro(\''+String(m.cadId).replace(/'/g,"\\'")+'\')">'+
+      var cid=String(m.cadId||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+      var cpfAttr=String(m.cpf||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+      return '<div class="chat-msg '+role+' cadastro" onclick="event.stopPropagation();chatAbrirCadastro(\''+cid+'\',\''+cpfAttr+'\')">'+
         '<div class="cad-card">'+fotoHtml+
         '<div class="cad-info"><b>'+chatEsc(m.cadNome||m.text||"Cadastro")+'</b>'+
         (m.cpf?('CPF: '+chatEsc(m.cpf)+'<br>'):'')+
         (qd?('Destino: '+chatEsc(qd)+'<br>'):'')+
         (m.cadTipo?('Tipo: '+chatEsc(m.cadTipo)+'<br>'):'')+
+        (m.horario?('Horário: '+chatEsc(m.horario)+'<br>'):'')+
         '<div class="cad-cta">Toque para abrir o cadastro</div></div></div>'+
         '<div class="chat-meta" style="padding:0 12px 8px"><span>'+when+'</span><span>📋 cadastro</span></div></div>';
     }
@@ -6096,12 +6233,69 @@ function chatOnScrollMsgs(){
   var el=document.getElementById("chat-msgs"); if(!el) return;
   window._chatStickBottom=(el.scrollHeight-el.scrollTop-el.clientHeight)<90;
 }
-function chatAbrirCadastro(id){
-  if(!id) return;
-  try{ chatFechar(); }catch(e){}
+function chatAbrirCadastro(id,cpf){
+  if(!id && !cpf) return;
+  var c=null;
   try{
-    if(typeof abrir==="function") abrir(id, "chat");
-    else toast("Cadastro: "+id,"ok");
+    if(id) c=(conv||[]).find(function(x){ return String(x.id)===String(id); });
+    if(!c && cpf){
+      var d=onlyDigits(cpf);
+      if(d) c=(conv||[]).find(function(x){ return onlyDigits(x.cpf||"")===d; });
+    }
+    if(!c && id){
+      var d2=onlyDigits(id);
+      if(d2.length>=11) c=(conv||[]).find(function(x){ return onlyDigits(x.cpf||"")===d2; });
+    }
+  }catch(e){}
+  if(!c){
+    toast("Cadastro não encontrado. Atualize a página e tente de novo.","er");
+    return;
+  }
+  // MORADOR: sem acesso ao cadastro completo — só nome/CPF
+  try{
+    if(typeof isMoradorSess==="function" && isMoradorSess()){
+      var cpfShow="";
+      try{
+        var dd=onlyDigits(c.cpf||cpf||"");
+        if(dd.length===11) cpfShow=dd.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,"$1.$2.$3-$4");
+        else cpfShow=c.cpf||"";
+      }catch(e){ cpfShow=c.cpf||""; }
+      var tipo=(c.tipo==="prestador"?"Prestador":"Visitante");
+      if(typeof mostrarAlerta==="function"){
+        mostrarAlerta({
+          titulo:c.nome||"Cadastro",
+          texto:tipo+(cpfShow?("\nCPF: "+cpfShow):"")+"\n\nEste cadastro está na sua lista. A portaria vê os dados completos.",
+          tipo:"ok",
+          okText:"Ver na minha lista",
+          onOk:function(){
+            try{ chatFechar(); }catch(e){}
+            try{ tela("site"); setTimeout(function(){ try{ renderListasMorador(); }catch(e){} }, 60); }catch(e){}
+          }
+        });
+      } else {
+        toast((c.nome||"")+(cpfShow?(" · CPF "+cpfShow):""),"ok");
+      }
+      return;
+    }
+  }catch(e){}
+  // OPERADOR: abre completo já com morador/QD LT linkados
+  try{
+    var mc=document.getElementById("modal-chat");
+    if(mc) mc.style.zIndex="900";
+  }catch(e){}
+  try{
+    // marca como pendente de convidado para listar em Convidados
+    try{ c.convitePend=true; c.porMor=true; saveC(); renderConvidados(); }catch(e){}
+    if(typeof abrir==="function") abrir(c.id, "chat");
+    var m=document.getElementById("modal");
+    if(m){ m.style.zIndex="1200"; m.classList.add("active"); }
+    // garante botões de entrada/saída/editar visíveis
+    try{
+      var care=document.querySelector("#modal .care"); if(care) care.style.display="";
+      var pair=document.getElementById("btn-pair"); if(pair) pair.style.display="flex";
+      var acts=document.querySelector("#modal .actions"); if(acts) acts.style.display=(typeof podeEditar==="function"&&podeEditar())?"flex":"none";
+      document.querySelectorAll("#modal .btn-ent, #modal .btn-sai, #modal .btn-e, #modal .btn-s").forEach(function(b){ b.style.display=""; });
+    }catch(e){}
   }catch(e){ toast("Não foi possível abrir o cadastro","er"); }
 }
 function chatPushMsg(msg){
@@ -6137,6 +6331,35 @@ function chatEnviarCadastro(cad){
       qd=(cad.qdlt?(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(cad.qdlt):cad.qdlt):"")||cad.end||"";
     }
   }catch(e){}
+  // dias/horários liberados
+  var horTxt="";
+  try{
+    var L=(cad.libres&&cad.libres[0])||null;
+    if(L){
+      if(L.todos) horTxt="Todos os dias e horários";
+      else {
+        var nomes={0:"Dom",1:"Seg",2:"Ter",3:"Qua",4:"Qui",5:"Sex",6:"Sáb"};
+        var ds=(L.dias||[]).map(function(d){ return nomes[d]||d; }).join(", ");
+        horTxt=(ds||"Dias")+" · "+(L.hi||"08:00")+"–"+(L.hf||"18:00");
+      }
+    } else {
+      // tenta coletar do formulário se ainda aberto
+      try{
+        if(typeof alColetar==="function"){
+          var d=alColetar();
+          if(d && (d.todos || (d.dias&&d.dias.length))){
+            if(d.todos) horTxt="Todos os dias e horários";
+            else {
+              var nomes2={0:"Dom",1:"Seg",2:"Ter",3:"Qua",4:"Qui",5:"Sex",6:"Sáb"};
+              horTxt=(d.dias||[]).map(function(x){return nomes2[x]||x;}).join(", ")+" · "+(d.hi||"08:00")+"–"+(d.hf||"18:00");
+            }
+          }
+        }
+      }catch(e){}
+    }
+  }catch(e){}
+  try{ marcarConviteMorador(cad); cad.convitePend=true; cad.porMor=true; if(port) cad.port=port; saveC(); }catch(e){}
+  try{ renderConvidados(); }catch(e){}
   var msg={
     id:chatUid(),
     port:port||"Parati",
@@ -6151,16 +6374,16 @@ function chatEnviarCadastro(cad){
     cadTipo:(cad.tipo==="prestador"?"PRESTADOR":"VISITANTE"),
     cpf:cad.cpf||"",
     qdlt:qd,
+    horario:horTxt,
     foto:cad.foto||"",
-    text:"Cadastro enviado: "+(cad.nome||""),
+    text:"Cadastro enviado: "+(cad.nome||"")+(horTxt?(" · "+horTxt):""),
     em:new Date().toISOString(),
     lidaOp:false,
     lidaMor:true
   };
-  // garante contexto de thread
   window._chatCtx={port:msg.port, morId:msg.morId, morNome:msg.morNome};
   chatPushMsg(msg);
-  toast("Cadastro enviado no chat da portaria","ok");
+  toast("Cadastro enviado no chat e em Convidados","ok");
 }
 function chatEnviar(){
   var inp=document.getElementById("chat-input");
@@ -8770,7 +8993,8 @@ function _toVC(x){
 }
 function iniciarCasasVisita(c, origem){
   var arr=[];
-  if(origem==="conv"){
+  // chat e convidados: já vêm com residência do morador linkada
+  if(origem==="conv" || origem==="chat"){
     var base=(c.casas&&c.casas.length)?c.casas:(c.mor?[{mor:c.mor,end:c.end,qdlt:c.qdlt,tel:c.tel,p:c.port}]:[]);
     var _loc=_norm((sess&&sess.loc)||"");
     var _f=base.filter(function(x){ return !_loc || !x.p || _norm(x.p)===_loc; });
@@ -10935,6 +11159,7 @@ const placaVal=placaRaw?(typeof fmtPlaca==="function"?fmtPlaca(placaRaw):placaRa
       mesclarConvite(_ex,{foto:foto,placa:placaVal,veiculo:veiculo,telVis:telVis,nasc:nasc,mae:mae,maeTel:maeTel,servico:servico,
         cnhNum:((document.getElementById("n-cnh-num")||{}).value||""),cnhCat:((document.getElementById("n-cnh-cat")||{}).value||""),cnhVal:((document.getElementById("n-cnh-val")||{}).value||""),
         casas:montarCasas(morFinal,endFinal,port,telFinal,null)});
+      try{ if(isMoradorSess()||window._moradorLock) marcarConviteMorador(_ex); }catch(e){}
       if(typeof aposSalvarCadastro==="function") aposSalvarCadastro(_ex);
       try{ pushNotif("adm","Novo convite", nome+" · Por "+morFinal+" · unido ao cadastro existente", {tipo:"cadastro", visitante:nome, mor:morFinal}); }catch(e){}
       try{ renderListasMorador(); }catch(e){}
@@ -10957,7 +11182,11 @@ const placaVal=placaRaw?(typeof fmtPlaca==="function"?fmtPlaca(placaRaw):placaRa
       casas:montarCasas(morFinal,endFinal,port,telFinal,null),
       libres:[]
     };
-    try{ if(tipoCad==="prestador") alAplicarNoCadastro(novo); }catch(e){}
+    try{
+      var alAt=document.getElementById("al-ativo");
+      if(tipoCad==="prestador" || ((isMoradorSess()||window._moradorLock) && alAt && alAt.checked)) alAplicarNoCadastro(novo);
+    }catch(e){}
+    try{ if(isMoradorSess()||window._moradorLock) marcarConviteMorador(novo); }catch(e){}
     conv.unshift(novo);
     saveC();
     if(typeof aposSalvarCadastro==="function") aposSalvarCadastro(novo);
