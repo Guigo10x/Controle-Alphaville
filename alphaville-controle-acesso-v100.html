@@ -9494,20 +9494,21 @@ function casasHtmlHist(x){
 
 function convidadoPendente(c){
   if(!c) return false;
-  // marcado explicitamente pelo morador / chat
-  if(c.convitePend===true) return true;
-  // convidado por morador e ainda sem nenhum movimento de entrada
-  if(c.porMor===true || c.convidadoPorCpf || (c.morKeys&&c.morKeys.length)){
-    var nome=(c.nome||"").toUpperCase();
-    var cpf=onlyDigits(c.cpf||"");
-    var jaEntrou=(acess||[]).some(function(a){
-      if((a.tipo||"")==="saida") return false;
-      if(nome && (a.nome||"").toUpperCase()===nome) return true;
-      if(cpf && onlyDigits(a.cpf||"")===cpf) return true;
-      return false;
-    });
-    if(!jaEntrou) return true;
+  var nome=(c.nome||"").toUpperCase();
+  var cpf=onlyDigits(c.cpf||"");
+  var jaEntrou=(acess||[]).some(function(a){
+    if((a.tipo||"")==="saida") return false;
+    if(nome && (a.nome||"").toUpperCase()===nome) return true;
+    if(cpf && onlyDigits(a.cpf||"")===cpf) return true;
+    return false;
+  });
+  // já teve entrada → sai de Convidados e volta ao Buscar
+  if(jaEntrou){
+    if(c.convitePend){ c.convitePend=false; try{ /* marca para salvar depois */ window._needSaveC=true; }catch(e){} }
+    return false;
   }
+  if(c.convitePend===true) return true;
+  if(c.porMor===true || c.convidadoPorCpf || (c.morKeys&&c.morKeys.length)) return true;
   return false;
 }
 function convidadoNaPortaria(c, loc){
@@ -9604,6 +9605,23 @@ function buscarMorConv(q){
     return '<div class="mp-item" onclick="selecionarMorConv(\''+m.id+'\')"><b>'+_escH(nomes)+'</b><span>'+_escH(m.end||m.e||"")+' · '+_escH(ql)+'</span></div>';
   }).join("");
 }
+function agendaLinhaHtml(c){
+  try{
+    if(typeof window.agendaLinhaHtml==="function" && window.agendaLinhaHtml!==agendaLinhaHtml){
+      // keep window version if richer
+    }
+  }catch(e){}
+  var a=c&&c.agenda; if(!a||a.usada) return "";
+  try{
+    var ymdFn=typeof ymd==="function"?ymd:function(d){ return d.toISOString().slice(0,10); };
+    var hoje=a.data===ymdFn(new Date()), atras=a.data<ymdFn(new Date());
+    var br=(typeof brData==="function"?brData(a.data):a.data);
+    var hr=a.hora||"";
+    var escFn=typeof esc==="function"?esc:(typeof _escH==="function"?_escH:function(s){return String(s||"");});
+    var tel=""; try{ if(a.tel && typeof fmtT==="function") tel=fmtT(a.tel); else if(a.tel&&typeof fmtTel==="function") tel=fmtTel(a.tel); else tel=a.tel||""; }catch(e){}
+    return '<div class="gmeta" style="font-weight:700;color:'+(atras?"#c62828":"#1B5E20")+'">'+(hoje?"🔔 HOJE · ":"📅 ")+br+' às '+escFn(hr)+(atras?" (data passada)":"")+' · '+(a.ligar?('📞 LIGAR p/ morador'+(tel?(' ('+escFn(tel)+')'):'')):'✅ Pode liberar, sem ligar')+'</div>';
+  }catch(e){ return ""; }
+}
 function cardConvidado(c){
   var foto=c.foto?'<img class="gcard-foto-left" src="'+c.foto+'" alt="">':'<div class="gcard-foto-ph">📷</div>';
   var cpfL=c.cpf?fmtCpfLabel(c.cpf):"";
@@ -9616,7 +9634,7 @@ function cardConvidado(c){
     '<div class="gname">'+_escH(c.nome)+blBadge(c)+'</div>'+
     (qdlt?'<div class="gmeta" style="white-space:nowrap;font-weight:600;color:var(--p)">'+(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(qdlt):qdlt)+'</div>':'')+
     '</div>'+
-    '<div class="gmeta">'+tipoL+' · Aguardando 1º acesso</div>'+agendaLinhaHtml(c)+
+    '<div class="gmeta">'+tipoL+' · Aguardando 1º acesso</div>'+(typeof agendaLinhaHtml==="function"?agendaLinhaHtml(c):(typeof window.agendaLinhaHtml==="function"?window.agendaLinhaHtml(c):""))+
     '<div class="gmeta">'+(cpfL||"Sem CPF")+(c.placa?(" · "+c.placa):"")+'</div>'+
     '<div class="gmeta" style="margin-top:2px">Convidado por: '+_escH(casal)+'</div></div></div></div>';
 }
@@ -9631,6 +9649,7 @@ function renderConvidados(){
   var base=(conv||[]).filter(function(c){
     try{ return convidadoPendente(c) && convidadoNaPortaria(c,loc); }catch(e){ return false; }
   });
+  try{ if(window._needSaveC){ window._needSaveC=false; saveC(); } }catch(e){}
   // badge sempre sincronizado com a lista
   if(badge){
     if(base.length){ badge.textContent=String(base.length); badge.style.display=""; }
@@ -11013,7 +11032,21 @@ function liveCpf(el){
   if(morEhCadastroMorador()){ clearLiveErr(el); return; }
   var ignore=null;
   try{ ignore=(document.getElementById("edit-id")||{}).value||null; }catch(e){}
-  if(!ignore && typeof cpfJaCadastrado==="function" && cpfJaCadastrado(d, ignore||((document.getElementById("edit-id")||{}).value)||null, (document.getElementById("n-nome")||{}).value)){ setLiveErr(el,"CPF já cadastrado"); return; }
+  if(ignore){ clearLiveErr(el); return; }
+  var found=null;
+  try{ found=(conv||[]).find(function(x){ return onlyDigits(x.cpf||"")===d; }); }catch(e){}
+  if(found){
+    setLiveErr(el,"CPF já cadastrado — abrindo cadastro…");
+    try{
+      // limpa formulário e abre o cadastro existente para o operador
+      setTimeout(function(){
+        try{ if(typeof cancelarCadastro==="function") cancelarCadastro(); }catch(e){}
+        try{ if(typeof abrir==="function") abrir(found.id,"main"); }catch(e){}
+        try{ toast((found.nome||"Cadastro")+" já existe — cadastro aberto","ok"); }catch(e){}
+      }, 250);
+    }catch(e){}
+    return;
+  }
   clearLiveErr(el);
 }
 function _telKey(t){
