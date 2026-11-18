@@ -725,8 +725,8 @@ html:not([data-role="op"]) #op-conta{display:none!important}
 .ed-prop .row{display:flex;gap:8px}
 .ed-prop .row>*{flex:1}
 </style>
-</head>
-<body style="overscroll-behavior-y:contain;background:#1B5E20">
+<style>html{background:#0a2e18!important;min-height:100%;}body{background:linear-gradient(180deg,#0a2e18 0%,#14532d 35%,#1B5E20 65%,#2E7D32 100%)!important;background-attachment:fixed!important;min-height:100%;}body::before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,#0a2e18 0%,#14532d 40%,#1B5E20 70%,#2E7D32 100%);z-index:-1;pointer-events:none;}</style></head>
+<body style="overscroll-behavior-y:contain;background:linear-gradient(180deg,#0a2e18 0%,#14532d 40%,#1B5E20 70%,#2E7D32 100%);background-attachment:fixed">
 
 <div id="s-login" class="login-wrap" style="display:none">
   <div class="login-brand">
@@ -1128,7 +1128,7 @@ html:not([data-role="op"]) #op-conta{display:none!important}
       <div class="fg"><label>Nome do pai ou da mãe (responsável)</label><input type="text" id="n-mae" placeholder="Exemplo: Maria de Jesus" disabled oninput="liveNome(this)"></div>
       <div class="fg"><label>Telefone do responsável</label><input type="text" id="n-mae-tel" placeholder="(41) 9 9950-1620" inputmode="numeric" oninput="maskTel(this);this.classList.remove('field-err')" disabled></div>
     </div>
-    <div id="box-mor-invite"><div class="sec-title" style="margin-top:12px">Morador que convidou (opcional)</div>
+    <div id="box-mor-invite" style="display:none"><div class="sec-title" style="margin-top:12px">Morador que convidou (opcional)</div>
     <div class="fg"><label>Portaria</label>
       <select id="n-port" onchange="fMor()">
         <option value="Iguacu">Iguaçu</option>
@@ -6451,14 +6451,12 @@ function chatAbrirCadastro(id,cpf){
       return;
     }
   }catch(e){}
-  // OPERADOR: abre completo já com morador/QD LT linkados
+  // OPERADOR: só abre o cadastro (não reenvia para Convidados)
   try{
     var mc=document.getElementById("modal-chat");
     if(mc) mc.style.zIndex="900";
   }catch(e){}
   try{
-    // marca como pendente de convidado para listar em Convidados
-    try{ c.convitePend=true; c.porMor=true; saveC(); renderConvidados(); }catch(e){}
     if(typeof abrir==="function") abrir(c.id, "chat");
     var m=document.getElementById("modal");
     if(m){ m.style.zIndex="1200"; m.classList.add("active"); }
@@ -6830,7 +6828,9 @@ function applyMoradorUI(){
   }
   if(navs.length>=6){ navs[5].style.display=mor?"":"none"; }
   const inv=document.getElementById("box-mor-invite");
-  if(inv) inv.style.display=mor?"none":"";
+  // Operador/ADM: não mostra "morador que convidou" no formulário de cadastro
+  // (destino é escolhido na hora da entrada). Morador usa fluxo próprio.
+  if(inv) inv.style.display="none";
   const cfgProp=document.getElementById("cfg-propaganda");
   if(cfgProp) cfgProp.style.display=(!mor && isAdmin())?"":"none";
   const bl=document.getElementById("btn-limpar-tudo");
