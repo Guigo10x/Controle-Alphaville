@@ -4136,121 +4136,158 @@ try{ document.addEventListener("DOMContentLoaded",function(){ var b=document.get
 
 
 function loginAdm(){
-  const cpf=onlyDigits(document.getElementById("lg-cpf").value);
-  const senha=document.getElementById("lg-senha").value;
-  const err=document.getElementById("lg-err-adm");
-  err.textContent="";
-  if(!validarCPF(cpf)){err.textContent="CPF inválido";return}
-  if(!senha){err.textContent="Informe a senha";return}
-  try{ limparNomesRuaMoradores(); }catch(e){}
-  try{ applyMorOverrides(); }catch(e){}
-  onCpfOperadorLogin();
+  try{
+    var cpfEl=document.getElementById("lg-cpf");
+    var senhaEl=document.getElementById("lg-senha");
+    var err=document.getElementById("lg-err-adm");
+    if(err) err.textContent="";
+    var cpf=onlyDigits(cpfEl?cpfEl.value:"");
+    var senha=senhaEl?String(senhaEl.value||""):"";
+    if(!validarCPF(cpf)){ if(err) err.textContent="CPF inválido"; return; }
+    if(!senha){ if(err) err.textContent="Informe a senha"; return; }
+    try{ limparNomesRuaMoradores(); }catch(e){}
+    try{ applyMorOverrides(); }catch(e){}
+    try{ onCpfOperadorLogin(); }catch(e){}
 
-  function okSess(sess){
-    userSess=sess;
-    if(!userSess.cpf) userSess.cpf=cpf;
-    if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf)) userSess.role="super";
-    localStorage.setItem("cae_user",JSON.stringify(userSess));
-    if(document.getElementById("lg-remember-adm")&&document.getElementById("lg-remember-adm").checked){
-      localStorage.setItem("cae_remember_adm",JSON.stringify({cpf:document.getElementById("lg-cpf").value,senha:senha,email:(sess&&sess.email)||""}));
-    } else localStorage.removeItem("cae_remember_adm");
-    try{ bioOferecerAposLogin(userSess); }catch(e){}
-    aposLogin();
-  }
-
-  function roleFromFound(found){
-    if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf)) return "super";
-    if(found && found.role==="admin") return "admin";
-    return "op";
-  }
-
-  function tryLocal(list){
-    var found=(list||[]).find(function(a){ return onlyDigits(a.cpf)===cpf; });
-    if(found && String(found.senha||"")===String(senha||"")){
-      var em=found.email||(typeof emailOperadorCpf==="function"?emailOperadorCpf(cpf):"");
-      okSess({tipo:"adm",nome:found.nome,cpf:found.cpf,role:roleFromFound(found),email:em});
-      // tenta sessão nuvem em segundo plano
+    function entrar(sess){
       try{
-        if(em && window.SB && typeof window.SB.login==="function"){
-          window.SB.login(em, senha).then(function(sess){
-            try{
-              if(sess && sess.token){
-                userSess=Object.assign({}, userSess||{}, sess, {role:userSess&&userSess.role, nome:(userSess&&userSess.nome)||sess.nome, cpf:cpf});
-                localStorage.setItem("cae_user",JSON.stringify(userSess));
-              }
-            }catch(e){}
-          }).catch(function(){});
+        userSess=sess||{};
+        if(!userSess.tipo) userSess.tipo="adm";
+        if(!userSess.cpf) userSess.cpf=cpf;
+        if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf)) userSess.role="super";
+        try{ localStorage.setItem("cae_user",JSON.stringify(userSess)); }catch(e){}
+        try{
+          var rem=document.getElementById("lg-remember-adm");
+          if(rem&&rem.checked){
+            localStorage.setItem("cae_remember_adm",JSON.stringify({cpf:(cpfEl&&cpfEl.value)||cpf,senha:senha,email:(sess&&sess.email)||""}));
+          } else localStorage.removeItem("cae_remember_adm");
+        }catch(e){}
+        try{ bioOferecerAposLogin(userSess); }catch(e){}
+        // SEMPRE avança a tela — nunca trava no login
+        try{ aposLogin(); }catch(e){
+          try{
+            var lg=document.getElementById("s-login"); if(lg) lg.style.display="none";
+            var st=document.getElementById("s-setup"); if(st) st.classList.add("active");
+            var io=document.getElementById("in-op"); if(io) io.value=userSess.nome||"";
+          }catch(e2){}
+        }
+        if(err) err.textContent="";
+      }catch(e){
+        if(err) err.textContent="Erro ao abrir o app. Tente de novo.";
+        console&&console.error&&console.error(e);
+      }
+    }
+
+    function roleFromFound(found){
+      if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf)) return "super";
+      if(found && found.role==="admin") return "admin";
+      return "op";
+    }
+
+    function matchList(list){
+      try{
+        var found=(list||[]).find(function(a){ return onlyDigits(a.cpf)===cpf; });
+        if(found && String(found.senha||"")===String(senha||"")){
+          var em=found.email||(typeof emailOperadorCpf==="function"?emailOperadorCpf(cpf):"");
+          entrar({tipo:"adm",nome:found.nome,cpf:found.cpf,role:roleFromFound(found),email:em});
+          // nuvem em segundo plano (não bloqueia)
+          try{
+            if(em && window.SB && window.SB.login){
+              window.SB.login(em, senha).then(function(sess){
+                try{
+                  if(sess&&sess.token){
+                    userSess=Object.assign({},userSess||{},sess,{role:userSess&&userSess.role,nome:(userSess&&userSess.nome)||sess.nome,cpf:cpf});
+                    localStorage.setItem("cae_user",JSON.stringify(userSess));
+                  }
+                }catch(e){}
+              }).catch(function(){});
+            }
+          }catch(e){}
+          return true;
         }
       }catch(e){}
-      return true;
+      // criador — senha oficial
+      if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf) && String(senha)===String(ADM_PADRAO.senha)){
+        entrar({tipo:"adm",nome:ADM_PADRAO.nome,cpf:ADM_PADRAO.cpf,role:"super",email:ADM_PADRAO.email||""});
+        return true;
+      }
+      return false;
     }
-    // criador: senha oficial do app
-    if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf) && String(senha)===String(ADM_PADRAO.senha)){
-      okSess({tipo:"adm",nome:ADM_PADRAO.nome,cpf:ADM_PADRAO.cpf,role:"super",email:ADM_PADRAO.email||""});
-      return true;
+
+    // 1) lista local/backup — resposta imediata
+    var localList=[];
+    try{ localList=loadAdmins()||[]; }catch(e){}
+    if(matchList(localList)) return;
+
+    if(err) err.textContent="Entrando…";
+    var done=false;
+    function fail(msg){
+      if(done) return; done=true;
+      if(err) err.textContent=msg||"CPF ou senha incorretos.";
     }
-    return false;
-  }
+    function okAuth(sess){
+      if(done) return; done=true;
+      entrar(sess);
+    }
 
-  err.textContent="Entrando…";
-  // 1) tenta lista local/backup
-  var localList=[];
-  try{ localList=loadAdmins()||[]; }catch(e){}
-  if(tryLocal(localList)) return;
-
-  // 2) busca operadores no BANCO (outros celulares)
-  var done=false;
-  function afterPull(list){
-    if(done) return;
-    if(list && tryLocal(list)){ done=true; return; }
-    // 3) tenta Auth do Supabase (e-mail do operador)
-    var emails=[];
-    function addEm(e){ e=String(e||"").trim().toLowerCase(); if(e.indexOf("@")>=0 && emails.indexOf(e)<0) emails.push(e); }
-    var found=(list||localList||[]).find(function(a){ return onlyDigits(a.cpf)===cpf; });
-    if(found && found.email) addEm(found.email);
-    addEm(typeof emailOperadorCpf==="function"?emailOperadorCpf(cpf):"");
-    if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf) && ADM_PADRAO.email) addEm(ADM_PADRAO.email);
+    // 2) busca no banco com TIMEOUT (não trava a tela)
+    var pullP=Promise.resolve(null);
     try{
-      var SB_URL=(window.SB&&window.SB.url)||"";
-      var SB_KEY=(window.SB&&window.SB.key)||"";
-      if(SB_URL && SB_KEY){
-        fetch(SB_URL+"/rest/v1/equipe?select=nome,cpf,email,papel,ativo&cpf=eq."+encodeURIComponent(cpf),
-          {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}).then(function(lista){
-            if(lista && lista[0] && lista[0].email) addEm(lista[0].email);
-            tentaAuth(0);
-          }).catch(function(){ tentaAuth(0); });
-        return;
+      if(typeof pullAdminsCloud==="function"){
+        pullP=Promise.race([
+          pullAdminsCloud().catch(function(){ return null; }),
+          new Promise(function(res){ setTimeout(function(){ res(null); }, 3500); })
+        ]);
       }
     }catch(e){}
-    tentaAuth(0);
-    function tentaAuth(i){
+
+    pullP.then(function(list){
       if(done) return;
-      if(i>=emails.length){
-        if(!done){ done=true; err.textContent="CPF ou senha incorretos. A senha precisa estar salva no banco (Config → Operadores → Salvar)."; }
-        return;
+      if(list && matchList(list)){ done=true; return; }
+
+      // 3) Auth Supabase
+      var emails=[];
+      function addEm(e){ e=String(e||"").trim().toLowerCase(); if(e.indexOf("@")>=0 && emails.indexOf(e)<0) emails.push(e); }
+      try{
+        var found=(list||localList||[]).find(function(a){ return onlyDigits(a.cpf)===cpf; });
+        if(found&&found.email) addEm(found.email);
+      }catch(e){}
+      try{ addEm(typeof emailOperadorCpf==="function"?emailOperadorCpf(cpf):""); }catch(e){}
+      if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf)&&ADM_PADRAO.email) addEm(ADM_PADRAO.email);
+
+      function tenta(i){
+        if(done) return;
+        if(i>=emails.length){ fail("CPF ou senha incorretos."); return; }
+        if(!(window.SB&&typeof window.SB.login==="function")){ fail("CPF ou senha incorretos."); return; }
+        window.SB.login(emails[i], senha).then(okAuth).catch(function(e){
+          var m=String((e&&e.message)||"");
+          if(/Failed to fetch|NetworkError/i.test(m)){ fail("Sem conexão. Verifique a internet."); return; }
+          tenta(i+1);
+        });
       }
-      if(!(window.SB && typeof window.SB.login==="function")){
-        if(!done){ done=true; err.textContent="CPF ou senha incorretos."; }
-        return;
-      }
-      window.SB.login(emails[i], senha).then(function(sess){
-        if(done) return; done=true;
-        okSess(sess);
-      }).catch(function(e){
-        var m=String((e&&e.message)||"");
-        if(m.indexOf("Failed to fetch")>=0||m.indexOf("NetworkError")>=0){
-          if(!done){ done=true; err.textContent="Sem conexão. Verifique a internet."; }
+      // tenta pegar e-mail da equipe, mas com timeout
+      try{
+        var SB_URL=(window.SB&&window.SB.url)||"";
+        var SB_KEY=(window.SB&&window.SB.key)||"";
+        if(SB_URL&&SB_KEY){
+          var ctl=setTimeout(function(){ tenta(0); }, 2500);
+          fetch(SB_URL+"/rest/v1/equipe?select=email&cpf=eq."+encodeURIComponent(cpf),
+            {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}).then(function(lista){
+              clearTimeout(ctl);
+              if(lista&&lista[0]&&lista[0].email) addEm(lista[0].email);
+              tenta(0);
+            }).catch(function(){ clearTimeout(ctl); tenta(0); });
           return;
         }
-        tentaAuth(i+1);
-      });
-    }
-  }
-
-  if(typeof pullAdminsCloud==="function"){
-    pullAdminsCloud().then(function(list){ afterPull(list); }).catch(function(){ afterPull(null); });
-  } else {
-    afterPull(null);
+      }catch(e){}
+      tenta(0);
+    }).catch(function(){ fail("Não foi possível entrar. Tente de novo."); });
+  }catch(e){
+    try{
+      var er=document.getElementById("lg-err-adm");
+      if(er) er.textContent="Erro no login. Atualize a página e tente de novo.";
+    }catch(e2){}
+    console&&console.error&&console.error(e);
   }
 }
 
@@ -5059,30 +5096,26 @@ function loginMor(){
 }
 
 function aposLogin(){
-  document.getElementById("s-login").style.display="none";
-  updateBell();
-  document.getElementById("s-setup").classList.add("active");
-  // prefill operator name
-  document.getElementById("in-op").value=userSess.nome;
-  applyRoleUI();
-  renderAllNotifs();
-  const mb=document.getElementById("adm-msg-box");
-  if(mb) mb.style.display=isAdmin()?"block":"none";
-  if(isAdmin()){
-    const msgs=loadMsgs();
-    if(document.getElementById("msg-senha")){
-      document.getElementById("msg-senha").value=msgs.senha;
-      document.getElementById("msg-senha-nova").value=msgs.reset;
-      document.getElementById("msg-entrada").value=msgs.entrada;
+  try{
+    var lg=document.getElementById("s-login"); if(lg) lg.style.display="none";
+    var st=document.getElementById("s-setup"); if(st) st.classList.add("active");
+    var io=document.getElementById("in-op"); if(io) io.value=(userSess&&userSess.nome)||"";
+  }catch(e){}
+  try{ updateBell(); }catch(e){}
+  try{ applyRoleUI(); }catch(e){}
+  try{ renderAllNotifs(); }catch(e){}
+  try{
+    var mb=document.getElementById("adm-msg-box");
+    if(mb) mb.style.display=isAdmin()?"block":"none";
+    if(isAdmin()){
+      var msgs=loadMsgs();
+      var a=document.getElementById("msg-senha"); if(a) a.value=msgs.senha||"";
+      var b=document.getElementById("msg-senha-nova"); if(b) b.value=msgs.reset||"";
+      var c=document.getElementById("msg-entrada"); if(c) c.value=msgs.entrada||"";
     }
-  }
-  // garante operadores/senhas no banco para outros celulares
-  try{
-    if(typeof pushAdminsCloudNow==="function") pushAdminsCloudNow(loadAdmins());
   }catch(e){}
-  try{
-    if(typeof pullAdminsCloud==="function") pullAdminsCloud().then(function(){ try{ if(typeof renderListaOperadores==="function") renderListaOperadores(); }catch(e){} });
-  }catch(e){}
+  try{ if(typeof pushAdminsCloudNow==="function") pushAdminsCloudNow(loadAdmins()); }catch(e){}
+  try{ if(typeof pullAdminsCloud==="function") pullAdminsCloud().then(function(){ try{ if(typeof renderListaOperadores==="function") renderListaOperadores(); }catch(e){} }); }catch(e){}
 }
 
 
