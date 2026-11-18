@@ -13237,15 +13237,25 @@ function copiarTextoWa(){
   }
   var cvs=null;
   async function lerQuadro(v){
-    if(window._scanDet){ return await window._scanDet.detect(v); }
+    var out=[];
+    if(window._scanDet){
+      try{ out=await window._scanDet.detect(v); }catch(e){ out=[]; }
+      if(out&&out.length) return out;
+    }
     if(!window.jsQR) return [];
     var w=v.videoWidth,h=v.videoHeight; if(!w||!h) return [];
     if(!cvs) cvs=document.createElement("canvas");
     cvs.width=w; cvs.height=h;
     var cx=cvs.getContext("2d",{willReadFrequently:true}); cx.drawImage(v,0,0,w,h);
     var im=cx.getImageData(0,0,w,h);
-    var c=window.jsQR(im.data,w,h,{inversionAttempts:"dontInvert"});
+    var c=window.jsQR(im.data,w,h,{inversionAttempts:"attemptBoth"});
     return c?[{rawValue:c.data}]:[];
+  }
+  function extrairTicketCode(raw){
+    var s=String(raw||"").trim().toUpperCase();
+    if(/^T\d{8}$/.test(s)) return s;
+    var m=s.match(/T\d{8}/);
+    return m?m[0]:"";
   }
   window.abrirScan=async function(){
     if(typeof _ehMorSess==="function" && _ehMorSess()) return;
@@ -13253,8 +13263,14 @@ function copiarTextoWa(){
     if(avisoSemHttps()){ toast("Abra o app por https para usar a câmera","er"); return; }
     var modal=document.getElementById("modal-scan"), v=document.getElementById("scan-video"), msg=document.getElementById("scan-msg");
     try{
-      if("BarcodeDetector" in window){ try{ window._scanDet=new BarcodeDetector({formats:["qr_code","code_128"]}); }catch(e){ window._scanDet=null; } }
-      else { window._scanDet=null; msg.textContent="Carregando leitor de QR…"; await carregarJsQR(); }
+      // BarcodeDetector (quando existe) + jsQR como reforço
+      window._scanDet=null;
+      if("BarcodeDetector" in window){
+        try{ window._scanDet=new BarcodeDetector({formats:["qr_code","code_128","code_39","ean_13"]}); }catch(e){
+          try{ window._scanDet=new BarcodeDetector({formats:["qr_code","code_128"]}); }catch(e2){ window._scanDet=null; }
+        }
+      }
+      try{ msg.textContent="Carregando leitor…"; await carregarJsQR(); }catch(e){}
       pararStream(_scanStream); _scanStream=await iniciarCam(v,camDev); v.srcObject=_scanStream; await v.play();
       var sel=document.getElementById("scan-cam-sel");
       if(!sel){ sel=document.createElement("select"); sel.id="scan-cam-sel"; v.parentNode.insertBefore(sel,v);
@@ -13262,20 +13278,48 @@ function copiarTextoWa(){
       var cams=await listarCams(); var cur=(_scanStream.getVideoTracks()[0]||{}).getSettings?_scanStream.getVideoTracks()[0].getSettings().deviceId:"";
       preencherSeletor(sel,cams,cur||camDev);
       if(cur) salvarDev(cur);
-      modal.classList.add("active"); msg.textContent="Procurando o código…";
+      modal.classList.add("active"); msg.textContent="Aponte para o QR ou código de barras do ticket…";
       clearInterval(_scanTimer);
+      var scanning=false;
       _scanTimer=setInterval(async function(){
+        if(scanning) return;
+        scanning=true;
         try{
-          var r=await lerQuadro(v);
+          var r=[];
+          // tenta BarcodeDetector
+          if(window._scanDet){
+            try{ r=await window._scanDet.detect(v); }catch(e){ r=[]; }
+          }
+          // fallback jsQR (QR) se nada veio
+          if((!r||!r.length) && window.jsQR){
+            try{
+              var w=v.videoWidth,h=v.videoHeight;
+              if(w&&h){
+                if(!cvs) cvs=document.createElement("canvas");
+                cvs.width=w; cvs.height=h;
+                var cx=cvs.getContext("2d",{willReadFrequently:true});
+                cx.drawImage(v,0,0,w,h);
+                var im=cx.getImageData(0,0,w,h);
+                var c1=window.jsQR(im.data,w,h,{inversionAttempts:"attemptBoth"});
+                if(c1&&c1.data) r=[{rawValue:c1.data}];
+              }
+            }catch(e){}
+          }
           if(r&&r.length){
             var raw0=String(r[0].rawValue||"").trim();
-            if(window.AG_isCode(raw0)){ fecharScan(); lerCodigoAG(raw0); return; }
-            var code=raw0.toUpperCase();
-            if(/^T\d{8}$/.test(code)){ fecharScan(); lerTicket(code); }
-            else msg.textContent="Esse código não é um ticket: "+code;
+            if(window.AG_isCode && window.AG_isCode(raw0)){ fecharScan(); lerCodigoAG(raw0); return; }
+            var code=extrairTicketCode(raw0);
+            if(code){ fecharScan(); lerTicket(code); return; }
+            // carteirinha permanente CL...
+            if(/^CL[A-Z0-9]+$/i.test(raw0)){
+              msg.textContent="Carteirinha: "+raw0+" (use na portaria)";
+            } else {
+              msg.textContent="Código lido: "+raw0+" — não é ticket T########";
+            }
           }
         }catch(e){}
-      },350);
+        finally{ scanning=false; }
+      },280);
     }catch(e){ fecharScan(); toast(e.message&&e.message.indexOf("leitor")>=0?"Não foi possível carregar o leitor de QR. Verifique a internet.":"Não foi possível abrir a câmera (permissão negada?)","er"); }
   };
 
@@ -13959,25 +14003,39 @@ function copiarTextoWa(){
     if(d.indexOf("55")!==0 && d.length>=12) d="55"+d.replace(/^55/,"");
     return d.length>=12?d:"";
   }
-  function ticketPngBlob(na,c){
+  function svgToImage(svgStr){
     return new Promise(function(resolve){
       try{
-        var W=420,H=640;
+        var url=URL.createObjectURL(new Blob([svgStr],{type:"image/svg+xml;charset=utf-8"}));
+        var img=new Image();
+        img.onload=function(){ resolve({img:img,url:url}); };
+        img.onerror=function(){ try{URL.revokeObjectURL(url);}catch(e){} resolve(null); };
+        img.src=url;
+      }catch(e){ resolve(null); }
+    });
+  }
+  function ticketPngBlob(na,c){
+    return new Promise(async function(resolve){
+      try{
+        var code=String((na&&na.tk)||"T00000000");
+        var W=480, H=900;
         var canvas=document.createElement("canvas");
         canvas.width=W; canvas.height=H;
         var ctx=canvas.getContext("2d");
         ctx.fillStyle="#ffffff"; ctx.fillRect(0,0,W,H);
-        ctx.fillStyle="#14532d"; ctx.fillRect(0,0,W,70);
-        ctx.fillStyle="#fff"; ctx.font="bold 16px Arial"; ctx.textAlign="center";
+        // header
+        ctx.fillStyle="#14532d"; ctx.fillRect(0,0,W,78);
+        ctx.fillStyle="#fff"; ctx.font="bold 15px Arial"; ctx.textAlign="center";
         ctx.fillText("ASSOCIAÇÃO ALPHAVILLE GRACIOSA", W/2, 32);
-        ctx.font="13px Arial"; ctx.fillText("RESIDENCIAL — TICKET DE ENTRADA", W/2, 54);
-        ctx.textAlign="left"; ctx.fillStyle="#0f172a";
-        var y=100, line=function(label,val){
+        ctx.font="12px Arial"; ctx.fillText("RESIDENCIAL — TICKET DE ENTRADA", W/2, 54);
+        ctx.textAlign="left";
+        var y=100;
+        var line=function(label,val){
           if(!val) return;
-          ctx.fillStyle="#64748b"; ctx.font="bold 12px Arial"; ctx.fillText(label, 28, y);
-          y+=20; ctx.fillStyle="#0f172a"; ctx.font="bold 16px Arial";
-          var t=String(val); while(t.length>36){ ctx.fillText(t.slice(0,36),28,y); y+=22; t=t.slice(36); }
-          ctx.fillText(t,28,y); y+=28;
+          ctx.fillStyle="#64748b"; ctx.font="bold 11px Arial"; ctx.fillText(label, 28, y);
+          y+=18; ctx.fillStyle="#0f172a"; ctx.font="bold 15px Arial";
+          var t=String(val); while(t.length>34){ ctx.fillText(t.slice(0,34),28,y); y+=20; t=t.slice(34); }
+          ctx.fillText(t,28,y); y+=24;
         };
         var tipo=((c&&c.tipo)==="prestador")?"PRESTADOR":"VISITANTE";
         line("TIPO", tipo);
@@ -13985,8 +14043,7 @@ function copiarTextoWa(){
         line("PORTARIA", (na&&na.local)||"");
         var dest="";
         try{
-          if(na&&na.qdlt) dest=na.qdlt;
-          else if(c&&c.qdlt) dest=c.qdlt;
+          if(na&&na.qdlt) dest=na.qdlt; else if(c&&c.qdlt) dest=c.qdlt;
           if(typeof fmtQdLtLabel==="function" && dest) dest=fmtQdLtLabel(dest);
         }catch(e){}
         line("DESTINO", dest||((na&&na.end)||""));
@@ -13994,17 +14051,51 @@ function copiarTextoWa(){
         if(c&&c.placa) line("PLACA", c.placa+(c.veiculo?" · "+c.veiculo:""));
         try{ line("ENTRADA", (typeof fmtD==="function"?fmtD(na.dh):String(na.dh||""))); }catch(e){ line("ENTRADA", String(na&&na.dh||"")); }
         line("OPERADOR", (na&&na.op)||"");
-        // código grande
-        y+=10;
-        ctx.strokeStyle="#14532d"; ctx.lineWidth=2; ctx.strokeRect(28,y,W-56,70);
-        ctx.fillStyle="#14532d"; ctx.font="bold 28px monospace"; ctx.textAlign="center";
-        ctx.fillText(String(na&&na.tk||""), W/2, y+45);
-        ctx.textAlign="left";
-        y+=95;
-        ctx.fillStyle="#64748b"; ctx.font="12px Arial"; ctx.textAlign="center";
+
+        // ---- Código de barras real (Code128) ----
+        y+=8;
+        ctx.fillStyle="#0f172a"; ctx.font="bold 13px Arial"; ctx.textAlign="center";
+        ctx.fillText("CÓDIGO DE BARRAS", W/2, y); y+=10;
+        try{
+          if(typeof code128SVG==="function"){
+            var barSvg=code128SVG(code, 2, 90);
+            var bar=await svgToImage(barSvg);
+            if(bar&&bar.img){
+              var bw=W-56, bh=70;
+              ctx.drawImage(bar.img, 28, y, bw, bh);
+              try{URL.revokeObjectURL(bar.url);}catch(e){}
+              y+=bh+6;
+            }
+          }
+        }catch(e){}
+        ctx.fillStyle="#14532d"; ctx.font="bold 20px monospace"; ctx.textAlign="center";
+        ctx.fillText(code, W/2, y+22); y+=40;
+
+        // ---- QR real ----
+        ctx.fillStyle="#0f172a"; ctx.font="bold 13px Arial";
+        ctx.fillText("QR CODE", W/2, y); y+=8;
+        try{
+          if(typeof QRG!=="undefined" && QRG.svg){
+            var qrSvg=QRG.svg(code);
+            var qr=await svgToImage(qrSvg);
+            if(qr&&qr.img){
+              var qs=180;
+              ctx.drawImage(qr.img, (W-qs)/2, y, qs, qs);
+              try{URL.revokeObjectURL(qr.url);}catch(e){}
+              y+=qs+12;
+            }
+          }
+        }catch(e){}
+
+        ctx.fillStyle="#64748b"; ctx.font="11px Arial"; ctx.textAlign="center";
         ctx.fillText("Mostre este ticket na portaria · Vel. máx. 30 km/h", W/2, y);
-        ctx.fillText("Cuide de nossas crianças", W/2, y+18);
-        canvas.toBlob(function(blob){ resolve(blob); }, "image/png", 0.92);
+        ctx.fillText("Cuide de nossas crianças", W/2, y+16);
+        // crop canvas to used height
+        var used=Math.min(H, y+40);
+        var out=document.createElement("canvas");
+        out.width=W; out.height=used;
+        out.getContext("2d").drawImage(canvas, 0, 0);
+        out.toBlob(function(blob){ resolve(blob); }, "image/png", 0.95);
       }catch(e){ resolve(null); }
     });
   }
