@@ -250,7 +250,7 @@ input:focus,select:focus{outline:none;border-color:var(--p2);box-shadow:0 0 0 3p
 .btn-pair{display:flex;gap:8px;margin-bottom:10px}
 .btn-pair .btn{flex:1}
 
-.login-wrap{min-height:100vh;display:flex;pointer-events:auto;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;background:radial-gradient(900px 520px at 12% -5%,rgba(34,197,94,.22),transparent 60%),linear-gradient(160deg,#06241a 0%,#0f3d24 48%,#14532d 100%)}
+.login-wrap{min-height:100vh;display:flex;pointer-events:auto;flex-direction:column;align-items:center;justify-content:center;padding:28px 20px;background:radial-gradient(900px 520px at 12% -5%,rgba(34,197,94,.18),transparent 55%),linear-gradient(180deg,#041a10 0%,#0a2e18 28%,#14532d 62%,#1B5E20 85%,#2E7D32 100%)}
 .login-brand{text-align:center;margin-bottom:22px;width:100%;max-width:400px}
 .login-brand img{height:108px;width:auto;max-width:94%;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 6px 16px rgba(0,0,0,.28));animation:splashLogoIn .6s ease-out both}
 .login-card{background:#fff;border-radius:20px;padding:18px 20px 18px;width:100%;max-width:400px;box-shadow:0 20px 50px rgba(0,0,0,.35)}
@@ -439,7 +439,7 @@ html.ui-pro{
 }
 html.ui-pro body{font-family:Inter,"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--t);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;padding-bottom:92px}
 /* splash / login */
-html.ui-pro #splash,html.ui-pro .login-wrap{background:radial-gradient(900px 520px at 12% -5%,rgba(34,197,94,.20),transparent 60%),linear-gradient(160deg,#06241a 0%,#0f3d24 48%,#14532d 100%)}
+html.ui-pro #splash,html.ui-pro .login-wrap{background:radial-gradient(900px 520px at 12% -5%,rgba(34,197,94,.18),transparent 55%),linear-gradient(180deg,#041a10 0%,#0a2e18 28%,#14532d 62%,#1B5E20 85%,#2E7D32 100%)}
 html.ui-pro .splash-logo .big{font-weight:800;letter-spacing:.4px}
 html.ui-pro .splash-logo .tag{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);letter-spacing:.8px;text-transform:uppercase;font-size:.7rem;padding:6px 14px}
 html.ui-pro .splash-btn{border-radius:14px;padding:14px 46px;font-weight:700;letter-spacing:.2px;box-shadow:0 10px 30px rgba(0,0,0,.28)}
@@ -725,8 +725,8 @@ html:not([data-role="op"]) #op-conta{display:none!important}
 .ed-prop .row{display:flex;gap:8px}
 .ed-prop .row>*{flex:1}
 </style>
-<style>html{background:#0a2e18!important;min-height:100%;}body{background:linear-gradient(180deg,#0a2e18 0%,#14532d 35%,#1B5E20 65%,#2E7D32 100%)!important;background-attachment:fixed!important;min-height:100%;}body::before{content:"";position:fixed;inset:0;background:linear-gradient(180deg,#0a2e18 0%,#14532d 40%,#1B5E20 70%,#2E7D32 100%);z-index:-1;pointer-events:none;}</style></head>
-<body style="overscroll-behavior-y:contain;background:linear-gradient(180deg,#0a2e18 0%,#14532d 40%,#1B5E20 70%,#2E7D32 100%);background-attachment:fixed">
+</head>
+<body style="overscroll-behavior-y:contain;background:#f1f5f9">
 
 <div id="s-login" class="login-wrap" style="display:none">
   <div class="login-brand">
@@ -13867,42 +13867,46 @@ function copiarTextoWa(){
     var txt="Ticket de acesso — Alphaville Graciosa\nNome: "+nome+"\nCódigo: "+codigo+"\n"+(local?("Portaria: "+local+"\n"):"")+"Mostre este ticket (código ou imagem) na portaria.";
     var blob=null;
     try{ blob=await ticketPngBlob(na,c); }catch(e){}
+    if(!blob){
+      toast("Não foi possível gerar a imagem do ticket","er");
+      if(tel) try{ abrirWhatsSeguro("https://wa.me/"+tel+"?text="+encodeURIComponent(txt)); }catch(e){}
+      return;
+    }
     var file=null;
-    try{ if(blob) file=new File([blob],"ticket-"+(codigo||"acesso")+".png",{type:"image/png"}); }catch(e){}
-    // 1) abre DIRETO o chat do prestador/visitante (como o botão ligar do morador)
+    try{ file=new File([blob],"ticket-"+(codigo||"acesso")+".png",{type:"image/png"}); }catch(e){}
+    // 1) PRIORIDADE: compartilhar a FOTO do ticket (Web Share API)
+    // No celular, escolha WhatsApp na lista — a imagem vai anexada.
+    var shared=false;
+    try{
+      if(file && navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:"Ticket "+codigo, text:txt});
+        shared=true;
+        toast("Ticket compartilhado","ok");
+        return;
+      }
+    }catch(e){
+      if(e && e.name==="AbortError") return; // usuário cancelou
+    }
+    // 2) Sem share de arquivo: baixa a imagem e abre o chat com texto
+    try{
+      var dl=document.createElement("a");
+      dl.href=URL.createObjectURL(blob);
+      dl.download="ticket-"+(codigo||"acesso")+".png";
+      document.body.appendChild(dl); dl.click();
+      setTimeout(function(){ try{ dl.remove(); URL.revokeObjectURL(dl.href); }catch(e){} }, 1200);
+    }catch(e){}
     if(tel){
-      var url="https://wa.me/"+tel+"?text="+encodeURIComponent(txt);
+      var url="https://wa.me/"+tel+"?text="+encodeURIComponent(txt+"\n\n(Anexe a imagem do ticket que foi baixada no celular)");
       try{
         var a=document.createElement("a");
         a.href=url; a.target="_blank"; a.rel="noopener";
         a.style.display="none"; document.body.appendChild(a);
         a.click();
         setTimeout(function(){ try{a.remove();}catch(e){} }, 600);
-      }catch(e){
-        try{ abrirWhatsSeguro(url); }catch(e2){}
-      }
+      }catch(e){ try{ abrirWhatsSeguro(url); }catch(e2){} }
+      toast("Ticket baixado. No WhatsApp, toque em 📎 e envie a imagem baixada.","ok");
     } else {
-      toast("Cadastro sem telefone do visitante/prestador","er");
-    }
-    // 2) compartilhar imagem (anexo)
-    try{
-      if(file && navigator.canShare && navigator.canShare({files:[file]})){
-        setTimeout(function(){
-          navigator.share({files:[file], title:"Ticket "+codigo, text:txt}).catch(function(){});
-        }, 800);
-        return;
-      }
-    }catch(e){}
-    // 3) baixa PNG para anexar no chat aberto
-    if(blob){
-      try{
-        var dl=document.createElement("a");
-        dl.href=URL.createObjectURL(blob);
-        dl.download="ticket-"+(codigo||"acesso")+".png";
-        document.body.appendChild(dl); dl.click();
-        setTimeout(function(){ try{dl.remove(); URL.revokeObjectURL(dl.href);}catch(e){} }, 800);
-        if(tel) toast("Chat aberto. Ticket baixado — anexe a imagem na conversa.","ok");
-      }catch(e){}
+      toast("Ticket baixado. Cadastro sem telefone — envie a imagem manualmente.","er");
     }
   };
   window.ticketAposEntrada=function(na,c){
