@@ -3784,7 +3784,10 @@ function loadAdmins(){
     return list;
   }catch(e){return [Object.assign({},ADM_PADRAO)]}
 }
-function saveAdmins(list){localStorage.setItem("cae_admins",JSON.stringify(list))}
+function saveAdmins(list){
+  localStorage.setItem("cae_admins",JSON.stringify(list));
+  try{ if(typeof agendarSyncSheets==="function") agendarSyncSheets("admins"); }catch(e){}
+}
 
 function onlyDigits(s){return String(s||"").replace(/\D/g,"")}
 
@@ -4131,7 +4134,7 @@ function loginAdm(){
     err.textContent="Entrando…";
     function tenta(i){
       if(i>=emails.length){
-        err.textContent="CPF ou senha incorretos.";
+        err.textContent="CPF ou senha incorretos. Se a senha foi alterada em outro celular, o administrador precisa tocar em «Salvar» na senha de novo para sincronizar.";
         return;
       }
       window.SB.login(emails[i], senha).then(okSess).catch(function(e){
@@ -10000,16 +10003,37 @@ function salvarSenhaOperador(i, silencioso){
   var list=loadAdmins(), a=list[i]; if(!a||_ehRoot(a)) return false;
   var v=_lerSenhaOp(i);
   if(v.length<4){ toast("A senha precisa ter ao menos 4 caracteres","er"); return false; }
-  a.senha=v; saveAdmins(list);
-  if(!silencioso) toast("Senha salva","ok");
+  a.senha=v;
+  if(!a.email) a.email=(typeof emailOperadorCpf==="function"?emailOperadorCpf(a.cpf):("op."+onlyDigits(a.cpf)+"@alphaville-graciosa.app"));
+  saveAdmins(list);
+  // Atualiza a senha no Supabase Auth para funcionar em QUALQUER celular
+  try{
+    if(typeof sbCriarLogin==="function"){
+      var papel=(a.role==="admin")?"administrador":"operador";
+      sbCriarLogin({nome:a.nome,cpf:onlyDigits(a.cpf),email:a.email,senha:v,papel:papel}).then(function(){
+        if(!silencioso) toast("Senha salva no banco (vale em todos os celulares)","ok");
+      }).catch(function(e){
+        if(!silencioso) toast("Senha salva neste aparelho. Nuvem: "+(e.message||"tente de novo"),"er");
+      });
+    } else if(!silencioso) toast("Senha salva","ok");
+  }catch(e){ if(!silencioso) toast("Senha salva neste aparelho","ok"); }
   return true;
 }
 function gerarSenhaOperador(i){
   if(!isAdmin()){ toast("Somente administrador","er"); return; }
   var list=loadAdmins(), a=list[i]; if(!a||_ehRoot(a)) return;
-  var n=genCode(); a.senha=n; saveAdmins(list);
+  var n=genCode(); a.senha=n;
+  if(!a.email) a.email=(typeof emailOperadorCpf==="function"?emailOperadorCpf(a.cpf):("op."+onlyDigits(a.cpf)+"@alphaville-graciosa.app"));
+  saveAdmins(list);
   var el=document.getElementById("op-senha-"+i); if(el) el.value=n;
-  toast("Nova senha gerada. Toque em Enviar senha.","ok");
+  try{
+    if(typeof sbCriarLogin==="function"){
+      var papel=(a.role==="admin")?"administrador":"operador";
+      sbCriarLogin({nome:a.nome,cpf:onlyDigits(a.cpf),email:a.email,senha:n,papel:papel}).then(function(){
+        toast("Nova senha gerada e salva no banco. Toque em Enviar senha.","ok");
+      }).catch(function(e){ toast("Senha gerada localmente. Nuvem: "+(e.message||"erro"),"er"); });
+    } else toast("Nova senha gerada. Toque em Enviar senha.","ok");
+  }catch(e){ toast("Nova senha gerada. Toque em Enviar senha.","ok"); }
 }
 function enviarSenhaOperador(i){
   if(!isAdmin()){ toast("Somente administrador","er"); return; }
@@ -13191,7 +13215,18 @@ function copiarTextoWa(){
     mostrarAlerta({titulo:virar==="admin"?"Tornar administrador":"Tornar operador",
       texto:a.nome+(virar==="admin"?" passará a poder alterar cadastros e configurações.":" passará a ter apenas as funções de operador."),
       tipo:"ask",okText:"Confirmar",cancelText:"Cancelar",
-      onOk:function(){ var l=loadAdmins(); if(l[i]){ l[i].role=virar; saveAdmins(l); sbPapel(onlyDigits(l[i].cpf), virar==="admin"?"administrador":"operador").then(function(){ toast("Papel alterado e salvo","ok"); }).catch(function(e){ toast(e.message||"Papel salvo só neste aparelho","er"); }); } try{ renderListaOperadores(); }catch(e){} }});
+      onOk:function(){ var l=loadAdmins(); if(l[i]){ l[i].role=virar; saveAdmins(l);
+        var papel=virar==="admin"?"administrador":"operador";
+        var prom=sbPapel(onlyDigits(l[i].cpf), papel);
+        // reenvia login com a senha atual para a nuvem reconhecer o papel/senha em outros celulares
+        try{
+          if(typeof sbCriarLogin==="function" && l[i].senha){
+            var em=l[i].email||(typeof emailOperadorCpf==="function"?emailOperadorCpf(l[i].cpf):"");
+            if(em) prom=prom.then(function(){ return sbCriarLogin({nome:l[i].nome,cpf:onlyDigits(l[i].cpf),email:em,senha:String(l[i].senha),papel:papel}); });
+          }
+        }catch(e){}
+        prom.then(function(){ toast("Papel alterado e sincronizado no banco","ok"); }).catch(function(e){ toast(e.message||"Papel salvo só neste aparelho","er"); });
+      } try{ renderListaOperadores(); }catch(e){} }});
   };
   var _t=window.tela;
   window.tela=function(n,b){
