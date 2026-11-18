@@ -1028,36 +1028,36 @@ html:not([data-role="op"]) #op-conta{display:none!important}
         <span id="al-chevron" style="font-size:1.1rem;color:#14532d;flex-shrink:0">▼</span>
       </button>
       <div id="al-detalhes" style="display:none;padding:0 12px 14px;border-top:1px solid #bbf7d0">
-        <div style="margin-top:12px;font-size:.82rem;font-weight:700;color:#14532d">Residências liberadas <span style="font-weight:500;color:#64748b">(toque para editar horário)</span></div>
-        <div id="al-lista" style="margin-top:6px"></div>
-        <div id="al-edit-box" style="display:none;margin-top:10px;padding:10px;background:#fff;border:1px solid #86efac;border-radius:10px">
-          <div id="al-edit-titulo" style="font-size:.85rem;font-weight:700;color:#14532d;margin-bottom:8px">Horário desta residência</div>
-          <label style="display:flex;align-items:center;gap:10px;font-size:.9rem;margin:6px 0;padding:8px 10px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;cursor:pointer">
-            <input type="checkbox" id="al-todos" style="width:18px;height:18px;accent-color:#15803d" onchange="alToggleTodos();alSalvarHorarioSelecionado()">
-            <span style="font-weight:600;color:#14532d">Todos os dias e horários</span>
-          </label>
-          <div class="dchips" id="al-dias" style="margin:6px 0">
-            <label class="dchip"><input type="checkbox" class="al-d" value="1" checked onchange="alSalvarHorarioSelecionado()"><span>Seg</span></label>
-            <label class="dchip"><input type="checkbox" class="al-d" value="2" checked onchange="alSalvarHorarioSelecionado()"><span>Ter</span></label>
-            <label class="dchip"><input type="checkbox" class="al-d" value="3" checked onchange="alSalvarHorarioSelecionado()"><span>Qua</span></label>
-            <label class="dchip"><input type="checkbox" class="al-d" value="4" checked onchange="alSalvarHorarioSelecionado()"><span>Qui</span></label>
-            <label class="dchip"><input type="checkbox" class="al-d" value="5" checked onchange="alSalvarHorarioSelecionado()"><span>Sex</span></label>
-            <label class="dchip"><input type="checkbox" class="al-d" value="6" onchange="alSalvarHorarioSelecionado()"><span>Sáb</span></label>
-            <label class="dchip"><input type="checkbox" class="al-d" value="0" onchange="alSalvarHorarioSelecionado()"><span>Dom</span></label>
-          </div>
-          <div style="display:flex;gap:10px" id="al-horas">
-            <div class="fg" style="flex:1"><label>Das</label><input type="time" id="al-hi" value="08:00" onchange="alSalvarHorarioSelecionado()"></div>
-            <div class="fg" style="flex:1"><label>Até</label><input type="time" id="al-hf" value="18:00" onchange="alSalvarHorarioSelecionado()"></div>
-          </div>
-        </div>
         <div id="al-busca-wrap" style="margin-top:12px">
-          <div style="font-size:.82rem;font-weight:700;color:#14532d;margin-bottom:4px">Adicionar residência</div>
+          <div style="font-size:.82rem;font-weight:700;color:#14532d;margin-bottom:4px">1) Buscar e selecionar residência</div>
           <div class="fg" style="margin:0"><label>Buscar residência</label>
             <input type="text" id="al-busca" placeholder="Nome, QD LT ou endereço" oninput="alBuscar()">
             <div class="mlist" id="al-mlist"></div>
           </div>
-          <button type="button" class="btn btn-s btn-b" style="margin-top:6px" onclick="alConfirmarAdd()">+ Adicionar residência liberada</button>
         </div>
+        <div id="al-edit-box" style="display:none;margin-top:12px;padding:10px;background:#fff;border:1px solid #86efac;border-radius:10px">
+          <div id="al-edit-titulo" style="font-size:.85rem;font-weight:700;color:#14532d;margin-bottom:8px">2) Dias e horário</div>
+          <label style="display:flex;align-items:center;gap:10px;font-size:.9rem;margin:6px 0;padding:8px 10px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;cursor:pointer">
+            <input type="checkbox" id="al-todos" style="width:18px;height:18px;accent-color:#15803d" onchange="alToggleTodos();alOnHorarioChange()">
+            <span style="font-weight:600;color:#14532d">Todos os dias e horários</span>
+          </label>
+          <div class="dchips" id="al-dias" style="margin:6px 0">
+            <label class="dchip"><input type="checkbox" class="al-d" value="1" checked onchange="alOnHorarioChange()"><span>Seg</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="2" checked onchange="alOnHorarioChange()"><span>Ter</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="3" checked onchange="alOnHorarioChange()"><span>Qua</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="4" checked onchange="alOnHorarioChange()"><span>Qui</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="5" checked onchange="alOnHorarioChange()"><span>Sex</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="6" onchange="alOnHorarioChange()"><span>Sáb</span></label>
+            <label class="dchip"><input type="checkbox" class="al-d" value="0" onchange="alOnHorarioChange()"><span>Dom</span></label>
+          </div>
+          <div style="display:flex;gap:10px" id="al-horas">
+            <div class="fg" style="flex:1"><label>Das</label><input type="time" id="al-hi" value="08:00" onchange="alOnHorarioChange()"></div>
+            <div class="fg" style="flex:1"><label>Até</label><input type="time" id="al-hf" value="18:00" onchange="alOnHorarioChange()"></div>
+          </div>
+          <button type="button" class="btn btn-s btn-b" id="al-btn-add" style="margin-top:10px" onclick="alConfirmarAdd()">+ Adicionar esta residência</button>
+        </div>
+        <div style="margin-top:14px;font-size:.82rem;font-weight:700;color:#14532d">Residências liberadas <span style="font-weight:500;color:#64748b">(toque para ver/editar horário)</span></div>
+        <div id="al-lista" style="margin-top:6px"></div>
       </div>
     </div>
     <p style="font-size:.85rem;color:var(--ts);margin-bottom:14px" id="form-desc">Dados do convidado e do morador que liberou</p>
@@ -1148,6 +1148,7 @@ html:not([data-role="op"]) #op-conta{display:none!important}
     <button type="button" class="btn btn-o btn-b" id="btn-add-casa" style="margin-bottom:8px" onclick="addCasaExtra()">+ Adicionar outra residência</button></div>
     </div><!-- /n-rest-fields -->
     <button class="btn btn-p btn-b" id="btn-salvar-cad" onclick="pedirConfirmCadastro()">Salvar cadastro</button>
+    <button type="button" class="btn btn-s btn-b" id="btn-carteirinha" style="margin-top:8px;display:none" onclick="enviarCarteirinhaAtual()">🪪 Enviar carteirinha permanente</button>
     <button class="btn btn-o btn-b" style="margin-top:8px" id="btn-cancel-edit" onclick="cancelarCadastro()">✖ Cancelar cadastro</button>
   </div>
 
@@ -5301,12 +5302,13 @@ function alToggleBox(){
     window._alAberto=false;
     d.style.display="none";
     if(ch) ch.textContent="▼";
-    window._alRes=[]; window._alSelIdx=-1;
+    window._alRes=[]; window._alSelIdx=-1; window._alMode="none"; window._alPendente=null;
     try{ alRenderLista(); }catch(e){}
     var m=document.getElementById("al-mlist"); if(m){m.innerHTML="";m.style.display="none";}
     var b=document.getElementById("al-busca"); if(b) b.value="";
     var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="none";
   }
+  try{ alAtualizarBtnCarteirinha(); }catch(e){}
 }
 function _alDefaultHorario(){
   return {todos:false, dias:[1,2,3,4,5], hi:"08:00", hf:"18:00"};
@@ -5354,12 +5356,53 @@ function alSetupMoradorUI(){
   try{ alRenderLista(); if(window._alSelIdx>=0) alSelecionarRes(window._alSelIdx); }catch(e){}
 }
 window._alPendente=null;
+window._alLoading=false;
+window._alMode="none"; // none | pendente | edit
+function alLerHorarioForm(){
+  var todos=!!(document.getElementById("al-todos")&&document.getElementById("al-todos").checked);
+  var dias=[].slice.call(document.querySelectorAll(".al-d:checked")).map(function(x){return +x.value;});
+  if(!todos && !dias.length) dias=[1,2,3,4,5];
+  return {
+    todos:todos,
+    dias:dias,
+    hi:(document.getElementById("al-hi")||{}).value||"08:00",
+    hf:(document.getElementById("al-hf")||{}).value||"18:00"
+  };
+}
+function alEscreverHorarioForm(h){
+  window._alLoading=true;
+  try{
+    h=h||_alDefaultHorario();
+    var td=document.getElementById("al-todos"); if(td) td.checked=!!h.todos;
+    var dias=h.dias||[1,2,3,4,5];
+    document.querySelectorAll(".al-d").forEach(function(ch){ ch.checked=dias.indexOf(+ch.value)>=0; });
+    var hi=document.getElementById("al-hi"); if(hi) hi.value=h.hi||"08:00";
+    var hf=document.getElementById("al-hf"); if(hf) hf.value=h.hf||"18:00";
+    alToggleTodos();
+  }finally{
+    setTimeout(function(){ window._alLoading=false; }, 0);
+  }
+}
+function alOnHorarioChange(){
+  if(window._alLoading) return;
+  if(window._alMode==="edit") alSalvarHorarioSelecionado();
+  // se mode pendente, o horário fica no form até clicar Adicionar
+}
 function alConfirmarAdd(){
-  if(!window._alPendente){ toast("Busque e toque numa residência, depois em Adicionar","er"); return; }
-  alPick(window._alPendente); window._alPendente=null;
+  if(!window._alPendente){ toast("Busque e toque numa residência primeiro","er"); return; }
+  var h=alLerHorarioForm();
+  var p=window._alPendente;
+  alPick({
+    rid:p.rid, mor:p.mor, end:p.end||"", qdlt:p.qdlt||"", p:p.p||"",
+    todos:h.todos, dias:h.dias.slice(), hi:h.hi, hf:h.hf
+  });
+  window._alPendente=null;
+  window._alMode="none";
   var b=document.getElementById("al-busca"); if(b) b.value="";
   var m=document.getElementById("al-mlist"); if(m){ m.innerHTML=""; m.style.display="none"; }
-  toast("Residência adicionada — toque nela para definir horário","ok");
+  // fecha editor de pendente; lista mostra o item
+  var btn=document.getElementById("al-btn-add"); if(btn) btn.style.display="";
+  toast("Residência adicionada com horário próprio","ok");
 }
 function alToggleTodos(){
   var t=document.getElementById("al-todos");
@@ -5373,11 +5416,10 @@ function alRenderLista(){
   var el=document.getElementById("al-lista"); if(!el) return;
   if(!window._alRes.length){
     el.innerHTML='<div style="font-size:.82rem;color:#94a3b8">Nenhuma residência liberada ainda.</div>';
-    var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="none";
     return;
   }
   el.innerHTML=window._alRes.map(function(r,i){
-    var sel=i===window._alSelIdx;
+    var sel=window._alMode==="edit" && i===window._alSelIdx;
     return '<div onclick="alSelecionarRes('+i+')" style="display:flex;justify-content:space-between;align-items:center;gap:8px;background:'+(sel?"#dcfce7":"#fff")+';border:1.5px solid '+(sel?"#16a34a":"#bbf7d0")+';border-radius:10px;padding:8px 10px;margin-bottom:6px;cursor:pointer">'+
       '<div style="font-size:.85rem;min-width:0;flex:1">'+
         '<b>'+_escH(r.mor||"")+'</b>'+
@@ -5388,45 +5430,58 @@ function alRenderLista(){
   }).join("");
 }
 function alRem(i){
+  if(window._alMode==="edit" && window._alSelIdx===i){
+    try{ alSalvarHorarioSelecionado(); }catch(e){}
+  }
   window._alRes.splice(i,1);
-  if(window._alSelIdx===i) window._alSelIdx=-1;
+  if(window._alSelIdx===i){ window._alSelIdx=-1; window._alMode="none"; var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="none"; }
   else if(window._alSelIdx>i) window._alSelIdx--;
   alRenderLista();
-  var eb=document.getElementById("al-edit-box");
-  if(window._alSelIdx<0 && eb) eb.style.display="none";
-  else if(window._alSelIdx>=0) alSelecionarRes(window._alSelIdx);
+  try{ alAtualizarBtnCarteirinha(); }catch(e){}
 }
 function alSelecionarRes(i){
   var r=window._alRes[i]; if(!r) return;
-  // salva horário da seleção anterior antes de trocar
-  try{ alSalvarHorarioSelecionado(); }catch(e){}
+  // salva o horário da residência que estava em edição
+  if(window._alMode==="edit" && window._alSelIdx>=0 && window._alSelIdx!==i){
+    try{ alSalvarHorarioSelecionado(); }catch(e){}
+  }
+  window._alPendente=null;
+  window._alMode="edit";
   window._alSelIdx=i;
   alRenderLista();
   var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="block";
   var tit=document.getElementById("al-edit-titulo");
   if(tit) tit.textContent="Horário · "+(r.mor||"Residência")+(r.qdlt?(" · "+(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(r.qdlt):r.qdlt)):"");
-  var td=document.getElementById("al-todos"); if(td) td.checked=!!r.todos;
-  var dias=r.dias||[1,2,3,4,5];
-  document.querySelectorAll(".al-d").forEach(function(ch){ ch.checked=dias.indexOf(+ch.value)>=0; });
-  var hi=document.getElementById("al-hi"); if(hi) hi.value=r.hi||"08:00";
-  var hf=document.getElementById("al-hf"); if(hf) hf.value=r.hf||"18:00";
-  alToggleTodos();
+  var btn=document.getElementById("al-btn-add"); if(btn) btn.style.display="none"; // já está na lista
+  alEscreverHorarioForm({todos:!!r.todos, dias:(r.dias&&r.dias.length)?r.dias.slice():[1,2,3,4,5], hi:r.hi||"08:00", hf:r.hf||"18:00"});
 }
 function alSalvarHorarioSelecionado(){
+  if(window._alLoading) return;
+  if(window._alMode!=="edit") return;
   var i=window._alSelIdx; if(i<0||!window._alRes[i]) return;
+  var h=alLerHorarioForm();
   var r=window._alRes[i];
-  r.todos=!!(document.getElementById("al-todos")&&document.getElementById("al-todos").checked);
-  r.dias=[].slice.call(document.querySelectorAll(".al-d:checked")).map(function(x){return +x.value;});
-  r.hi=(document.getElementById("al-hi")||{}).value||"08:00";
-  r.hf=(document.getElementById("al-hf")||{}).value||"18:00";
-  // atualiza só o resumo na lista sem perder seleção
+  r.todos=!!h.todos;
+  r.dias=h.dias.slice();
+  r.hi=h.hi;
+  r.hf=h.hf;
+  // atualiza resumo na lista
   try{
     var el=document.getElementById("al-lista");
     if(el && el.children[i]){
-      var sub=el.children[i].querySelector("div div[style*='15803d']");
-      if(sub) sub.textContent="⏰ "+_alHorarioResumo(r);
+      var subs=el.children[i].querySelectorAll("div");
+      for(var k=0;k<subs.length;k++){
+        if((subs[k].textContent||"").indexOf("⏰")===0 || (subs[k].textContent||"").indexOf("⏰")>=0){
+          if((subs[k].style&&subs[k].style.color)|| (subs[k].getAttribute("style")||"").indexOf("15803d")>=0){
+            subs[k].textContent="⏰ "+_alHorarioResumo(r);
+            break;
+          }
+        }
+      }
+      // fallback: re-render lista
+      alRenderLista();
     }
-  }catch(e){}
+  }catch(e){ try{ alRenderLista(); }catch(e2){} }
 }
 function alAddMais(){ var b=document.getElementById("al-busca"); if(b){ b.value=""; b.focus(); } var m=document.getElementById("al-mlist"); if(m) m.style.display=""; }
 function alBuscar(){
@@ -5451,11 +5506,21 @@ function alPickIdx(i){
   var r=(window._alTmp||[])[i]; if(!r) return;
   var mor=[r.n1,r.n2].filter(Boolean).join(" e ");
   var qdlt=(r.qd||r.lt)?("QD "+(r.qd||"")+" LT "+(r.lt||"")):"";
-  var def=_alDefaultHorario();
-  window._alPendente={rid:r.id,mor:mor,end:r.end||"",qdlt:qdlt,p:r.p||"",todos:def.todos,dias:def.dias.slice(),hi:def.hi,hf:def.hf};
+  if(window._alRes.some(function(x){ return x.rid===r.id; })){ toast("Residência já adicionada — toque nela na lista para editar horário","er"); return; }
+  // salva edição em andamento
+  if(window._alMode==="edit"){ try{ alSalvarHorarioSelecionado(); }catch(e){} }
+  window._alPendente={rid:r.id,mor:mor,end:r.end||"",qdlt:qdlt,p:r.p||""};
+  window._alMode="pendente";
+  window._alSelIdx=-1;
   var ml=document.getElementById("al-mlist");
   if(ml){ ml.querySelectorAll(".mitem").forEach(function(el,idx){ el.style.background=idx===i?"#dcfce7":""; }); }
-  toast("Selecionada. Toque em Adicionar residência liberada.","ok");
+  var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="block";
+  var tit=document.getElementById("al-edit-titulo");
+  if(tit) tit.textContent="2) Dias e horário · "+mor+(qdlt?(" · "+qdlt):"");
+  var btn=document.getElementById("al-btn-add"); if(btn) btn.style.display="";
+  alEscreverHorarioForm(_alDefaultHorario());
+  alRenderLista();
+  toast("Defina os dias/horário e toque em Adicionar","ok");
 }
 function alPick(r){
   if(!r||!r.rid) return;
@@ -5467,15 +5532,23 @@ function alPick(r){
     dias:(r.dias&&r.dias.length)?r.dias.slice():def.dias.slice(),
     hi:r.hi||def.hi, hf:r.hf||def.hf
   });
-  window._alSelIdx=window._alRes.length-1;
+  window._alSelIdx=-1;
+  window._alMode="none";
   alRenderLista();
-  alSelecionarRes(window._alSelIdx);
-  var b=document.getElementById("al-busca"); if(b) b.value="";
-  var m=document.getElementById("al-mlist"); if(m){ m.innerHTML=""; m.style.display="none"; }
+  var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="none";
+  try{ alAtualizarBtnCarteirinha(); }catch(e){}
 }
 function alColetar(){
-  try{ alSalvarHorarioSelecionado(); }catch(e){}
-  return {res:window._alRes.slice()};
+  try{ if(window._alMode==="edit") alSalvarHorarioSelecionado(); }catch(e){}
+  // deep copy to avoid shared refs
+  return {res:(window._alRes||[]).map(function(r){
+    return {
+      rid:r.rid||"", mor:r.mor||"", end:r.end||"", qdlt:r.qdlt||"", p:r.p||"",
+      todos:!!r.todos,
+      dias:(r.dias&&r.dias.length)?r.dias.slice():[1,2,3,4,5],
+      hi:r.hi||"08:00", hf:r.hf||"18:00"
+    };
+  })};
 }
 function alAplicarNoCadastro(c){
   var d=alColetar();
@@ -5492,6 +5565,8 @@ function alAplicarNoCadastro(c){
 function alCarregarDoCadastro(c){
   window._alRes=[];
   window._alSelIdx=-1;
+  window._alMode="none";
+  window._alPendente=null;
   try{
     (c.libres||[]).forEach(function(r){
       window._alRes.push({
@@ -5509,9 +5584,49 @@ function alCarregarDoCadastro(c){
     window._alAberto=tem;
     if(det) det.style.display=tem?"block":"none";
     if(ch) ch.textContent=tem?"▲":"▼";
+    var eb=document.getElementById("al-edit-box"); if(eb) eb.style.display="none";
     alRenderLista();
-    if(window._alRes.length) alSelecionarRes(0);
+    try{ alAtualizarBtnCarteirinha(); }catch(e){}
   }catch(e){}
+}
+function alAtualizarBtnCarteirinha(){
+  var btn=document.getElementById("btn-carteirinha");
+  if(!btn) return;
+  var alAt=document.getElementById("al-ativo");
+  var show=!!(alAt&&alAt.checked&&window._alRes&&window._alRes.length);
+  // também se já tem libres no cadastro em edição
+  try{
+    var editId=(document.getElementById("edit-id")||{}).value||"";
+    if(!show && editId){
+      var c=(conv||[]).find(function(x){ return String(x.id)===String(editId); });
+      if(c&&c.libres&&c.libres.length) show=true;
+    }
+  }catch(e){}
+  btn.style.display=show?"":"none";
+}
+function enviarCarteirinhaAtual(){
+  // garante libres no objeto
+  var c=null;
+  try{
+    var editId=(document.getElementById("edit-id")||{}).value||"";
+    if(editId) c=(conv||[]).find(function(x){ return String(x.id)===String(editId); });
+  }catch(e){}
+  if(!c){
+    // monta temporário a partir do formulário
+    c={
+      id:"tmp",
+      nome:((document.getElementById("n-nome")||{}).value||"").trim()||"SEM NOME",
+      cpf:((document.getElementById("n-cpf")||{}).value||""),
+      foto:((document.getElementById("n-foto-data")||{}).value||""),
+      servico:((document.getElementById("n-servico")||{}).value||""),
+      telVis:((document.getElementById("n-tel-vis")||{}).value||""),
+      tipo:"prestador",
+      libres:[]
+    };
+  }
+  try{ alAplicarNoCadastro(c); }catch(e){}
+  if(!(c.libres&&c.libres.length)){ toast("Adicione ao menos uma residência em Acesso livre","er"); return; }
+  emitirCarteirinha(c, true);
 }
 function libreAgoraValida(lib){
   if(!lib) return false;
@@ -5567,31 +5682,65 @@ function preencherLibBox(c){
   window._libEscolhida=null;
   window._libLista=todos;
 }
-function emitirCarteirinha(c){
+function emitirCarteirinha(c, enviarWhats){
   if(!c) return;
   var libs=c.libres||[];
   if(!libs.length){ toast("Cadastre ao menos uma residência em Acesso livre","er"); return; }
-  var codigo="CL"+Date.now().toString(36).toUpperCase().slice(-8);
-  c.carteirinha={codigo:codigo,emitido:new Date().toISOString(),locais:libs.map(function(L){return {mor:L.mor,qdlt:L.qdlt,end:L.end,p:L.p};})};
-  try{ saveC(); }catch(e){}
-  var destinos=libs.map(function(L){ return [L.mor, L.qdlt?fmtQdLtLabel(L.qdlt):"", L.end||""].filter(Boolean).join(" · "); }).join("<br>");
+  var codigo=(c.carteirinha&&c.carteirinha.codigo)?c.carteirinha.codigo:("CL"+Date.now().toString(36).toUpperCase().slice(-8));
+  c.carteirinha={
+    codigo:codigo,
+    emitido:new Date().toISOString(),
+    locais:libs.map(function(L){
+      return {mor:L.mor,qdlt:L.qdlt,end:L.end,p:L.p,todos:!!L.todos,dias:(L.dias||[]).slice(),hi:L.hi||"",hf:L.hf||""};
+    })
+  };
+  try{ if(c.id && c.id!=="tmp") saveC(); }catch(e){}
+  var destinos=libs.map(function(L){
+    var hor=L.todos?"Todos os dias":((L.hi||"?")+"–"+(L.hf||"?"));
+    return [L.mor, L.qdlt?(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(L.qdlt):L.qdlt):"", L.end||"", hor].filter(Boolean).join(" · ");
+  }).join("<br>");
   var css='@page{size:58mm auto;margin:0}body{width:58mm;padding:3mm;font-family:Arial,sans-serif;color:#000;margin:0}'+
     '.t{text-align:center;font-weight:800;font-size:11pt}.l{font-size:9pt;margin:1mm 0}.c{text-align:center}.bar{margin:2mm 0}.code{letter-spacing:2px;font-weight:800;text-align:center}';
   var html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>Carteirinha</title><style>'+css+'</style></head><body>'+
-    '<div class="t">ASSOCIAÇÃO ALPHAVILLE GRACIOSA</div><div class="c l">CARTEIRINHA DE ACESSO</div><hr>'+
+    '<div class="t">ASSOCIAÇÃO ALPHAVILLE GRACIOSA</div><div class="c l">CARTEIRINHA PERMANENTE</div><hr>'+
     (c.foto?'<div class="c"><img src="'+c.foto+'" style="width:28mm;height:28mm;object-fit:cover;border-radius:4px;border:1px solid #000"></div>':'')+
     '<div class="l"><b>Nome:</b> '+_escH(String(c.nome||"").toUpperCase())+'</div>'+
-    (c.cpf?'<div class="l"><b>CPF:</b> '+_escH(fmtCPF(c.cpf))+'</div>':'')+
+    (c.cpf?'<div class="l"><b>CPF:</b> '+_escH((typeof fmtCPF==="function"?fmtCPF(c.cpf):c.cpf))+'</div>':'')+
     (c.servico?'<div class="l"><b>Serviço:</b> '+_escH(c.servico)+'</div>':'')+
     '<div class="l"><b>Liberado em:</b><br>'+destinos+'</div>'+
     '<div class="l"><b>Válida:</b> permanente (até revogação)</div><hr>'+
-    '<div class="bar">'+code128SVG(codigo,2,100)+'</div><div class="code">'+codigo+'</div>'+
+    '<div class="bar">'+(typeof code128SVG==="function"?code128SVG(codigo,2,100):"")+'</div><div class="code">'+_escH(codigo)+'</div>'+
     (typeof QRG!=="undefined"?'<div class="c">'+QRG.svg(codigo)+'</div>':'')+
     '<div class="c l">Apresente na portaria. Não precisa ligar.</div>'+
-    '<scr'+'ipt>window.onload=function(){setTimeout(function(){try{window.print()}catch(e){}},300)}<\/script></body></html>';
+    (enviarWhats?"":('<scr'+'ipt>window.onload=function(){setTimeout(function(){try{window.print()}catch(e){}},300)}<\/script>'))+
+    '</body></html>';
+  if(enviarWhats){
+    // tenta compartilhar / WhatsApp
+    try{
+      var tel="";
+      try{ tel=String(c.telVis||c.tel||"").replace(/\D/g,""); if(tel.length===10||tel.length===11) tel="55"+tel; }catch(e){}
+      var txt="Carteirinha permanente — Alphaville Graciosa\nNome: "+(c.nome||"")+"\nCódigo: "+codigo+"\nApresente na portaria (não expira).";
+      // abre impressão também como fallback visual
+      try{
+        var w=window.open("","_blank","width=420,height=700");
+        if(w){ w.document.open(); w.document.write(html); w.document.close(); }
+      }catch(e){}
+      if(tel){
+        try{
+          var a=document.createElement("a");
+          a.href="https://wa.me/"+tel+"?text="+encodeURIComponent(txt);
+          a.target="_blank"; a.rel="noopener";
+          a.style.display="none"; document.body.appendChild(a); a.click();
+          setTimeout(function(){ try{a.remove();}catch(e){} }, 500);
+        }catch(e){}
+      }
+      toast("Carteirinha gerada"+(tel?" — WhatsApp aberto":" — salve/imprima o comprovante"),"ok");
+    }catch(e){ toast("Carteirinha gerada","ok"); }
+    return;
+  }
   try{
-    var w=window.open("","_blank","width=420,height=700");
-    if(w){ w.document.open(); w.document.write(html); w.document.close(); }
+    var w2=window.open("","_blank","width=420,height=700");
+    if(w2){ w2.document.open(); w2.document.write(html); w2.document.close(); }
     else toast("Permita pop-ups para imprimir a carteirinha","er");
   }catch(e){ toast("Não foi possível abrir a carteirinha","er"); }
   toast("Carteirinha gerada","ok");
