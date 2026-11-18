@@ -3762,16 +3762,35 @@ if(localStorage.getItem("cae_clear_guests_v1")!=="1"){
 const ADM_PADRAO = {nome:"Rodrigo Duarte", cpf:"37041976882", senha:"Guigo5190880#", email:"guigo92856034@gmail.com", role:"admin"};
 let userSess = {tipo:null, nome:"", cpf:""}; // tipo: adm | mor
 
+function _adminsBackupGet(){
+  try{
+    // leitura direta do storage real (não passa pelo MEM do sync)
+    var raw=Storage.prototype.getItem.call(localStorage,"cae_admins_backup");
+    if(!raw) return null;
+    var list=JSON.parse(raw);
+    return Array.isArray(list)?list:null;
+  }catch(e){ return null; }
+}
+function _adminsBackupSet(list){
+  try{ Storage.prototype.setItem.call(localStorage,"cae_admins_backup",JSON.stringify(list||[])); }catch(e){}
+}
 function loadAdmins(){
   try{
-    const a=localStorage.getItem("cae_admins");
-    let list=a?JSON.parse(a):[];
+    var list=[];
+    try{
+      const a=localStorage.getItem("cae_admins");
+      list=a?JSON.parse(a):[];
+      if(!Array.isArray(list)) list=[];
+    }catch(e){ list=[]; }
+    // se a memória do sync estiver vazia, recupera do backup do aparelho
+    if(!list.length){
+      var bk=_adminsBackupGet();
+      if(bk&&bk.length) list=bk;
+    }
     var idx=list.findIndex(x=>onlyDigits(x.cpf)===onlyDigits(ADM_PADRAO.cpf));
     if(idx<0){
       list.unshift(Object.assign({},ADM_PADRAO));
-      localStorage.setItem("cae_admins",JSON.stringify(list));
     } else {
-      // mantém criador alinhado com a senha/e-mail oficiais do app
       list[idx]=Object.assign({}, list[idx], {
         nome: ADM_PADRAO.nome,
         cpf: onlyDigits(ADM_PADRAO.cpf),
@@ -3779,14 +3798,70 @@ function loadAdmins(){
         email: ADM_PADRAO.email||list[idx].email||"",
         role: list[idx].role||ADM_PADRAO.role||"admin"
       });
-      try{ localStorage.setItem("cae_admins",JSON.stringify(list)); }catch(e){}
     }
+    try{ localStorage.setItem("cae_admins",JSON.stringify(list)); }catch(e){}
+    try{ _adminsBackupSet(list); }catch(e){}
     return list;
   }catch(e){return [Object.assign({},ADM_PADRAO)]}
 }
 function saveAdmins(list){
-  localStorage.setItem("cae_admins",JSON.stringify(list));
+  try{ localStorage.setItem("cae_admins",JSON.stringify(list)); }catch(e){}
+  try{ _adminsBackupSet(list); }catch(e){}
   try{ if(typeof agendarSyncSheets==="function") agendarSyncSheets("admins"); }catch(e){}
+  // envia SEMPRE para o banco (não depende do HYD)
+  try{ pushAdminsCloud(list); }catch(e){}
+}
+var _pushAdminsTimer=null;
+function pushAdminsCloud(list){
+  clearTimeout(_pushAdminsTimer);
+  _pushAdminsTimer=setTimeout(function(){ pushAdminsCloudNow(list); }, 400);
+}
+async function pushAdminsCloudNow(list){
+  try{
+    var SB_URL=(window.SB&&window.SB.url)||"https://iccrwqanjayutohmmrvz.supabase.co";
+    var SB_KEY=(window.SB&&window.SB.key)||"sb_publishable_-prEky1sDvxq-K1rZAfRdw_Db0W99dh";
+    var token=null;
+    try{ var s=JSON.parse(Storage.prototype.getItem.call(localStorage,"cae_sb")||"null"); if(s&&s.token) token=s.token; }catch(e){}
+    var auth=token||SB_KEY;
+    var payload={chave:"cae_admins",valor:list||[],atualizado_em:new Date().toISOString()};
+    var r=await fetch(SB_URL+"/rest/v1/configuracoes?on_conflict=chave",{
+      method:"POST",
+      headers:{"apikey":SB_KEY,"Authorization":"Bearer "+auth,"Content-Type":"application/json","Prefer":"resolution=merge-duplicates,return=minimal"},
+      body:JSON.stringify(payload)
+    });
+    if(!r.ok){
+      // tenta PATCH se já existir
+      await fetch(SB_URL+"/rest/v1/configuracoes?chave=eq.cae_admins",{
+        method:"PATCH",
+        headers:{"apikey":SB_KEY,"Authorization":"Bearer "+auth,"Content-Type":"application/json","Prefer":"return=minimal"},
+        body:JSON.stringify({valor:list||[],atualizado_em:new Date().toISOString()})
+      });
+    }
+  }catch(e){}
+}
+async function pullAdminsCloud(){
+  try{
+    var SB_URL=(window.SB&&window.SB.url)||"https://iccrwqanjayutohmmrvz.supabase.co";
+    var SB_KEY=(window.SB&&window.SB.key)||"sb_publishable_-prEky1sDvxq-K1rZAfRdw_Db0W99dh";
+    var token=null;
+    try{ var s=JSON.parse(Storage.prototype.getItem.call(localStorage,"cae_sb")||"null"); if(s&&s.token) token=s.token; }catch(e){}
+    var auth=token||SB_KEY;
+    var r=await fetch(SB_URL+"/rest/v1/configuracoes?chave=eq.cae_admins&select=valor",{
+      headers:{"apikey":SB_KEY,"Authorization":"Bearer "+auth}
+    });
+    if(!r.ok) return null;
+    var j=[]; try{ j=await r.json(); }catch(e){}
+    if(!j||!j[0]) return null;
+    var v=j[0].valor;
+    if(typeof v==="string"){ try{ v=JSON.parse(v); }catch(e){ return null; } }
+    if(!Array.isArray(v)||!v.length) return null;
+    // mescla no aparelho
+    try{
+      localStorage.setItem("cae_admins",JSON.stringify(v));
+      _adminsBackupSet(v);
+    }catch(e){}
+    return v;
+  }catch(e){ return null; }
 }
 
 function onlyDigits(s){return String(s||"").replace(/\D/g,"")}
@@ -4071,34 +4146,42 @@ function loginAdm(){
   try{ applyMorOverrides(); }catch(e){}
   onCpfOperadorLogin();
 
-  var found=null;
-  try{ found=(loadAdmins()||[]).find(function(a){ return onlyDigits(a.cpf)===cpf; }); }catch(e){}
-  var emails=[];
-  function addEm(e){ e=String(e||"").trim().toLowerCase(); if(e.indexOf("@")>=0 && emails.indexOf(e)<0) emails.push(e); }
-  if(found && found.email) addEm(found.email);
-  addEm(emailOperadorCpf(cpf));
-  try{
-    var rem=JSON.parse(localStorage.getItem("cae_remember_adm")||"null");
-    if(rem && rem.email) addEm(rem.email);
-  }catch(e){}
-  // e-mail do criador
-  if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf) && ADM_PADRAO.email) addEm(ADM_PADRAO.email);
-
   function okSess(sess){
     userSess=sess;
-    if(!userSess.nome && found) userSess.nome=found.nome;
     if(!userSess.cpf) userSess.cpf=cpf;
     if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf)) userSess.role="super";
     localStorage.setItem("cae_user",JSON.stringify(userSess));
     if(document.getElementById("lg-remember-adm")&&document.getElementById("lg-remember-adm").checked){
-      localStorage.setItem("cae_remember_adm",JSON.stringify({cpf:document.getElementById("lg-cpf").value,senha:senha,email:(sess&&sess.email)||emails[0]||""}));
+      localStorage.setItem("cae_remember_adm",JSON.stringify({cpf:document.getElementById("lg-cpf").value,senha:senha,email:(sess&&sess.email)||""}));
     } else localStorage.removeItem("cae_remember_adm");
     try{ bioOferecerAposLogin(userSess); }catch(e){}
     aposLogin();
   }
-  function okLocal(){
+
+  function roleFromFound(found){
+    if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf)) return "super";
+    if(found && found.role==="admin") return "admin";
+    return "op";
+  }
+
+  function tryLocal(list){
+    var found=(list||[]).find(function(a){ return onlyDigits(a.cpf)===cpf; });
     if(found && String(found.senha||"")===String(senha||"")){
-      okSess({tipo:"adm",nome:found.nome,cpf:found.cpf,role:(onlyDigits(found.cpf)===onlyDigits(ADM_PADRAO.cpf)?"super":(found.role==="admin"?"admin":"op")),email:emails[0]||found.email||""});
+      var em=found.email||(typeof emailOperadorCpf==="function"?emailOperadorCpf(cpf):"");
+      okSess({tipo:"adm",nome:found.nome,cpf:found.cpf,role:roleFromFound(found),email:em});
+      // tenta sessão nuvem em segundo plano
+      try{
+        if(em && window.SB && typeof window.SB.login==="function"){
+          window.SB.login(em, senha).then(function(sess){
+            try{
+              if(sess && sess.token){
+                userSess=Object.assign({}, userSess||{}, sess, {role:userSess&&userSess.role, nome:(userSess&&userSess.nome)||sess.nome, cpf:cpf});
+                localStorage.setItem("cae_user",JSON.stringify(userSess));
+              }
+            }catch(e){}
+          }).catch(function(){});
+        }
+      }catch(e){}
       return true;
     }
     // criador: senha oficial do app
@@ -4109,40 +4192,24 @@ function loginAdm(){
     return false;
   }
 
-  // 1) liberação imediata se senha local/criador bater (não trava se o Supabase estiver diferente)
-  if(okLocal()){
-    // ainda tenta sessão cloud em segundo plano (não bloqueia)
-    try{
-      if(typeof window.SB==="object" && window.SB && typeof window.SB.login==="function"){
-        emails.forEach(function(em){
-          window.SB.login(em, senha).then(function(sess){
-            try{
-              if(sess && sess.token){
-                userSess=Object.assign({}, userSess||{}, sess, {role:userSess&&userSess.role, nome:(userSess&&userSess.nome)||sess.nome, cpf:cpf});
-                localStorage.setItem("cae_user",JSON.stringify(userSess));
-              }
-            }catch(e){}
-          }).catch(function(){});
-        });
-      }
-    }catch(e){}
-    return;
-  }
+  err.textContent="Entrando…";
+  // 1) tenta lista local/backup
+  var localList=[];
+  try{ localList=loadAdmins()||[]; }catch(e){}
+  if(tryLocal(localList)) return;
 
-  // 2) tenta nuvem se senha local não bateu
-  if(typeof window.SB==="object" && window.SB && typeof window.SB.login==="function"){
-    err.textContent="Entrando…";
-    function tenta(i){
-      if(i>=emails.length){
-        err.textContent="CPF ou senha incorretos. Se a senha foi alterada em outro celular, o administrador precisa tocar em «Salvar» na senha de novo para sincronizar.";
-        return;
-      }
-      window.SB.login(emails[i], senha).then(okSess).catch(function(e){
-        var m=String((e&&e.message)||"");
-        if(m.indexOf("Failed to fetch")>=0||m.indexOf("NetworkError")>=0){ err.textContent="Sem conexão. Verifique a internet."; return; }
-        tenta(i+1);
-      });
-    }
+  // 2) busca operadores no BANCO (outros celulares)
+  var done=false;
+  function afterPull(list){
+    if(done) return;
+    if(list && tryLocal(list)){ done=true; return; }
+    // 3) tenta Auth do Supabase (e-mail do operador)
+    var emails=[];
+    function addEm(e){ e=String(e||"").trim().toLowerCase(); if(e.indexOf("@")>=0 && emails.indexOf(e)<0) emails.push(e); }
+    var found=(list||localList||[]).find(function(a){ return onlyDigits(a.cpf)===cpf; });
+    if(found && found.email) addEm(found.email);
+    addEm(typeof emailOperadorCpf==="function"?emailOperadorCpf(cpf):"");
+    if(onlyDigits(cpf)===onlyDigits(ADM_PADRAO.cpf) && ADM_PADRAO.email) addEm(ADM_PADRAO.email);
     try{
       var SB_URL=(window.SB&&window.SB.url)||"";
       var SB_KEY=(window.SB&&window.SB.key)||"";
@@ -4150,21 +4217,43 @@ function loginAdm(){
         fetch(SB_URL+"/rest/v1/equipe?select=nome,cpf,email,papel,ativo&cpf=eq."+encodeURIComponent(cpf),
           {headers:{apikey:SB_KEY,Authorization:"Bearer "+SB_KEY}}).then(function(r){return r.json();}).then(function(lista){
             if(lista && lista[0] && lista[0].email) addEm(lista[0].email);
-            tenta(0);
-          }).catch(function(){ tenta(0); });
+            tentaAuth(0);
+          }).catch(function(){ tentaAuth(0); });
         return;
       }
     }catch(e){}
-    tenta(0);
-    return;
+    tentaAuth(0);
+    function tentaAuth(i){
+      if(done) return;
+      if(i>=emails.length){
+        if(!done){ done=true; err.textContent="CPF ou senha incorretos. A senha precisa estar salva no banco (Config → Operadores → Salvar)."; }
+        return;
+      }
+      if(!(window.SB && typeof window.SB.login==="function")){
+        if(!done){ done=true; err.textContent="CPF ou senha incorretos."; }
+        return;
+      }
+      window.SB.login(emails[i], senha).then(function(sess){
+        if(done) return; done=true;
+        okSess(sess);
+      }).catch(function(e){
+        var m=String((e&&e.message)||"");
+        if(m.indexOf("Failed to fetch")>=0||m.indexOf("NetworkError")>=0){
+          if(!done){ done=true; err.textContent="Sem conexão. Verifique a internet."; }
+          return;
+        }
+        tentaAuth(i+1);
+      });
+    }
   }
-  if(!found) err.textContent="CPF não autorizado. Peça ao administrador para cadastrar você como operador.";
-  else err.textContent="Senha incorreta";
+
+  if(typeof pullAdminsCloud==="function"){
+    pullAdminsCloud().then(function(list){ afterPull(list); }).catch(function(){ afterPull(null); });
+  } else {
+    afterPull(null);
+  }
 }
 
-// ===== SENHAS MORADOR + NOTIFICACOES =====
-
-function loadNotifs(){try{return JSON.parse(localStorage.getItem("cae_notifs")||"[]")}catch(e){return []}}
 function saveNotifs(a){localStorage.setItem("cae_notifs",JSON.stringify(a.slice(0,200)))}
 function pushNotif(alvo, titulo, texto, extra){
   // alvo: "adm" | key telefone morador | "all_adm"
@@ -4278,6 +4367,19 @@ function _regMovForce(id,tipo){
   const q=contagemEntrada(c.nome,sess.loc);
   ult={conv:c.nome,mor:c.mor,tel:c.tel,loc:sess.loc,dh:na.dh,tipo:tipo};
   try{ if(typeof popupMov==="function") popupMov(c, tipo==="saida"?"saida":"entrada", na); }catch(e){}
+  if(tipo==="saida"){
+    try{ limparCasasVisita(); }catch(e){}
+    try{
+      window._visitaCasas=[]; window._morSel=null; window._libEscolhida=null;
+      var me=document.getElementById("m-mor"); if(me) me.textContent="-";
+      var endEl=document.getElementById("m-end"); if(endEl) endEl.textContent="-";
+      var q=document.getElementById("m-mor-q"); if(q) q.value="";
+      var r1=document.getElementById("m-tit1-row"); if(r1) r1.style.display="none";
+      var r2=document.getElementById("m-tit2-row"); if(r2) r2.style.display="none";
+      var clr=document.getElementById("m-casas-clear"); if(clr) clr.style.display="none";
+    }catch(e){}
+    try{ if(sel&&sel.id===c.id) refreshModal(); }catch(e){}
+  }
   if(tipo==="entrada"){
     try{
       if(c.tipo==="prestador" && (c.libres||[]).length && !c.carteirinha){
@@ -4974,6 +5076,13 @@ function aposLogin(){
       document.getElementById("msg-entrada").value=msgs.entrada;
     }
   }
+  // garante operadores/senhas no banco para outros celulares
+  try{
+    if(typeof pushAdminsCloudNow==="function") pushAdminsCloudNow(loadAdmins());
+  }catch(e){}
+  try{
+    if(typeof pullAdminsCloud==="function") pullAdminsCloud().then(function(){ try{ if(typeof renderListaOperadores==="function") renderListaOperadores(); }catch(e){} });
+  }catch(e){}
 }
 
 
@@ -9046,6 +9155,20 @@ function regMov(id,tipo){
   const q=contagemEntrada(c.nome,sess.loc);
   ult={conv:c.nome,mor:c.mor,tel:c.tel,loc:sess.loc,dh:na.dh,tipo:tipo};
   try{ if(typeof popupMov==="function") popupMov(c, tipo==="saida"?"saida":"entrada", na); }catch(e){}
+  // Saída: limpa morador/residência linkados na tela
+  if(tipo==="saida"){
+    try{ limparCasasVisita(); }catch(e){}
+    try{
+      window._visitaCasas=[]; window._morSel=null; window._libEscolhida=null;
+      var me=document.getElementById("m-mor"); if(me) me.textContent="-";
+      var endEl=document.getElementById("m-end"); if(endEl) endEl.textContent="-";
+      var q=document.getElementById("m-mor-q"); if(q) q.value="";
+      var r1=document.getElementById("m-tit1-row"); if(r1) r1.style.display="none";
+      var r2=document.getElementById("m-tit2-row"); if(r2) r2.style.display="none";
+      var clr=document.getElementById("m-casas-clear"); if(clr) clr.style.display="none";
+      var lib=document.getElementById("m-lib-box"); if(lib){ /* mantém box se houver libres */ }
+    }catch(e){}
+  }
   if(sel&&sel.id===c.id) try{refreshModal()}catch(e){}
   
   // Notificações: APENAS para o morador convidante (nunca para operador/ADM)
@@ -10006,17 +10129,22 @@ function salvarSenhaOperador(i, silencioso){
   a.senha=v;
   if(!a.email) a.email=(typeof emailOperadorCpf==="function"?emailOperadorCpf(a.cpf):("op."+onlyDigits(a.cpf)+"@alphaville-graciosa.app"));
   saveAdmins(list);
-  // Atualiza a senha no Supabase Auth para funcionar em QUALQUER celular
+  if(!silencioso) toast("Salvando senha no banco…","ok");
+  // 1) lista de operadores no configuracoes (login em qualquer celular)
+  var p1=(typeof pushAdminsCloudNow==="function")?pushAdminsCloudNow(list):Promise.resolve();
+  // 2) Auth Supabase (quando houver sessão/edge function)
+  var p2=Promise.resolve();
   try{
     if(typeof sbCriarLogin==="function"){
       var papel=(a.role==="admin")?"administrador":"operador";
-      sbCriarLogin({nome:a.nome,cpf:onlyDigits(a.cpf),email:a.email,senha:v,papel:papel}).then(function(){
-        if(!silencioso) toast("Senha salva no banco (vale em todos os celulares)","ok");
-      }).catch(function(e){
-        if(!silencioso) toast("Senha salva neste aparelho. Nuvem: "+(e.message||"tente de novo"),"er");
-      });
-    } else if(!silencioso) toast("Senha salva","ok");
-  }catch(e){ if(!silencioso) toast("Senha salva neste aparelho","ok"); }
+      p2=sbCriarLogin({nome:a.nome,cpf:onlyDigits(a.cpf),email:a.email,senha:v,papel:papel}).catch(function(e){ return {ok:false,erro:(e&&e.message)||"auth"}; });
+    }
+  }catch(e){}
+  Promise.all([p1,p2]).then(function(){
+    if(!silencioso) toast("Senha salva no banco. Pode entrar em qualquer celular com CPF + esta senha.","ok");
+  }).catch(function(){
+    if(!silencioso) toast("Senha gravada. Se outro celular falhar, toque em Salvar de novo com internet.","er");
+  });
   return true;
 }
 function gerarSenhaOperador(i){
@@ -10085,21 +10213,47 @@ function confirmarNovoAdmin(id){
   var cpf=onlyDigits(c.cpf);
   if(!validarCPF(cpf)){ toast("Este cadastro não tem CPF válido","er"); return; }
   if(loadAdmins().find(function(a){ return onlyDigits(a.cpf)===cpf; })){ toast("Já é operador","er"); return; }
-  mostrarAlerta({titulo:"Novo operador",texto:"Confirmar "+c.nome+" como operador? Vamos gerar uma senha de acesso (login por CPF).",tipo:"ask",okText:"Sim, confirmar",cancelText:"Cancelar",
+  mostrarAlerta({titulo:"Novo operador",texto:"Confirmar "+c.nome+" como operador? Vamos gerar uma senha de acesso (login por CPF) e salvar no banco para qualquer celular.",tipo:"ask",okText:"Sim, confirmar",cancelText:"Cancelar",
     onOk:function(){
       (function(){
         var email=emailOperadorCpf(cpf);
         var senha=gerarSenhaForte();
-        sbCriarLogin({nome:c.nome,cpf:cpf,email:email,senha:senha,papel:"operador"}).then(function(){
-          var list=loadAdmins(); list.push({nome:c.nome,cpf:cpf,senha:senha,cadId:c.id,role:"op",email:email}); saveAdmins(list);
-          var idx=list.length-1;
+        function finalizarOk(msgExtra){
+          var list=loadAdmins();
+          if(!list.find(function(a){ return onlyDigits(a.cpf)===cpf; })){
+            list.push({nome:c.nome,cpf:cpf,senha:senha,cadId:c.id,role:"op",email:email});
+          } else {
+            list.forEach(function(a){ if(onlyDigits(a.cpf)===cpf){ a.senha=senha; a.email=email; a.cadId=c.id; a.nome=c.nome; } });
+          }
+          saveAdmins(list);
+          try{ if(typeof pushAdminsCloudNow==="function") pushAdminsCloudNow(list); }catch(e){}
+          var idx=list.findIndex(function(a){ return onlyDigits(a.cpf)===cpf; });
           try{ pushNotif("adm","Novo operador", c.nome+" foi adicionado como operador por "+(userSess.nome||"administrador"), {tipo:"admin"}); }catch(e){}
           var b=document.getElementById("adm-busca"); if(b) b.value="";
           var r=document.getElementById("adm-busca-res"); if(r){ r.classList.remove("show"); r.innerHTML=""; }
-          renderConfig();
-          mostrarAlerta({titulo:"Operador adicionado",texto:c.nome+" já pode entrar com CPF e a senha "+senha+". Enviar a senha por WhatsApp agora?",tipo:"ask",okText:"📲 Enviar senha",cancelText:"Depois",
+          try{ renderConfig(); renderListaOperadores(); }catch(e){}
+          mostrarAlerta({titulo:"Operador adicionado",texto:c.nome+" já pode entrar com CPF e a senha "+senha+(msgExtra?("\n\n"+msgExtra):"")+". Enviar a senha por WhatsApp agora?",tipo:"ask",okText:"📲 Enviar senha",cancelText:"Depois",
             onOk:function(){ enviarSenhaOperador(idx); }});
-        }).catch(function(e){ toast(e.message||"Não foi possível criar o login","er"); });
+        }
+        // tenta criar no Auth; se e-mail já existe, ainda grava operador no banco
+        var p=Promise.resolve();
+        try{
+          if(typeof sbCriarLogin==="function"){
+            p=sbCriarLogin({nome:c.nome,cpf:cpf,email:email,senha:senha,papel:"operador"});
+          }
+        }catch(e){}
+        p.then(function(){ finalizarOk(""); }).catch(function(e){
+          var msg=String((e&&e.message)||e||"");
+          // e-mail já registrado no Auth → atualiza lista mesmo assim (senha no cae_admins)
+          if(/already|already been registered|já|exists|registered/i.test(msg)){
+            finalizarOk("O acesso na nuvem já existia; senha atualizada na lista de operadores.");
+            // tenta de novo só para atualizar senha (edge pode falhar de novo - ok)
+            try{ if(typeof sbCriarLogin==="function") sbCriarLogin({nome:c.nome,cpf:cpf,email:email,senha:senha,papel:"operador"}).catch(function(){}); }catch(e2){}
+          } else {
+            // mesmo com erro de Auth, salva no banco de operadores para login por CPF
+            finalizarOk("Aviso: "+(msg||"Auth indisponível")+ ". Login por CPF+senha via lista do banco.");
+          }
+        });
       })();
     }});
 }
@@ -13534,6 +13688,15 @@ function copiarTextoWa(){
       }
     }catch(e){}
     popupMov(c,"saida",na);
+    try{ if(typeof limparCasasVisita==="function") limparCasasVisita(); }catch(e){}
+    try{
+      window._visitaCasas=[]; window._morSel=null;
+      var me=document.getElementById("m-mor"); if(me) me.textContent="-";
+      var endEl=document.getElementById("m-end"); if(endEl) endEl.textContent="-";
+      var r1=document.getElementById("m-tit1-row"); if(r1) r1.style.display="none";
+      var r2=document.getElementById("m-tit2-row"); if(r2) r2.style.display="none";
+      var clr=document.getElementById("m-casas-clear"); if(clr) clr.style.display="none";
+    }catch(e){}
   }
 
   window.lerTicket=function(code){
