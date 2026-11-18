@@ -411,10 +411,15 @@ html.ui-pro .logo-img{background:#fff;padding:5px 10px;border-radius:10px}
 .tit-nome{font-weight:700;color:#1B5E20;text-align:right;line-height:1.2;max-width:52%}
 .btn-ligar-wa{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:#25D366;color:#fff!important;text-decoration:none!important;font-weight:700;font-size:.82rem;padding:10px 12px;border-radius:10px;white-space:nowrap;flex-shrink:0;border:none}
 </style><style>
-.mhead-dados{display:grid;grid-template-columns:1fr 1fr;gap:3px 6px;margin:0 0 8px;padding:0;background:transparent;border:0}
+.mhead-dados{display:flex;flex-direction:column;gap:5px;margin:0 0 8px;padding:0;background:transparent;border:0}
+.md-row{display:flex;gap:6px;align-items:flex-end;width:100%}
+.md-row3 .md-item{flex:1 1 0;min-width:0}
+.md-row2 .md-item{flex:1 1 0;min-width:0}
 .md-item{display:flex;flex-direction:column;min-width:0;padding:0}
-.md-l{font-size:.65rem;font-weight:700;color:#14532d;margin-bottom:1px}
-.md-v{font-size:.78rem;color:#0f172a;font-weight:600;line-height:1.15;padding:4px 7px;background:#fff;border:1px solid #9ca3af;border-radius:4px;min-height:26px;max-height:26px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:inset 1px 1px 2px rgba(0,0,0,.1)}
+.md-item.md-fit{flex:0 0 auto}
+.md-l{font-size:.62rem;font-weight:700;color:#14532d;margin-bottom:1px;white-space:nowrap}
+.md-v{font-size:.76rem;color:#0f172a;font-weight:600;line-height:1.15;padding:4px 6px;background:#fff;border:1px solid #9ca3af;border-radius:4px;min-height:24px;max-height:24px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;box-shadow:inset 1px 1px 2px rgba(0,0,0,.1);width:100%;box-sizing:border-box}
+.md-item.md-fit .md-v{width:auto;min-width:4.5em;max-width:11em;display:inline-block}
 .mhead{padding-bottom:12px}
 html.ui-pro .mhead-dados{background:transparent;border:0}
 html.ui-pro .md-item{background:transparent;border:0}
@@ -721,7 +726,7 @@ html:not([data-role="op"]) #op-conta{display:none!important}
 .ed-prop .row>*{flex:1}
 </style>
 </head>
-<body style="overscroll-behavior-y:contain">
+<body style="overscroll-behavior-y:contain;background:#1B5E20">
 
 <div id="s-login" class="login-wrap" style="display:none">
   <div class="login-brand">
@@ -1579,21 +1584,31 @@ html:not([data-role="op"]) #op-conta{display:none!important}
     </div>
     <div class="mbody">
       <div id="m-dados" class="mhead-dados">
-        <div class="md-item" id="m-cpf-wrap"><span class="md-l">CPF</span><span class="md-v" id="m-cpf">-</span></div>
-        <div class="md-item" id="m-nasc-wrap"><span class="md-l">Nascimento</span><span class="md-v" id="m-nasc">-</span></div>
-        <div class="md-item" id="m-tel-wrap"><span class="md-l">Telefone</span><span class="md-v" id="m-tel-head">-</span></div>
-        <div class="md-item" id="m-veic-wrap"><span class="md-l">Veículo</span><span class="md-v" id="m-veiculo">-</span></div>
-        <div class="md-item" id="m-placa-wrap"><span class="md-l">Placa</span><span class="md-v" id="m-placa-line">-</span></div>
-        <div class="md-item" id="m-cnh-wrap"><span class="md-l">CNH</span><span class="md-v" id="m-cnh">-</span></div>
-        <div class="md-item" id="m-serv-wrap" style="display:none"><span class="md-l">Serviço</span><span class="md-v" id="m-servico">-</span></div>
-        <div class="md-item" id="m-tipo-wrap"><span class="md-l">Tipo</span><span class="md-v" id="m-tipo">-</span></div>
-        <div class="md-item" id="m-port-wrap"><span class="md-l">Portaria</span><span class="md-v" id="m-port">-</span></div>
-        <div id="m-lib-box" style="display:none;grid-column:1/-1;margin-top:6px;padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px">
-          <div style="font-size:.72rem;font-weight:700;color:#14532d;text-transform:uppercase;margin-bottom:4px">🔓 Escolher liberação</div>
-          <select id="m-lib-sel" style="width:100%;padding:8px;border-radius:6px;border:1px solid #86efac;font-size:.85rem" onchange="onLibSelChange()"></select>
-          <div id="m-lib-info" style="font-size:.78rem;color:#64748b;margin-top:4px"></div>
+        <div class="md-row md-row3">
+          <div class="md-item md-fit" id="m-cpf-wrap"><span class="md-l">CPF</span><span class="md-v" id="m-cpf">-</span></div>
+          <div class="md-item md-fit" id="m-nasc-wrap"><span class="md-l">Nascimento</span><span class="md-v" id="m-nasc">-</span></div>
+          <div class="md-item md-fit" id="m-tel-wrap"><span class="md-l">Telefone</span><span class="md-v" id="m-tel-head">-</span></div>
         </div>
-        <div class="md-item" id="m-resp-wrap" style="display:none;grid-column:1/-1"><span class="md-l">Responsável</span><span class="md-v" id="m-resp">-</span></div>
+        <div class="md-row md-row2">
+          <div class="md-item" id="m-veic-wrap"><span class="md-l">Veículo</span><span class="md-v" id="m-veiculo">-</span></div>
+          <div class="md-item md-fit" id="m-placa-wrap"><span class="md-l">Placa</span><span class="md-v" id="m-placa-line">-</span></div>
+        </div>
+        <div class="md-row md-row3">
+          <div class="md-item" id="m-cnh-num-wrap"><span class="md-l">CNH</span><span class="md-v" id="m-cnh-num">-</span></div>
+          <div class="md-item md-fit" id="m-cnh-cat-wrap"><span class="md-l">Categoria</span><span class="md-v" id="m-cnh-cat">-</span></div>
+          <div class="md-item md-fit" id="m-cnh-val-wrap"><span class="md-l">Validade</span><span class="md-v" id="m-cnh-val">-</span></div>
+        </div>
+        <div class="md-row md-row2">
+          <div class="md-item md-fit" id="m-tipo-wrap"><span class="md-l">Tipo</span><span class="md-v" id="m-tipo">-</span></div>
+          <div class="md-item" id="m-serv-wrap" style="display:none"><span class="md-l">Serviço</span><span class="md-v" id="m-servico">-</span></div>
+        </div>
+        <div class="md-item" id="m-port-wrap" style="display:none"><span class="md-l">Portaria</span><span class="md-v" id="m-port">-</span></div>
+        <div class="md-item" id="m-resp-wrap" style="display:none"><span class="md-l">Responsável</span><span class="md-v" id="m-resp">-</span></div>
+      </div>
+      <div id="m-lib-box" style="display:none;margin:8px 0 6px;padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px">
+        <div style="font-size:.72rem;font-weight:700;color:#14532d;text-transform:uppercase;margin-bottom:4px">🔓 Livre acesso</div>
+        <select id="m-lib-sel" style="width:100%;padding:8px;border-radius:6px;border:1px solid #86efac;font-size:.85rem" onchange="onLibSelChange()"></select>
+        <div id="m-lib-info" style="font-size:.78rem;color:#64748b;margin-top:4px"></div>
       </div>
       <div class="sec-title" style="margin:10px 0 6px" id="m-conv-title">Convidado por</div>
       <div class="irow" id="m-mor-row" style="display:none"><span class="il">Convidado por</span><span class="iv" id="m-mor">-</span></div>
@@ -5241,17 +5256,37 @@ function onTipoCadastro(){
 /* ===== Acesso livre (prestador liberado sem ligação) ===== */
 window._alRes=[];
 window._alSelIdx=-1;
+function alPodeEditar(){
+  try{
+    if(typeof isMoradorSess==="function" && isMoradorSess()) return true; // morador edita o próprio
+    if(typeof isSuperAdmin==="function" && isSuperAdmin()) return true;
+    if(typeof isAdmin==="function" && isAdmin()) return true;
+    return false; // operador: só visualiza
+  }catch(e){ return false; }
+}
+
 window._alAberto=false;
 function alToggleAccordion(){
   var a=document.getElementById("al-ativo");
   var d=document.getElementById("al-detalhes");
   var ch=document.getElementById("al-chevron");
   if(!d) return;
-  // se ainda não está ativo, ativa ao expandir
-  if(a && !a.checked){ a.checked=true; try{ alToggleBox(); }catch(e){} }
+  if(a && !a.checked){
+    if(!alPodeEditar()){ toast("Somente administrador pode ativar acesso livre","er"); return; }
+    a.checked=true; try{ alToggleBox(); }catch(e){}
+  }
   window._alAberto=!window._alAberto;
   d.style.display=window._alAberto?"block":"none";
   if(ch) ch.textContent=window._alAberto?"▲":"▼";
+  try{ alAplicarPermissaoUI(); }catch(e){}
+}
+function alAplicarPermissaoUI(){
+  var pode=alPodeEditar();
+  var wrap=document.getElementById("al-busca-wrap"); if(wrap) wrap.style.display=pode?"":"none";
+  var edit=document.getElementById("al-edit-box");
+  // operador pode ver horários ao tocar, mas não alterar
+  document.querySelectorAll("#al-edit-box input, #al-edit-box select").forEach(function(el){ el.disabled=!pode; });
+  var a=document.getElementById("al-ativo"); if(a) a.disabled=!pode && !(typeof isMoradorSess==="function"&&isMoradorSess());
 }
 function alToggleBox(){
   var a=document.getElementById("al-ativo"), d=document.getElementById("al-detalhes");
@@ -5349,7 +5384,7 @@ function alRenderLista(){
         '<div style="color:#64748b;font-size:.78rem">'+_escH((r.qdlt?(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(r.qdlt):r.qdlt):"")+(r.end?" · "+r.end:""))+(r.p?" · "+r.p:"")+'</div>'+
         '<div style="color:#15803d;font-size:.75rem;font-weight:600;margin-top:2px">⏰ '+_escH(_alHorarioResumo(r))+'</div>'+
       '</div>'+
-      '<button type="button" class="btn btn-o btn-sm" onclick="event.stopPropagation();alRem('+i+')" style="flex-shrink:0">✖</button></div>';
+      (alPodeEditar()?'<button type="button" class="btn btn-o btn-sm" onclick="event.stopPropagation();alRem('+i+')" style="flex-shrink:0">✖</button>':'')+'</div>';
   }).join("");
 }
 function alRem(i){
@@ -5494,38 +5529,43 @@ function libresAtivas(c){
 function onLibSelChange(){
   var selEl=document.getElementById("m-lib-sel"); if(!selEl||!sel) return;
   var i=+selEl.value;
-  var libs=libresAtivas(sel);
+  var libs=window._libLista||(sel.libres||[]);
   var info=document.getElementById("m-lib-info");
   if(i<0 || !libs[i]){ if(info) info.textContent=""; window._libEscolhida=null; return; }
   var L=libs[i];
   window._libEscolhida=L;
-  if(info) info.textContent=(L.todos?"Liberado todos os dias e horários":("Dias/horário: "+(L.hi||"?")+"–"+(L.hf||"?")))+(L.qdlt||L.end?(" · "+(L.qdlt||"")+" "+(L.end||"")):"");
-  // preenche destino da visita
+  var ok=libreAgoraValida(L);
+  var hor=L.todos?"Todos os dias e horários":((L.hi||"?")+"–"+(L.hf||"?"));
+  if(info) info.textContent=(ok?"":"⚠️ Fora do horário · ")+"Liberado: "+hor+(L.qdlt||L.end?(" · "+(L.qdlt||"")+" "+(L.end||"")):"");
   try{
     window._visitaCasas=[{rid:L.rid||"",mor:L.mor||"",end:L.end||"",qdlt:L.qdlt||"",p:L.p||"",st:"ok",t1:""}];
-    var mb=document.getElementById("m-mor-pick"); if(mb) mb.value=L.mor||"";
+    window._casasOpen=true;
+    var q=document.getElementById("m-mor-q"); if(q) q.value=L.mor||"";
     var me=document.getElementById("m-mor"); if(me) me.textContent=L.mor||"-";
+    var endEl=document.getElementById("m-end"); if(endEl) endEl.textContent=(L.end||"")+(L.qdlt?(" · "+(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(L.qdlt):L.qdlt)):"");
+    try{ if(typeof _pintarTitulares==="function") _pintarTitulares({rid:L.rid,mor:L.mor,end:L.end,qdlt:L.qdlt,p:L.p,st:"ok"}); }catch(e){}
+    try{ if(typeof renderConvidadoOperador==="function") renderConvidadoOperador(sel, window._modalOrigem||"main"); }catch(e){}
   }catch(e){}
 }
 function preencherLibBox(c){
   var box=document.getElementById("m-lib-box");
   var selEl=document.getElementById("m-lib-sel");
   if(!box||!selEl) return;
-  if(!c || c.tipo!=="prestador" || !(c.libres&&c.libres.length)){ box.style.display="none"; return; }
-  var libs=libresAtivas(c);
-  if(!libs.length){
-    box.style.display="block";
-    selEl.innerHTML='<option value="-1">Sem liberação válida agora (fora do horário/dia)</option>';
-    document.getElementById("m-lib-info").textContent="Cadastro tem residências liberadas, mas fora da janela de horário.";
-    return;
-  }
+  if(!c || !(c.libres&&c.libres.length)){ box.style.display="none"; return; }
+  // lista todas as residências; marca as fora do horário
+  var todos=c.libres.slice();
   box.style.display="block";
-  selEl.innerHTML='<option value="-1">Selecione a residência liberada…</option>'+
-    libs.map(function(L,i){
-      return '<option value="'+i+'">'+_escH((L.mor||"Residência")+(L.qdlt?" · "+fmtQdLtLabel(L.qdlt):"")+(L.end?" · "+L.end:""))+'</option>';
+  selEl.innerHTML='<option value="-1">Selecione a residência (livre acesso)…</option>'+
+    todos.map(function(L,i){
+      var ok=libreAgoraValida(L);
+      var lab=(L.mor||"Residência")+(L.qdlt?" · "+(typeof fmtQdLtLabel==="function"?fmtQdLtLabel(L.qdlt):L.qdlt):"")+(L.end?" · "+L.end:"");
+      if(!ok) lab+=" (fora do horário)";
+      return '<option value="'+i+'"'+(ok?"":' style="color:#b45309"')+'>'+_escH(lab)+'</option>';
     }).join("");
-  document.getElementById("m-lib-info").textContent="";
+  var info=document.getElementById("m-lib-info");
+  if(info) info.textContent="Toque na residência para preencher o destino (Convidado por).";
   window._libEscolhida=null;
+  window._libLista=todos;
 }
 function emitirCarteirinha(c){
   if(!c) return;
@@ -12366,19 +12406,18 @@ function preencherCabecalhoCadastro(c){
   set("m-placa-line", placa, "m-placa-wrap");
   if(!placa){ var pw=document.getElementById("m-placa-wrap"); if(pw) pw.style.display="none"; }
 
-  var cnh=[];
-  if(c.cnhNum) cnh.push(c.cnhNum);
-  if(c.cnhCat) cnh.push("Cat. "+c.cnhCat);
-  if(c.cnhVal) cnh.push("Val. "+c.cnhVal);
-  set("m-cnh", cnh.join(" · "), "m-cnh-wrap");
-  if(!cnh.length){ var cw=document.getElementById("m-cnh-wrap"); if(cw) cw.style.display="none"; }
+  set("m-cnh-num", c.cnhNum||"", "m-cnh-num-wrap");
+  if(!c.cnhNum){ var cn=document.getElementById("m-cnh-num-wrap"); if(cn) cn.style.display="none"; }
+  set("m-cnh-cat", c.cnhCat||"", "m-cnh-cat-wrap");
+  if(!c.cnhCat){ var cc=document.getElementById("m-cnh-cat-wrap"); if(cc) cc.style.display="none"; }
+  set("m-cnh-val", c.cnhVal||"", "m-cnh-val-wrap");
+  if(!c.cnhVal){ var cv=document.getElementById("m-cnh-val-wrap"); if(cv) cv.style.display="none"; }
 
   var isP=(c.tipo||"")==="prestador";
+  set("m-tipo", isP?"PRESTADOR":"VISITANTE", "m-tipo-wrap");
   set("m-servico", c.servico||"", "m-serv-wrap");
   var sw=document.getElementById("m-serv-wrap");
   if(sw) sw.style.display=(isP && c.servico)?"":"none";
-
-  set("m-tipo", isP?"PRESTADOR":"VISITANTE", "m-tipo-wrap");
   set("m-port", c.port||"", "m-port-wrap");
   if(!c.port){ var pp=document.getElementById("m-port-wrap"); if(pp) pp.style.display="none"; }
   try{
@@ -13792,39 +13831,45 @@ function copiarTextoWa(){
     var codigo=(na&&na.tk)||"";
     var nome=(na&&na.nome)||(c&&c.nome)||"";
     var local=(na&&na.local)||"";
-    var txt="Ticket de acesso — Alphaville Graciosa\n"+
-      "Nome: "+nome+"\n"+
-      "Código: "+codigo+"\n"+
-      (local?("Portaria: "+local+"\n"):"")+
-      "Mostre este ticket (código ou imagem) na portaria.";
+    var txt="Ticket de acesso — Alphaville Graciosa\nNome: "+nome+"\nCódigo: "+codigo+"\n"+(local?("Portaria: "+local+"\n"):"")+"Mostre este ticket (código ou imagem) na portaria.";
     var blob=null;
     try{ blob=await ticketPngBlob(na,c); }catch(e){}
     var file=null;
     try{ if(blob) file=new File([blob],"ticket-"+(codigo||"acesso")+".png",{type:"image/png"}); }catch(e){}
-    // tenta compartilhar PNG (WhatsApp no celular entra na lista)
-    try{
-      if(file && navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file], title:"Ticket "+codigo, text:txt});
-        // se já compartilhou, ainda assim tenta abrir chat direto se tiver telefone
-        if(tel) setTimeout(function(){ abrirWhatsSeguro("https://wa.me/"+tel+"?text="+encodeURIComponent(txt)); }, 400);
-        return;
-      }
-    }catch(e){ if(e&&e.name==="AbortError") return; }
-    // fallback: baixa PNG e abre WhatsApp direto na conversa
-    if(blob){
+    // 1) abre DIRETO o chat do prestador/visitante (como o botão ligar do morador)
+    if(tel){
+      var url="https://wa.me/"+tel+"?text="+encodeURIComponent(txt);
       try{
         var a=document.createElement("a");
-        a.href=URL.createObjectURL(blob);
-        a.download="ticket-"+(codigo||"acesso")+".png";
-        document.body.appendChild(a); a.click();
-        setTimeout(function(){ try{a.remove(); URL.revokeObjectURL(a.href);}catch(e){} }, 800);
-      }catch(e){}
-    }
-    if(tel){
-      abrirWhatsSeguro("https://wa.me/"+tel+"?text="+encodeURIComponent(txt));
+        a.href=url; a.target="_blank"; a.rel="noopener";
+        a.style.display="none"; document.body.appendChild(a);
+        a.click();
+        setTimeout(function(){ try{a.remove();}catch(e){} }, 600);
+      }catch(e){
+        try{ abrirWhatsSeguro(url); }catch(e2){}
+      }
     } else {
-      toast("Cadastro sem telefone — abra o WhatsApp e envie o ticket baixado","er");
-      abrirWhatsSeguro("https://wa.me/?text="+encodeURIComponent(txt));
+      toast("Cadastro sem telefone do visitante/prestador","er");
+    }
+    // 2) compartilhar imagem (anexo)
+    try{
+      if(file && navigator.canShare && navigator.canShare({files:[file]})){
+        setTimeout(function(){
+          navigator.share({files:[file], title:"Ticket "+codigo, text:txt}).catch(function(){});
+        }, 800);
+        return;
+      }
+    }catch(e){}
+    // 3) baixa PNG para anexar no chat aberto
+    if(blob){
+      try{
+        var dl=document.createElement("a");
+        dl.href=URL.createObjectURL(blob);
+        dl.download="ticket-"+(codigo||"acesso")+".png";
+        document.body.appendChild(dl); dl.click();
+        setTimeout(function(){ try{dl.remove(); URL.revokeObjectURL(dl.href);}catch(e){} }, 800);
+        if(tel) toast("Chat aberto. Ticket baixado — anexe a imagem na conversa.","ok");
+      }catch(e){}
     }
   };
   window.ticketAposEntrada=function(na,c){
